@@ -1,6 +1,7 @@
 package frc.robot.subsystems.armManager.hand;
 
 public class HandSpeeds {
+    public static final double IDLE = 0;
     public static final double SCORE_L4 = 0;
     public static final double HANDOFF = 0;
     public static final double INTAKE_LOW_REEF_ALGAE = 0;
