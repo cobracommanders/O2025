@@ -10,12 +10,14 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
 public class Elevator extends StateMachine<ElevatorStates> {
+    private final String name = getName();
     public static TalonFX lMotor;
     public static TalonFX rMotor;
     private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
@@ -72,6 +74,11 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
     @Override
     public void collectInputs() {
+        elevatorPosition = lMotor.getPosition().getValueAsDouble();
+        double leftElevatorPosition = lMotor.getPosition().getValueAsDouble();
+        double rightElevatorPosition = rMotor.getPosition().getValueAsDouble();
+        DogLog.log(name + "/Left Elevator Position", leftElevatorPosition);
+        DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
     }
 
     @Override
@@ -81,7 +88,8 @@ public class Elevator extends StateMachine<ElevatorStates> {
     }
 
     public void setArmPosition(double position) {
-        motor.setControl(motor_request.withPosition(position));
+        rMotor.setControl(right_motor_request);
+        lMotor.setControl(motor_request.withPosition(position));
     }
 
     @Override
