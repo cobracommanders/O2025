@@ -9,6 +9,7 @@ public final class Constants {
         public static final double MotionMagicCruiseVelocity = 0;
         public static final double MotionMagicAcceleration = 0;
         public static final double MotionMagicJerk = 0;
+        public static final double encoderOffset = 0;
     }
 
   public static final class IntakePivotConstants{
