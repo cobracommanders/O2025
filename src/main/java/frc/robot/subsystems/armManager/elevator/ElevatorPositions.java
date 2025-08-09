@@ -5,7 +5,6 @@ public class ElevatorPositions {
     public static final double L4 = 0;
     public static final double HIGH_REEF_ALGAE = 0;
     public static final double LOW_REEF_ALGAE = 0;
-    public static final double INTAKE_GROUND_ALAGAE = 0;
     public static final double GROUND_ALGAE = 0;
     public static final double ALGAE_NET = 0;
     public static final double ALGAE_PROCESSOR = 0;
