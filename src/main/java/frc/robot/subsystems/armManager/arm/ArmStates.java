@@ -2,7 +2,7 @@ package frc.robot.subsystems.armManager.arm;
 
 public enum ArmStates {
     IDLE,
-    INTAKE_GROUND_ALAGAE,
+    INTAKE_GROUND_ALGAE,
     INTAKE_HIGH_REEF_ALGAE,
     INTAKE_LOW_REEF_ALGAE,
     ALGAE_PROCESSOR,
