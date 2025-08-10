@@ -15,6 +15,7 @@ import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.armManager.arm.ArmStates;
 
 public class Elevator extends StateMachine<ElevatorStates> {
     private final String name = getName();
@@ -81,10 +82,8 @@ public class Elevator extends StateMachine<ElevatorStates> {
         DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
     }
 
-    @Override
-    public void periodic() {
-        // System.out.println(encoder.get());ph
-        super.periodic();
+    public void setState(ElevatorStates state){
+        setStateFromRequest(state);
     }
 
     public void setArmPosition(double position) {
