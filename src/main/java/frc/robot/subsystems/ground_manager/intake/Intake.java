@@ -16,7 +16,7 @@ import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
 public class Intake extends StateMachine<IntakeStates> {
-  // private final String name = getName();
+
   private final TalonFX intakeMotor;
   private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
       .withSlot0(new Slot0Configs().withKP(IntakeConstants.P).withKI(IntakeConstants.I).withKD(IntakeConstants.D)
@@ -26,7 +26,6 @@ public class Intake extends StateMachine<IntakeStates> {
   private final double tolerance;
 
   private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
-  // to do: add values
 
 
   private Intake() {
@@ -40,6 +39,9 @@ public class Intake extends StateMachine<IntakeStates> {
     motor_config.MotionMagic.MotionMagicJerk = IntakeConstants.MotionMagicJerk;
     tolerance = 0.0;
   }
+  public double getIntakePosition() {
+    return intakePosition;
+}
 
   public boolean atGoal() {
     return switch (getState()) {
@@ -127,7 +129,7 @@ public void decreaseSetpoint(){
   }
   @Override
   public void periodic() {
-    // System.out.println(encoder.get());ph
+   
     super.periodic();
     }
     public void setIntakePosition(double position) {
@@ -158,7 +160,8 @@ public void decreaseSetpoint(){
     private static Intake instance;
   
     public static Intake getInstance() {
-        if (instance == null) instance = new Intake(); // Make sure there is an instance (this will only run once)
+        if (instance == null) instance = new Intake(); 
         return instance;
     }
   }
+

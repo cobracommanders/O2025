@@ -15,10 +15,13 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
     }
 
     @Override
-    protected void collectInputs() {
+    public void collectInputs() {
       motorStatorCurrent = motor.getStatorCurrent().getValueAsDouble();
     }
-
+    public double getMotorStatorCurrent() {
+      return motorStatorCurrent;
+  }
+  
     public void setState(IntakeRollersStates newState) {
         setStateFromRequest(newState);
       }
