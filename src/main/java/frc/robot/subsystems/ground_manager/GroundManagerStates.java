@@ -1,3 +1,5 @@
+package frc.robot.subsystems.ground_manager;
+
 public enum GroundManagerStates {
     PREPARE_IDLE,
     IDLE,
