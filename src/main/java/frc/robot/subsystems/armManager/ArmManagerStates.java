@@ -1,10 +1,10 @@
 package frc.robot.subsystems.armManager;
 
-public enum ArmManagerState {
+public enum ArmManagerStates {
     PREPARE_IDLE,
     IDLE,
     PREPARE_INTAKE_GROUND_ALGAE,
-    INTAKE_GROUND_ALAGAE,
+    INTAKE_GROUND_ALGAE,
     PREPARE_INTAKE_HIGH_REEF_ALGAE,
     INTAKE_HIGH_REEF_ALGAE,
     PREPARE_INTAKE_LOW_REEF_ALGAE,
