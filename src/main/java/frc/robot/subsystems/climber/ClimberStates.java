@@ -4,5 +4,5 @@ public enum ClimberStates {
     IDLE,
     DEPLOYED,
     CLIMBING,
-    CLIMBED   
+    CLIMBED,   
 }
