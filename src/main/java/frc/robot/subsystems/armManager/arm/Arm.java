@@ -84,20 +84,8 @@ public class Arm extends StateMachine<ArmStates> {
         absolutePosition = encoder.getPosition().getValueAsDouble();
     }
 
-    @Override
-    public void periodic() {
-        // System.out.println(encoder.get());ph
-        super.periodic();
-
-        // if (RobotManager.getInstance().getState() == RobotState.INVERTED_IDLE &&
-        // RobotManager.getInstance().timeout(1)
-        // && !isSynced) {
-        // syncEncoder();
-        // isSynced = true;
-        // } else if (RobotManager.getInstance().getState() != RobotState.INVERTED_IDLE)
-        // {
-        // isSynced = false;
-        // }
+    public void setState(ArmStates state){
+        setStateFromRequest(state);
     }
 
     public void setArmPosition(double position) {
