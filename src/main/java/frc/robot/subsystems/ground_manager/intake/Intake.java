@@ -45,16 +45,17 @@ public class Intake extends StateMachine<IntakeStates> {
 
   public boolean atGoal() {
     return switch (getState()) {
-      case IDLE ->
-        MathUtil.isNear(IntakePositions.IDLE, intakePosition, tolerance);
-      case INTAKING ->
-        MathUtil.isNear(IntakePositions.INTAKING, intakePosition, tolerance);
-      case CLIMB ->
-        MathUtil.isNear(IntakePositions.CLIMB, intakePosition, tolerance);
-      case HANDOFF ->
-        MathUtil.isNear(IntakePositions.HANDOFF, intakePosition, tolerance);
-      case SCORE_L1 ->
-        MathUtil.isNear(IntakePositions.SCORE_L1, intakePosition, tolerance);
+          case IDLE ->
+            MathUtil.isNear(IntakePositions.IDLE, intakePosition, tolerance);
+          case INTAKING ->
+            MathUtil.isNear(IntakePositions.INTAKING, intakePosition, tolerance);
+          case CLIMB ->
+            MathUtil.isNear(IntakePositions.CLIMB, intakePosition, tolerance);
+          case HANDOFF ->
+            MathUtil.isNear(IntakePositions.HANDOFF, intakePosition, tolerance);
+          case SCORE_L1 ->
+            MathUtil.isNear(IntakePositions.SCORE_L1, intakePosition, tolerance);
+          default -> throw new IllegalArgumentException("Unexpected value: " + getState());
     };
   }
 
