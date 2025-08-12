@@ -53,9 +53,6 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
           case SCORE_L1 -> {
             setIntakeRollerSpeeds(IntakeRollersSpeeds.SCORE_L1);
           }
-          case CLIMB -> {
-            setIntakeRollerSpeeds(IntakeRollersSpeeds.CLIMB);
-          }
           default -> {}
         }
       }

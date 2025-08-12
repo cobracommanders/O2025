@@ -16,6 +16,7 @@ import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
 public class Intake extends StateMachine<IntakeStates> {
+  private static final double SETPOINT_INCREMENT = 0.005;
 
   private final TalonFX intakeMotor;
   private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
@@ -26,7 +27,6 @@ public class Intake extends StateMachine<IntakeStates> {
   private final double tolerance;
 
   private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
-
 
   private Intake() {
     super(IntakeStates.IDLE);
@@ -39,23 +39,19 @@ public class Intake extends StateMachine<IntakeStates> {
     motor_config.MotionMagic.MotionMagicJerk = IntakeConstants.MotionMagicJerk;
     tolerance = 0.0;
   }
+
   public double getIntakePosition() {
     return intakePosition;
-}
+  }
 
   public boolean atGoal() {
     return switch (getState()) {
-          case IDLE ->
-            MathUtil.isNear(IntakePositions.IDLE, intakePosition, tolerance);
-          case INTAKING ->
-            MathUtil.isNear(IntakePositions.INTAKING, intakePosition, tolerance);
-          case CLIMB ->
-            MathUtil.isNear(IntakePositions.CLIMB, intakePosition, tolerance);
-          case HANDOFF ->
-            MathUtil.isNear(IntakePositions.HANDOFF, intakePosition, tolerance);
-          case SCORE_L1 ->
-            MathUtil.isNear(IntakePositions.SCORE_L1, intakePosition, tolerance);
-          default -> throw new IllegalArgumentException("Unexpected value: " + getState());
+      case IDLE -> MathUtil.isNear(IntakePositions.IDLE, intakePosition, tolerance);
+      case INTAKING -> MathUtil.isNear(IntakePositions.INTAKING, intakePosition, tolerance);
+      case HANDOFF -> MathUtil.isNear(IntakePositions.HANDOFF, intakePosition, tolerance);
+      case SCORE_L1 -> MathUtil.isNear(IntakePositions.SCORE_L1, intakePosition, tolerance);
+      case CLIMB -> MathUtil.isNear(IntakePositions.CLIMB, intakePosition, tolerance);
+      default -> false;
     };
   }
 
@@ -63,106 +59,99 @@ public class Intake extends StateMachine<IntakeStates> {
     setStateFromRequest(newState);
   }
 
-public void increaseSetpoint(){
-  System.out.println("Setpoints increased to " + (IntakePositions.INTAKING + 0.005));
-  switch (getState()) {
-    case IDLE -> {
-      IntakePositions.IDLE += IntakeConstants.positionIncrement;
-      setIntakePosition(IntakePositions.IDLE);
-      break;
-    }
-    case INTAKING -> {
-      IntakePositions.INTAKING += 0.005;
-      setIntakePosition(IntakePositions.INTAKING);
-      break;
-    }
-    case HANDOFF-> {
-      IntakePositions.HANDOFF += 0.005;
-      setIntakePosition(IntakePositions.HANDOFF);
-      break;
-    }
-    case SCORE_L1->{
-      IntakePositions.SCORE_L1 += 0.005;
-      setIntakePosition(IntakePositions.SCORE_L1);
-      break;
-    }
-    case CLIMB->{
-      IntakePositions.CLIMB += 0.005;
-      setIntakePosition(IntakePositions.CLIMB);
-      break;
-    }
-  }
-}
-public void decreaseSetpoint(){
-    System.out.println("Setpoints decreased to " + (IntakePositions.INTAKING - 0.005));
+  // At the top of the class
+  public void increaseSetpoint() {
     switch (getState()) {
       case IDLE -> {
-        IntakePositions.IDLE -= 0.005;
+        IntakePositions.IDLE += IntakeConstants.positionIncrement;
         setIntakePosition(IntakePositions.IDLE);
-        break;
       }
       case INTAKING -> {
-        IntakePositions.INTAKING -= 0.005;
+        IntakePositions.INTAKING += SETPOINT_INCREMENT;
         setIntakePosition(IntakePositions.INTAKING);
-        break;
       }
-      case HANDOFF-> {
-        IntakePositions.HANDOFF -= 0.005;
+      case HANDOFF -> {
+        IntakePositions.HANDOFF += SETPOINT_INCREMENT;
         setIntakePosition(IntakePositions.HANDOFF);
-        break;
       }
-      case SCORE_L1->{
-        IntakePositions.SCORE_L1 -= 0.005;
+      case SCORE_L1 -> {
+        IntakePositions.SCORE_L1 += SETPOINT_INCREMENT;
         setIntakePosition(IntakePositions.SCORE_L1);
-        break;
       }
-      case CLIMB->{
-        IntakePositions.CLIMB -= 0.005;
+      case CLIMB -> {
+        IntakePositions.CLIMB += SETPOINT_INCREMENT;
         setIntakePosition(IntakePositions.CLIMB);
-        break;
       }
+    }
   }
-}
-@Override
+
+  public void decreaseSetpoint() {
+    switch (getState()) {
+      case IDLE -> {
+        IntakePositions.IDLE -= SETPOINT_INCREMENT;
+        setIntakePosition(IntakePositions.IDLE);
+      }
+      case INTAKING -> {
+        IntakePositions.INTAKING -= SETPOINT_INCREMENT;
+        setIntakePosition(IntakePositions.INTAKING);
+      }
+      case HANDOFF -> {
+        IntakePositions.HANDOFF -= SETPOINT_INCREMENT;
+        setIntakePosition(IntakePositions.HANDOFF);
+      }
+      case SCORE_L1 -> {
+        IntakePositions.SCORE_L1 -= SETPOINT_INCREMENT;
+        setIntakePosition(IntakePositions.SCORE_L1);
+      }
+      case CLIMB -> {
+        IntakePositions.CLIMB -= SETPOINT_INCREMENT;
+        setIntakePosition(IntakePositions.CLIMB);
+      }
+    }
+  }
+
+  @Override
   public void collectInputs() {
     intakePosition = intakeMotor.getPosition().getValueAsDouble();
     DogLog.log(getName() + "/Intake Position", intakePosition);
   }
+
   @Override
   public void periodic() {
-   
+
     super.periodic();
-    }
-    public void setIntakePosition(double position) {
-      intakeMotor.setControl(motor_request.withPosition(position));
-    }
-  
-      @Override
-      protected void afterTransition(IntakeStates newState) {
-        switch (newState) {
-          case IDLE -> {
-            setIntakePosition(IntakePositions.IDLE);
-          }
-          case INTAKING -> {
-            setIntakePosition(IntakePositions.INTAKING);
-          }
-          case CLIMB -> {
-            setIntakePosition(IntakePositions.CLIMB);
-          }
-          case HANDOFF -> {
-            setIntakePosition(IntakePositions.HANDOFF);
-          }
-          case SCORE_L1 -> {
-            setIntakePosition(IntakePositions.SCORE_L1);
-          }
-        }
+  }
+
+  public void setIntakePosition(double position) {
+    intakeMotor.setControl(motor_request.withPosition(position));
+  }
+
+  @Override
+  protected void afterTransition(IntakeStates newState) {
+    switch (newState) {
+      case IDLE -> {
+        setIntakePosition(IntakePositions.IDLE);
       }
-  
-    private static Intake instance;
-  
-    public static Intake getInstance() {
-        if (instance == null) instance = new Intake(); 
-        return instance;
+      case INTAKING -> {
+        setIntakePosition(IntakePositions.INTAKING);
+      }
+      case CLIMB -> {
+        setIntakePosition(IntakePositions.CLIMB);
+      }
+      case HANDOFF -> {
+        setIntakePosition(IntakePositions.HANDOFF);
+      }
+      case SCORE_L1 -> {
+        setIntakePosition(IntakePositions.SCORE_L1);
+      }
     }
   }
 
+  private static Intake instance;
+
+  public static Intake getInstance() {
+    if (instance == null)
+      instance = new Intake();
+    return instance;
+  }
+}
