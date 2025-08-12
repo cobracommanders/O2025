@@ -4,14 +4,8 @@ import frc.robot.subsystems.ground_manager.intake.Intake;
 import frc.robot.subsystems.ground_manager.intake.IntakeStates;
 import frc.robot.subsystems.ground_manager.intakeRollers.IntakeRollers;
 import frc.robot.subsystems.ground_manager.intakeRollers.IntakeRollersStates;
-import frc.robot.subsystems.ground_manager.GroundManagerStates;
 
 import dev.doglog.DogLog;
-
-import java.util.Queue;
-import java.util.LinkedList;
-
-
 
 public class GroundManager {
 
@@ -35,10 +29,8 @@ public class GroundManager {
     public void periodic() {
         intake.collectInputs();
         rollers.collectInputs();
-        
+
         DogLog.log("GroundManager/State", getStateBooleans());
-
-
 
         getNextState();
 
@@ -46,13 +38,15 @@ public class GroundManager {
             currentState = nextState;
             afterTransition(currentState);
             DogLog.log("GroundManager/State", getStateBooleans());
-
         }
     }
 
     private void getNextState() {
         switch (currentState) {
-            case PREPARE_IDLE -> nextState = GroundManagerStates.IDLE;
+            case PREPARE_IDLE -> {
+                intake.setIntakePosition(idlePosition);
+                nextState = GroundManagerStates.IDLE;
+            }
             case IDLE -> {
                 intake.setState(IntakeStates.IDLE);
                 rollers.setState(IntakeRollersStates.IDLE);
@@ -67,31 +61,30 @@ public class GroundManager {
             }
             case PREPARE_HANDOFF -> {
                 intake.setIntakePosition(handoffPosition);
-                nextState = GroundManagerStates.WAIT_HANDOFF;
-            }
-            case WAIT_HANDOFF -> {
-                intake.setState(IntakeStates.HANDOFF);
-                rollers.setState(IntakeRollersStates.WAIT_HANDOFF);
+                nextState = GroundManagerStates.HANDOFF;
             }
             case HANDOFF -> {
                 intake.setState(IntakeStates.HANDOFF);
                 rollers.setState(IntakeRollersStates.HANDOFF);
             }
+            case WAIT_HANDOFF -> {
+                // Hold current subsystem states, no changes
+            }
             case PREPARE_SCORE_L1 -> {
                 intake.setIntakePosition(scoreL1Position);
-                nextState = GroundManagerStates.WAIT_SCORE_L1;
-            }
-            case WAIT_SCORE_L1 -> {
-                intake.setState(IntakeStates.SCORE_L1);
-                rollers.setState(IntakeRollersStates.WAIT_SCORE_L1);
+                nextState = GroundManagerStates.SCORE_L1;
             }
             case SCORE_L1 -> {
                 intake.setState(IntakeStates.SCORE_L1);
                 rollers.setState(IntakeRollersStates.SCORE_L1);
             }
+            case WAIT_SCORE_L1 -> {
+                // Hold current subsystem states, no changes
+            }
             case CLIMB -> {
                 intake.setState(IntakeStates.CLIMB);
-                rollers.setState(IntakeRollersStates.CLIMB);
+                rollers.setState(IntakeRollersStates.IDLE);
+                intake.setIntakePosition(climbPosition);
             }
         }
     }
@@ -107,27 +100,25 @@ public class GroundManager {
                 intake.setState(IntakeStates.INTAKING);
                 rollers.setState(IntakeRollersStates.INTAKING);
             }
-            case WAIT_HANDOFF -> {
-                intake.setState(IntakeStates.HANDOFF);
-                rollers.setState(IntakeRollersStates.WAIT_HANDOFF);
-            }
             case HANDOFF -> {
                 intake.setState(IntakeStates.HANDOFF);
                 rollers.setState(IntakeRollersStates.HANDOFF);
-            }
-            case WAIT_SCORE_L1 -> {
-                intake.setState(IntakeStates.SCORE_L1);
-                rollers.setState(IntakeRollersStates.WAIT_SCORE_L1);
+                intake.setIntakePosition(handoffPosition);
             }
             case SCORE_L1 -> {
                 intake.setState(IntakeStates.SCORE_L1);
                 rollers.setState(IntakeRollersStates.SCORE_L1);
+                intake.setIntakePosition(scoreL1Position);
             }
             case CLIMB -> {
                 intake.setState(IntakeStates.CLIMB);
-                rollers.setState(IntakeRollersStates.CLIMB);
+                rollers.setState(IntakeRollersStates.IDLE);
                 intake.setIntakePosition(climbPosition);
             }
+            case WAIT_HANDOFF, WAIT_SCORE_L1 -> {
+                // no changes during wait states
+            }
+            default -> {}
         }
     }
 
@@ -138,7 +129,6 @@ public class GroundManager {
     public void setState(GroundManagerStates newState) {
         nextState = newState;
         DogLog.log("GroundManager/State", getStateBooleans());
-
     }
 
     public void setIdlePosition(double pos) { idlePosition = pos; }
@@ -151,38 +141,37 @@ public class GroundManager {
         switch (state) {
             case PREPARE_IDLE, IDLE -> idlePosition += delta;
             case PREPARE_INTAKE, INTAKING -> intakePosition += delta;
-            case PREPARE_HANDOFF, WAIT_HANDOFF, HANDOFF -> handoffPosition += delta;
-            case PREPARE_SCORE_L1, WAIT_SCORE_L1, SCORE_L1 -> scoreL1Position += delta;
+            case PREPARE_HANDOFF, HANDOFF -> handoffPosition += delta;
+            case PREPARE_SCORE_L1, SCORE_L1 -> scoreL1Position += delta;
             case CLIMB -> climbPosition += delta;
+            default -> {}
         }
-        DogLog.log("GroundManager/IdlePosition", new double[]{idlePosition});
-        DogLog.log("GroundManager/IntakePosition", new double[]{intakePosition});
-        DogLog.log("GroundManager/HandoffPosition", new double[]{handoffPosition});
-        DogLog.log("GroundManager/ScoreL1Position", new double[]{scoreL1Position});
-        DogLog.log("GroundManager/ClimbPosition", new double[]{climbPosition});
-        
-
+        logPositions();
     }
 
     public void decreaseSetpoint(GroundManagerStates state, double delta) {
         switch (state) {
             case PREPARE_IDLE, IDLE -> idlePosition -= delta;
             case PREPARE_INTAKE, INTAKING -> intakePosition -= delta;
-            case PREPARE_HANDOFF, WAIT_HANDOFF, HANDOFF -> handoffPosition -= delta;
-            case PREPARE_SCORE_L1, WAIT_SCORE_L1, SCORE_L1 -> scoreL1Position -= delta;
+            case PREPARE_HANDOFF, HANDOFF -> handoffPosition -= delta;
+            case PREPARE_SCORE_L1, SCORE_L1 -> scoreL1Position -= delta;
             case CLIMB -> climbPosition -= delta;
+            default -> {}
         }
+        logPositions();
+    }
+
+    private void logPositions() {
         DogLog.log("GroundManager/IdlePosition", new double[]{idlePosition});
         DogLog.log("GroundManager/IntakePosition", new double[]{intakePosition});
         DogLog.log("GroundManager/HandoffPosition", new double[]{handoffPosition});
         DogLog.log("GroundManager/ScoreL1Position", new double[]{scoreL1Position});
         DogLog.log("GroundManager/ClimbPosition", new double[]{climbPosition});
-
     }
+
     private boolean[] getStateBooleans() {
         boolean[] states = new boolean[GroundManagerStates.values().length];
         states[currentState.ordinal()] = true;
         return states;
     }
-    
 }
