@@ -11,4 +11,7 @@ public class Constants {
         public static final double MotionMagicJerk = 0;
         public static final double encoderOffset = 0;
     }
+    public static final class HandConstants {
+        public static final double coralStallCurrent = 0;
+    }
 }
