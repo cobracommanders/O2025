@@ -1,16 +1,16 @@
 package frc.robot;
 
 public final class Constants {
-    public static final class ArmConstants {
-        public static final double P = 0;
-        public static final double I = 0;
-        public static final double D = 0;
-        public static final double G = 0;
-        public static final double MotionMagicCruiseVelocity = 0;
-        public static final double MotionMagicAcceleration = 0;
-        public static final double MotionMagicJerk = 0;
-        public static final double encoderOffset = 0;
-    }
+  public static final class ArmConstants {
+      public static final double P = 0;
+      public static final double I = 0;
+      public static final double D = 0;
+      public static final double G = 0;
+      public static final double MotionMagicCruiseVelocity = 0;
+      public static final double MotionMagicAcceleration = 0;
+      public static final double MotionMagicJerk = 0;
+      public static final double encoderOffset = 0;
+  }
 
   public static final class IntakePivotConstants{
     public static final double positionIncrement = 0;
@@ -37,4 +37,8 @@ public final class Constants {
       public static final double DEPLOY_MOTION_MAGIC_JERK = 0;
       public static final double CAGE_DETECECTION_CURRENT = 0;
   }
+  public static final class HandConstants {
+      public static final double coralStallCurrent = 0;
+  }
 }
+
