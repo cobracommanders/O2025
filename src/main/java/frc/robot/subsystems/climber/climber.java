@@ -8,16 +8,17 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import frc.robot.Constants.ClimberConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.Constants.ClimberConstants;
 
 public class Climber extends StateMachine<ClimberStates>{
+    private final String name = getName();
     private final TalonFX wheelMotor;
     private final TalonFX winchMotor;
-    private TalonFXConfiguration wheel_motor_config = new TalonFXConfiguration().withSlot0(new Slot0Configs().withKP(0.0).withKI(0).withKD(0).withKG(0).withGravityType(GravityTypeValue.Arm_Cosine)).withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(0));
-    // todo: Wheel doesn't have same config as winch!
+    private TalonFXConfiguration wheel_motor_config = new TalonFXConfiguration();
     private TalonFXConfiguration winch_motor_config = new TalonFXConfiguration().withSlot0(new Slot0Configs().withKP(0.0).withKI(0.0).withKD(0.0).withKG(0.0).withGravityType(GravityTypeValue.Arm_Cosine)).withFeedback(new FeedbackConfigs().withSensorToMechanismRatio((122.449 / 1.0)));
     public double climberPosition;
     private MotionMagicVoltage winch_motor_request = new MotionMagicVoltage(0).withSlot(0);
@@ -28,9 +29,9 @@ public class Climber extends StateMachine<ClimberStates>{
       //TODO: update configs
       winch_motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       wheel_motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-      winch_motor_config.MotionMagic.MotionMagicCruiseVelocity = ClimberConstants.DeployMotionMagicCruiseVelocity;
-      winch_motor_config.MotionMagic.MotionMagicAcceleration = ClimberConstants.deploymotionMagicAcceleration;
-      winch_motor_config.MotionMagic.MotionMagicJerk = ClimberConstants.deployMotionMagicJerk;
+      winch_motor_config.MotionMagic.MotionMagicCruiseVelocity = ClimberConstants.DEPLOY_MOTION_MAGIC_CRUISE_VELOCITY;
+      winch_motor_config.MotionMagic.MotionMagicAcceleration = ClimberConstants.DEPLOY_MOTION_MAGIC_ACCELERATION;
+      winch_motor_config.MotionMagic.MotionMagicJerk = ClimberConstants.DEPLOY_MOTION_MAGIC_JERK;
       winchMotor = new TalonFX(Ports.Climber.WINCH_CLIMBER_MOTOR_PORT);
       wheelMotor = new TalonFX(Ports.Climber.WHEEL_CLIMBER_MOTOR_PORT);
     }
@@ -41,7 +42,8 @@ public class Climber extends StateMachine<ClimberStates>{
     motorCurrent = wheelMotor.getStatorCurrent().getValueAsDouble();
     //TODO: update climberPosition
     //TODO: log important inputs
-
+    DogLog.log(name + "/ climber postions", climberPosition);
+    DogLog.log(name + "/ cage detection", cageDetected());
     //implement input collection (these values will be used in state transitions)
   }
 
@@ -52,7 +54,6 @@ public class Climber extends StateMachine<ClimberStates>{
 
   public ClimberStates getNextState(ClimberStates currentState){
       ClimberStates nextState = currentState;
-      //implement state Transitions
       switch(currentState){
         case IDLE:
           //none
@@ -120,11 +121,6 @@ public class Climber extends StateMachine<ClimberStates>{
    public void setClimberWheelSpeed(double speed){
     wheelMotor.set(speed);
    }
-
-   //TODO: Why not use atGoal() instead?
-  public boolean climberDeployed() {
-    return MathUtil.isNear(ClimberPositions.DEPLOYED, climberPosition, 0.0);
-  }
 
   private boolean cageDetected(){
     return motorCurrent >  ClimberConstants.CAGE_DETECECTION_CURRENT;
