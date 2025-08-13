@@ -1,4 +1,5 @@
 package frc.robot.subsystems.ground_manager.intakeRollers;
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import frc.robot.Ports;
 import frc.robot.Constants.IntakeRollersConstants;
@@ -6,6 +7,8 @@ import frc.robot.stateMachine.StateMachine;
 
 
 public class IntakeRollers extends StateMachine<IntakeRollersStates>{
+  public final String name = getName();
+  
     private final TalonFX motor;
     private double motorStatorCurrent;
     

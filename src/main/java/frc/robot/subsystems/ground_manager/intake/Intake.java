@@ -1,5 +1,7 @@
 package frc.robot.subsystems.ground_manager.intake;
 
+import java.util.jar.Attributes.Name;
+
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -16,7 +18,7 @@ import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
 public class Intake extends StateMachine<IntakeStates> {
-  private static final double SETPOINT_INCREMENT = 0.005;
+  public final String name = getName();
 
   private final TalonFX intakeMotor;
   private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
@@ -40,10 +42,6 @@ public class Intake extends StateMachine<IntakeStates> {
     tolerance = 0.0;
   }
 
-  public double getIntakePosition() {
-    return intakePosition;
-  }
-
   public boolean atGoal() {
     return switch (getState()) {
       case IDLE -> MathUtil.isNear(IntakePositions.IDLE, intakePosition, tolerance);
@@ -59,67 +57,10 @@ public class Intake extends StateMachine<IntakeStates> {
     setStateFromRequest(newState);
   }
 
-  // At the top of the class
-  public void increaseSetpoint() {
-    switch (getState()) {
-      case IDLE -> {
-        IntakePositions.IDLE += IntakeConstants.positionIncrement;
-        setIntakePosition(IntakePositions.IDLE);
-      }
-      case INTAKING -> {
-        IntakePositions.INTAKING += SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.INTAKING);
-      }
-      case HANDOFF -> {
-        IntakePositions.HANDOFF += SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.HANDOFF);
-      }
-      case SCORE_L1 -> {
-        IntakePositions.SCORE_L1 += SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.SCORE_L1);
-      }
-      case CLIMB -> {
-        IntakePositions.CLIMB += SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.CLIMB);
-      }
-    }
-  }
-
-  public void decreaseSetpoint() {
-    switch (getState()) {
-      case IDLE -> {
-        IntakePositions.IDLE -= SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.IDLE);
-      }
-      case INTAKING -> {
-        IntakePositions.INTAKING -= SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.INTAKING);
-      }
-      case HANDOFF -> {
-        IntakePositions.HANDOFF -= SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.HANDOFF);
-      }
-      case SCORE_L1 -> {
-        IntakePositions.SCORE_L1 -= SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.SCORE_L1);
-      }
-      case CLIMB -> {
-        IntakePositions.CLIMB -= SETPOINT_INCREMENT;
-        setIntakePosition(IntakePositions.CLIMB);
-      }
-    }
-  }
-
   @Override
   public void collectInputs() {
     intakePosition = intakeMotor.getPosition().getValueAsDouble();
-    DogLog.log(getName() + "/Intake Position", intakePosition);
-  }
-
-  @Override
-  public void periodic() {
-
-    super.periodic();
+    DogLog.log(name + "/Intake Position", intakePosition);
   }
 
   public void setIntakePosition(double position) {
