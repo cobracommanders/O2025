@@ -5,10 +5,15 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import dev.doglog.DogLog;
+import frc.robot.Constants;
+import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.elevator.ElevatorStates;
 
 public class Hand extends StateMachine<HandStates> {
+    private String name = getName();
+    private double statorCurrent;
     public static TalonFX motor;
     private final TalonFXConfiguration motor_config = new TalonFXConfiguration();
 
@@ -16,6 +21,8 @@ public class Hand extends StateMachine<HandStates> {
         super(HandStates.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        motor = new TalonFX(Ports.HandPorts.MOTOR);
 
         motor.getConfigurator().apply(motor_config);
     }
@@ -26,6 +33,8 @@ public class Hand extends StateMachine<HandStates> {
 
     @Override
     public void collectInputs() {
+      statorCurrent = motor.getStatorCurrent().getValueAsDouble();
+      DogLog.log(name + "/Motor Stator Current", statorCurrent);
     }
 
     public void setState(HandStates state){
@@ -34,11 +43,16 @@ public class Hand extends StateMachine<HandStates> {
 
   public void setHandSpeed(double speed) {
     motor.set(speed);
+    DogLog.log(getName() + "hand speed", speed);
   }
 
-  public boolean hasAlgae(){
-    return true;
-  }
+      public boolean hasCoral(){
+      if (statorCurrent > Constants.HandConstants.coralStallCurrent){
+        return true;
+      } else {
+        return false;
+      }
+    }
 
     @Override
     protected void afterTransition(HandStates newState) {
