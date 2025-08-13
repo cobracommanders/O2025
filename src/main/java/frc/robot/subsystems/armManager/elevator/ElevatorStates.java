@@ -7,5 +7,6 @@ public enum ElevatorStates {
     LOW_REEF_ALGAE,
     GROUND_ALGAE,
     ALGAE_NET,
-    ALGAE_PROCESSOR
+    ALGAE_PROCESSOR,
+    HANDOFF
 }

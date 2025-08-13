@@ -8,4 +8,5 @@ public class ElevatorPositions {
     public static final double GROUND_ALGAE = 0;
     public static final double ALGAE_NET = 0;
     public static final double ALGAE_PROCESSOR = 0;
+    public static final double HANDOFF = 0;
 }
