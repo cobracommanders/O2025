@@ -34,12 +34,14 @@ public class Climber extends StateMachine<ClimberStates>{
       winch_motor_config.MotionMagic.MotionMagicJerk = ClimberConstants.DEPLOY_MOTION_MAGIC_JERK;
       winchMotor = new TalonFX(Ports.Climber.WINCH_CLIMBER_MOTOR_PORT);
       wheelMotor = new TalonFX(Ports.Climber.WHEEL_CLIMBER_MOTOR_PORT);
+      climberPosition = 0; //fix this by linking it to absolute encoder
     }
    
   
   @Override
   public void collectInputs(){
     motorCurrent = wheelMotor.getStatorCurrent().getValueAsDouble();
+    climberPosition = winchMotor.getPosition().getValueAsDouble();
     //TODO: update climberPosition
     //TODO: log important inputs
     DogLog.log(name + "/ climber postions", climberPosition);
