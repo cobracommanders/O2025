@@ -69,6 +69,8 @@ public class Elevator extends StateMachine<ElevatorStates> {
                 MathUtil.isNear(ElevatorPositions.ALGAE_NET, elevatorPosition, tolerance);
             case ALGAE_PROCESSOR ->
                 MathUtil.isNear(ElevatorPositions.ALGAE_PROCESSOR, elevatorPosition, tolerance);
+            case HANDOFF ->
+                MathUtil.isNear(ElevatorPositions.HANDOFF, elevatorPosition, tolerance);
         };
 
     }
@@ -113,6 +115,9 @@ public class Elevator extends StateMachine<ElevatorStates> {
                 setArmPosition(ElevatorPositions.ALGAE_PROCESSOR);
             }
             case ALGAE_NET -> {
+                setArmPosition(ElevatorPositions.ALGAE_NET);
+            }
+            case HANDOFF -> {
                 setArmPosition(ElevatorPositions.ALGAE_NET);
             }
         }

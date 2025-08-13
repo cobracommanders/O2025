@@ -12,9 +12,9 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants;
-import edu.wpi.first.math.MathUtil;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
@@ -36,8 +36,6 @@ public class Arm extends StateMachine<ArmStates> {
 
     public Arm() {
         super(ArmStates.IDLE);
-        encoder = new CANcoder(Ports.ArmPorts.ENCODER);
-        motor = new TalonFX(Ports.ArmPorts.MOTOR);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MotionMagicCruiseVelocity;
@@ -47,14 +45,13 @@ public class Arm extends StateMachine<ArmStates> {
         canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.9;
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
 
+        encoder = new CANcoder(Ports.ArmPorts.ENCODER);
+        motor = new TalonFX(Ports.ArmPorts.MOTOR);
+
         motor.getConfigurator().apply(motor_config);
         encoder.getConfigurator().apply(canCoderConfig);
 
         tolerance = 0.1;
-    }
-
-    protected ArmStates getNexState(ArmStates currentState) {
-        return currentState;
     }
 
     public boolean atGoal() {
@@ -71,6 +68,17 @@ public class Arm extends StateMachine<ArmStates> {
                 MathUtil.isNear(ArmPositions.ALGAE_NET, armPosition, tolerance);
             case ALGAE_PROCESSOR ->
                 MathUtil.isNear(ArmPositions.ALGAE_PROCESSOR, armPosition, tolerance);
+            case L4 ->
+                MathUtil.isNear(ArmPositions.L4, armPosition, tolerance);
+            case SCORE_L4 ->
+                MathUtil.isNear(ArmPositions.SCORE_L4, armPosition, tolerance);
+            case HANDOFF_LEFT ->
+                MathUtil.isNear(ArmPositions.HANDOFF_LEFT, armPosition, tolerance);
+            case HANDOFF_MIDDLE ->
+                MathUtil.isNear(ArmPositions.HANDOFF_MIDDLE, armPosition, tolerance);
+            case HANDOFF_RIGHT ->
+                MathUtil.isNear(ArmPositions.HANDOFF_LEFT, armPosition, tolerance);
+
         };
 
     }
@@ -82,9 +90,11 @@ public class Arm extends StateMachine<ArmStates> {
     @Override
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
+        DogLog.log(getName() + "/arm encoder position", absolutePosition);
+        DogLog.log(getName() + "/current arm state", getState());
     }
 
-    public void setState(ArmStates state){
+    public void setState(ArmStates state) {
         setStateFromRequest(state);
     }
 
@@ -112,6 +122,21 @@ public class Arm extends StateMachine<ArmStates> {
             }
             case ALGAE_NET -> {
                 setArmPosition(ArmPositions.ALGAE_NET);
+            }
+            case L4 -> {
+                setArmPosition(ArmPositions.L4);
+            }
+            case SCORE_L4 -> {
+                setArmPosition(ArmPositions.SCORE_L4);
+            }
+            case HANDOFF_LEFT -> {
+                setArmPosition(ArmPositions.HANDOFF_LEFT);
+            }
+            case HANDOFF_MIDDLE -> {
+                setArmPosition(ArmPositions.HANDOFF_MIDDLE);
+            }
+            case HANDOFF_RIGHT -> {
+                setArmPosition(ArmPositions.HANDOFF_RIGHT);
             }
         }
     }
