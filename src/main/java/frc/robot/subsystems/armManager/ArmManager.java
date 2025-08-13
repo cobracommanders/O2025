@@ -1,5 +1,6 @@
 package frc.robot.subsystems.armManager;
 
+import dev.doglog.DogLog;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmStates;
@@ -16,7 +17,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     public final Elevator elevator;
     public final Arm arm;
 
-    public ArmScheduler armScheduler;
+    public final ArmScheduler armScheduler;
 
     public ArmManager() {
         super(ArmManagerStates.PREPARE_IDLE);
@@ -32,34 +33,34 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
 
         switch (currentState) {
             case PREPARE_IDLE -> {
-                if (armScheduler.isReady()){
+                if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.IDLE;
                 }
             }
 
             case PREPARE_INTAKE_GROUND_ALGAE -> {
-                if (armScheduler.isReady()){
+                if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_GROUND_ALGAE;
                 }
             }
             case INTAKE_GROUND_ALGAE -> {
             }
             case PREPARE_INTAKE_HIGH_REEF_ALGAE -> {
-                if (armScheduler.isReady()){
+                if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_HIGH_REEF_ALGAE;
                 }
             }
             case INTAKE_HIGH_REEF_ALGAE -> {
             }
             case PREPARE_INTAKE_LOW_REEF_ALGAE -> {
-                if (armScheduler.isReady()){
+                if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_LOW_REEF_ALGAE;
                 }
             }
             case INTAKE_LOW_REEF_ALGAE -> {
             }
             case PREPARE_SCORE_ALGAE_NET -> {
-                if (armScheduler.isReady()){
+                if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.WAIT_SCORE_ALGAE_NET;
                 }
             }
@@ -68,7 +69,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             case SCORE_ALGAE_NET -> {
             }
             case PREPARE_SCORE_ALGAE_PROCESSOR -> {
-                if (armScheduler.isReady()){
+                if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.WAIT_SCORE_ALGAE_PROCESSOR;
                 }
             }
@@ -76,7 +77,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
             case SCORE_ALGAE_PROCESSOR -> {
             }
-            
+
         }
 
         return nextState;
@@ -84,9 +85,15 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
 
     @Override
     public void collectInputs() {
+        DogLog.log(name + "current arm manager state", getState());
+        // TODO: log needed inputs
     }
 
     public void setState(ArmManagerStates state) {
+        if (armScheduler.isReady()) {
+            setStateFromRequest(state);
+        }
+
         setStateFromRequest(state);
     }
 
@@ -97,19 +104,25 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
             }
             case IDLE -> {
+                if (timeout(1)) {
+                    arm.syncEncoder();
+                }
             }
             case PREPARE_INTAKE_GROUND_ALGAE -> {
-                armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
+                armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE,
+                        ElevatorStates.GROUND_ALGAE);
             }
             case INTAKE_GROUND_ALGAE -> {
             }
             case PREPARE_INTAKE_HIGH_REEF_ALGAE -> {
-                armScheduler.scheduleStates(ArmStates.INTAKE_HIGH_REEF_ALGAE, HandStates.INTAKE_HIGH_REEF_ALGAE, ElevatorStates.HIGH_REEF_ALGAE);
+                armScheduler.scheduleStates(ArmStates.INTAKE_HIGH_REEF_ALGAE, HandStates.INTAKE_HIGH_REEF_ALGAE,
+                        ElevatorStates.HIGH_REEF_ALGAE);
             }
             case INTAKE_HIGH_REEF_ALGAE -> {
             }
             case PREPARE_INTAKE_LOW_REEF_ALGAE -> {
-                armScheduler.scheduleStates(ArmStates.INTAKE_LOW_REEF_ALGAE, HandStates.INTAKE_LOW_REEF_ALGAE, ElevatorStates.LOW_REEF_ALGAE);
+                armScheduler.scheduleStates(ArmStates.INTAKE_LOW_REEF_ALGAE, HandStates.INTAKE_LOW_REEF_ALGAE,
+                        ElevatorStates.LOW_REEF_ALGAE);
             }
             case INTAKE_LOW_REEF_ALGAE -> {
             }
@@ -129,36 +142,32 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             case SCORE_ALGAE_PROCESSOR -> {
                 hand.setState(HandStates.SCORE_ALGAE_PROCESSOR);
             }
-            // case PREPARE_SCORE_L4 -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case WAIT_L4 -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case SCORE_L4 -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case PREPARE_HANDOFF_RIGHT -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case WAIT_HANDOFF_RIGHT -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case PREPARE_HANDOFF_MIDDLE -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case WAIT_HANDOFF_MIDDLE -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case PREPARE_HANDOFF_LEFT -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case WAIT_HANDOFF_LEFT -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
-            // case CLIMB -> {
-            //     armScheduler.scheduleStates(ArmStates.INTAKE_GROUND_ALGAE, HandStates.INTAKE_GROUND_ALGAE, ElevatorStates.GROUND_ALGAE);
-            // }
+            case PREPARE_SCORE_L4 -> {
+            armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.SCORE_L4, ElevatorStates.L4);
+            }
+            case WAIT_L4 -> {
+            armScheduler.scheduleStates(ArmStates.L4, HandStates.IDLE, ElevatorStates.L4);
+            }
+            case SCORE_L4 -> {
+            }
+            case PREPARE_HANDOFF_RIGHT -> {
+            armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+            }
+            case WAIT_HANDOFF_RIGHT -> {
+            }
+            case PREPARE_HANDOFF_MIDDLE -> {
+            armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+            }
+            case WAIT_HANDOFF_MIDDLE -> {
+            }
+            case PREPARE_HANDOFF_LEFT -> {
+            armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+            }
+            case WAIT_HANDOFF_LEFT -> {
+            }
+            case CLIMB -> {
+            armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
+            }
 
         }
     }
