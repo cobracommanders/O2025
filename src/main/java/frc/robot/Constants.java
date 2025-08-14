@@ -13,5 +13,6 @@ public class Constants {
     }
     public static final class HandConstants {
         public static final double coralStallCurrent = 0;
+        public static final double algaeStallCurrent = 0;
     }
 }
