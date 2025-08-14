@@ -17,7 +17,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         intake = Intake.getInstance();
         rollers = IntakeRollers.getInstance();
     }
-    
+    @Override
     protected GroundManagerStates getNextState(GroundManagerStates currentState) {
         GroundManagerStates nextState = currentState;
         switch (currentState) {
@@ -63,7 +63,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         }
         return nextState;
     }
-
+@Override
     public void afterTransition(GroundManagerStates newState) {
         switch (newState) {
             case PREPARE_IDLE -> {
