@@ -88,7 +88,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
         setStateFromRequest(state);
     }
 
-    public void setArmPosition(double position) {
+    public void setElevatorPosition(double position) {
         rMotor.setControl(right_motor_request);
         lMotor.setControl(motor_request.withPosition(position));
     }
@@ -97,28 +97,28 @@ public class Elevator extends StateMachine<ElevatorStates> {
     protected void afterTransition(ElevatorStates newState) {
         switch (newState) {
             case IDLE -> {
-                setArmPosition(ElevatorPositions.IDLE);
+                setElevatorPosition(ElevatorPositions.IDLE);
             }
             case L4 -> {
-                setArmPosition(ElevatorPositions.L4);
+                setElevatorPosition(ElevatorPositions.L4);
             }
             case HIGH_REEF_ALGAE -> {
-                setArmPosition(ElevatorPositions.HIGH_REEF_ALGAE);
+                setElevatorPosition(ElevatorPositions.HIGH_REEF_ALGAE);
             }
             case LOW_REEF_ALGAE -> {
-                setArmPosition(ElevatorPositions.LOW_REEF_ALGAE);
+                setElevatorPosition(ElevatorPositions.LOW_REEF_ALGAE);
             }
             case GROUND_ALGAE -> {
-                setArmPosition(ElevatorPositions.GROUND_ALGAE);
+                setElevatorPosition(ElevatorPositions.GROUND_ALGAE);
             }
             case ALGAE_PROCESSOR -> {
-                setArmPosition(ElevatorPositions.ALGAE_PROCESSOR);
+                setElevatorPosition(ElevatorPositions.ALGAE_PROCESSOR);
             }
             case ALGAE_NET -> {
-                setArmPosition(ElevatorPositions.ALGAE_NET);
+                setElevatorPosition(ElevatorPositions.ALGAE_NET);
             }
             case HANDOFF -> {
-                setArmPosition(ElevatorPositions.ALGAE_NET);
+                setElevatorPosition(ElevatorPositions.ALGAE_NET);
             }
         }
     }
