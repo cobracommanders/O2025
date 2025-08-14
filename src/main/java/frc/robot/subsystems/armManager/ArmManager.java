@@ -17,6 +17,8 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     public final Elevator elevator;
     public final Arm arm;
 
+    private boolean synced = false;
+
     public final ArmScheduler armScheduler;
 
     public ArmManager() {
@@ -99,13 +101,15 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
 
     @Override
     protected void afterTransition(ArmManagerStates newState) {
+        synced = false;
         switch (newState) {
             case PREPARE_IDLE -> {
                 armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
             }
             case IDLE -> {
-                if (timeout(1)) {
+                if (!synced && timeout(1)) {
                     arm.syncEncoder();
+                    synced = true;
                 }
             }
             case PREPARE_INTAKE_GROUND_ALGAE -> {
@@ -143,30 +147,31 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 hand.setState(HandStates.SCORE_ALGAE_PROCESSOR);
             }
             case PREPARE_SCORE_L4 -> {
-            armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.SCORE_L4, ElevatorStates.L4);
+                armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.SCORE_L4, ElevatorStates.L4);
             }
             case WAIT_L4 -> {
-            armScheduler.scheduleStates(ArmStates.L4, HandStates.IDLE, ElevatorStates.L4);
+                armScheduler.scheduleStates(ArmStates.L4, HandStates.IDLE, ElevatorStates.L4);
             }
             case SCORE_L4 -> {
+                hand.setState(HandStates.SCORE_L4);
             }
             case PREPARE_HANDOFF_RIGHT -> {
-            armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
             }
             case WAIT_HANDOFF_RIGHT -> {
             }
             case PREPARE_HANDOFF_MIDDLE -> {
-            armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
             }
             case WAIT_HANDOFF_MIDDLE -> {
             }
             case PREPARE_HANDOFF_LEFT -> {
-            armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
             }
             case WAIT_HANDOFF_LEFT -> {
             }
             case CLIMB -> {
-            armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
+                armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
             }
 
         }
