@@ -1,6 +1,5 @@
 package frc.robot.subsystems.ground_manager.intake;
 
-import java.util.jar.Attributes.Name;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -19,7 +18,7 @@ import frc.robot.stateMachine.StateMachine;
 
 public class Intake extends StateMachine<IntakeStates> {
   public final String name = getName();
-
+//TODO update motor configs
   private final TalonFX intakeMotor;
   private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
       .withSlot0(new Slot0Configs().withKP(IntakeConstants.P).withKI(IntakeConstants.I).withKD(IntakeConstants.D)
