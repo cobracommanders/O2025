@@ -41,17 +41,17 @@ public class Hand extends StateMachine<HandStates> {
         setStateFromRequest(state);
     }
 
-  public void setHandSpeed(double speed) {
-    motor.set(speed);
-    DogLog.log(getName() + "hand speed", speed);
-  }
+    public void setHandSpeed(double speed) {
+        motor.set(speed);
+        DogLog.log(getName() + "hand speed", speed);
+    }
 
-      public boolean hasCoral(){
-      if (statorCurrent > Constants.HandConstants.coralStallCurrent){
-        return true;
-      } else {
-        return false;
-      }
+    public boolean hasCoral(){
+        return statorCurrent > Constants.HandConstants.coralStallCurrent;
+    }
+
+    public boolean hasAlgae(){
+        return statorCurrent > Constants.HandConstants.algaeStallCurrent;
     }
 
     @Override

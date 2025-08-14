@@ -38,7 +38,8 @@ public final class Constants {
       public static final double CAGE_DETECECTION_CURRENT = 0;
   }
   public static final class HandConstants {
-      public static final double coralStallCurrent = 0;
+    public static final double coralStallCurrent = 0;
+    public static final double algaeStallCurrent = 0;
   }
 }
 
