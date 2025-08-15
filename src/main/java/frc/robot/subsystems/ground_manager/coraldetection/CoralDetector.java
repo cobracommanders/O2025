@@ -4,6 +4,8 @@ import com.ctre.phoenix6.hardware.CANrange;
 
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.armManager.ArmManagerStates;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
 public class CoralDetector extends StateMachine<CoralDetectorStates> {
     public CANrange lCANRange;
@@ -24,6 +26,58 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
 
     @Override
     protected CoralDetectorStates getNextState(CoralDetectorStates currentState) {
+        // ArmManagerStates nextState = currentState; reference ofc
+        CoralDetectorStates nextState = currentState;
+
+        switch (nextState) {
+            case NONE -> {
+                if (lDetected && rDetected == false) {
+                    lDetected = false;
+                    rDetected = false;
+                    nextState = CoralDetectorStates.LEFT;
+                }
+            }
+            case LEFT -> {
+                if (lDetected == true) {
+                    lDetected = true;
+                    rDetected = false;
+                    nextState = CoralDetectorStates.RIGHT;
+                }
+            }
+            case RIGHT -> {
+                if (rDetected == true) {
+                    lDetected = false;
+                    rDetected = true;
+                    nextState = CoralDetectorStates.MIDDLE;
+                }
+            }
+            case MIDDLE -> {
+                if (rDetected && lDetected == true) {
+                    lDetected = true;
+                    rDetected = true;
+                    nextState = CoralDetectorStates.NONE;
+                }
+            }
+        }
+
+        return nextState;
+
+        // Referenced Arm manager switch case
+        // Basically thinking: we are getting the coral detector states, we start off with NONE as the current state and we would technically want to say: 
+        //ex: The left CANRange is detecting, so if the current state we're in is NONE so we would go to the next state (cont.)
+        //by saying if the left can is detecting, it would read as true, which would go to the next state: LEFT
+        // Id like to get more clarifiation on this stuff to make sure im doing this right.
     }
 
+    // Wondering if we need an instance for this subsystem? but ill add it just in case
+    private static CoralDetector instance;
+
+    public static CoralDetector getInstance() {
+        if (instance == null)
+            instance = new CoralDetector();
+        return instance;
+    }
+    // Would we want to log this stuff? If yes, what would we log?
+    // Would we want an after transitions? and could i get an explaination on what it is cause i saw it and i don't exactly know what it is?
+    // I was thinking about arm and handoff and such but i would like to get assistance on it - if its included on this subsystem!
 }
