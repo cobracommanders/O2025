@@ -12,47 +12,47 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.IntakePivotConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
-public class Intake extends StateMachine<IntakeStates> {
+public class IntakePivot extends StateMachine<IntakePivotStates> {
   public final String name = getName();
 //TODO update motor configs
   private final TalonFX intakeMotor;
   private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
-      .withSlot0(new Slot0Configs().withKP(IntakeConstants.P).withKI(IntakeConstants.I).withKD(IntakeConstants.D)
-          .withKG(IntakeConstants.G).withGravityType(GravityTypeValue.Arm_Cosine))
+      .withSlot0(new Slot0Configs().withKP(IntakePivotConstants.P).withKI(IntakePivotConstants.I).withKD(IntakePivotConstants.D)
+          .withKG(IntakePivotConstants.G).withGravityType(GravityTypeValue.Arm_Cosine))
       .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio((8.0357 / 1.0)));
   private double intakePosition;
   private final double tolerance;
 
   private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
-  private Intake() {
-    super(IntakeStates.IDLE);
+  private IntakePivot() {
+    super(IntakePivotStates.IDLE);
     motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    intakeMotor = new TalonFX(Ports.IntakePorts.INTAKE_MOTOR);
+    intakeMotor = new TalonFX(Ports.IntakePivotPorts.INTAKE_MOTOR);
     intakeMotor.getConfigurator().apply(motor_config);
-    motor_config.MotionMagic.MotionMagicCruiseVelocity = IntakeConstants.MotionMagicCruiseVelocity;
-    motor_config.MotionMagic.MotionMagicAcceleration = IntakeConstants.MotionMagicAcceleration;
-    motor_config.MotionMagic.MotionMagicJerk = IntakeConstants.MotionMagicJerk;
+    motor_config.MotionMagic.MotionMagicCruiseVelocity = IntakePivotConstants.MotionMagicCruiseVelocity;
+    motor_config.MotionMagic.MotionMagicAcceleration = IntakePivotConstants.MotionMagicAcceleration;
+    motor_config.MotionMagic.MotionMagicJerk = IntakePivotConstants.MotionMagicJerk;
     tolerance = 0.0;
   }
 
   public boolean atGoal() {
     return switch (getState()) {
-      case IDLE -> MathUtil.isNear(IntakePositions.IDLE, intakePosition, tolerance);
-      case INTAKING -> MathUtil.isNear(IntakePositions.INTAKING, intakePosition, tolerance);
-      case HANDOFF -> MathUtil.isNear(IntakePositions.HANDOFF, intakePosition, tolerance);
-      case SCORE_L1 -> MathUtil.isNear(IntakePositions.SCORE_L1, intakePosition, tolerance);
-      case CLIMB -> MathUtil.isNear(IntakePositions.CLIMB, intakePosition, tolerance);
+      case IDLE -> MathUtil.isNear(IntakePivotPositions.IDLE, intakePosition, tolerance);
+      case INTAKING -> MathUtil.isNear(IntakePivotPositions.INTAKING, intakePosition, tolerance);
+      case HANDOFF -> MathUtil.isNear(IntakePivotPositions.HANDOFF, intakePosition, tolerance);
+      case SCORE_L1 -> MathUtil.isNear(IntakePivotPositions.SCORE_L1, intakePosition, tolerance);
+      case CLIMB -> MathUtil.isNear(IntakePivotPositions.CLIMB, intakePosition, tolerance);
       default -> false;
     };
   }
 
-  public void setState(IntakeStates newState) {
+  public void setState(IntakePivotStates newState) {
     setStateFromRequest(newState);
   }
 
@@ -67,31 +67,31 @@ public class Intake extends StateMachine<IntakeStates> {
   }
 
   @Override
-  protected void afterTransition(IntakeStates newState) {
+  protected void afterTransition(IntakePivotStates newState) {
     switch (newState) {
       case IDLE -> {
-        setIntakePosition(IntakePositions.IDLE);
+        setIntakePosition(IntakePivotPositions.IDLE);
       }
       case INTAKING -> {
-        setIntakePosition(IntakePositions.INTAKING);
+        setIntakePosition(IntakePivotPositions.INTAKING);
       }
       case CLIMB -> {
-        setIntakePosition(IntakePositions.CLIMB);
+        setIntakePosition(IntakePivotPositions.CLIMB);
       }
       case HANDOFF -> {
-        setIntakePosition(IntakePositions.HANDOFF);
+        setIntakePosition(IntakePivotPositions.HANDOFF);
       }
       case SCORE_L1 -> {
-        setIntakePosition(IntakePositions.SCORE_L1);
+        setIntakePosition(IntakePivotPositions.SCORE_L1);
       }
     }
   }
 
-  private static Intake instance;
+  private static IntakePivot instance;
 
-  public static Intake getInstance() {
+  public static IntakePivot getInstance() {
     if (instance == null)
-      instance = new Intake();
+      instance = new IntakePivot();
     return instance;
   }
 }

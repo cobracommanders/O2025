@@ -1,5 +1,5 @@
 package frc.robot.subsystems.ground_manager.intake;
-public class IntakePositions {
+public class IntakePivotPositions {
     public static double IDLE = 0.0;
     public static double INTAKING = 0.0;
     public static double HANDOFF = 0.0;

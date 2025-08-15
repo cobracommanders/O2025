@@ -1,6 +1,6 @@
 package frc.robot.subsystems.ground_manager.intake;
 
-public enum IntakeStates {
+public enum IntakePivotStates {
     IDLE,
     INTAKING,
     HANDOFF,

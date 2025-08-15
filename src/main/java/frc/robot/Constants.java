@@ -2,7 +2,7 @@ package frc.robot;
 
 public final class Constants {
   
-  public static final class IntakeConstants{
+  public static final class IntakePivotConstants{
     public static final double positionIncrement = 0;
     public static final double P = 0.0;
     public static final double I = 0.0;
