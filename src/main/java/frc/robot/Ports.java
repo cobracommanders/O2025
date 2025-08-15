@@ -14,7 +14,7 @@ public class Ports {
         public static final int RIGHT_CAN_RANGE = 0;
     }
   
-    public static class Climber {
+    public static class ClimberPorts {
         public static int WHEEL_CLIMBER_MOTOR_PORT = 0;
         public static int WINCH_CLIMBER_MOTOR_PORT = 0;
     }

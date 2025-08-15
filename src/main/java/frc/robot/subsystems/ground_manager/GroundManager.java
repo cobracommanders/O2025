@@ -94,4 +94,11 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
         }
     }
+
+    private static GroundManager instance;
+
+    public static GroundManager getInstance() {
+        if (instance == null) instance = new GroundManager(); 
+        return instance;
+    }
 }

@@ -1,12 +1,27 @@
 package frc.robot.stateMachine;
 
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
+
+import frc.robot.subsystems.armManager.ArmManager;
+import frc.robot.subsystems.armManager.ArmManagerStates;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.ground_manager.GroundManager;
+import frc.robot.subsystems.ground_manager.GroundManagerStates;
+
 public class RobotManager extends StateMachine<RobotState> {
+
+    public final ArmManager armManager;
+    public final GroundManager groundManager;
+    public final Climber climber;
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
     public RobotManager() {
         super(RobotState.IDLE);
 
+        this.armManager = ArmManager.getInstance();
+        this.groundManager = GroundManager.getInstance();
+        this.climber = Climber.getInstance();
     }
 
     @Override
@@ -20,7 +35,7 @@ public class RobotManager extends StateMachine<RobotState> {
         for (RobotFlag flag : flags.getChecked()) {
             switch (flag) {
                 case IDLE:
-                    nextState = RobotState.PREPARE_IDLE;
+                    nextState = RobotState.IDLE;
                 case INTAKE_CORAL:
                     nextState = RobotState.INTAKING_CORAL;
                     break;
@@ -71,81 +86,104 @@ public class RobotManager extends StateMachine<RobotState> {
 
         switch (currentState) {
 
-            case INTAKING_CORAL:
-            //fill later when mereged with other subsystems
-                // if () {
-                //     nextState = RobotState.PREPARE_IDLE;
-                // }
-                break;
-            case PREPARE_IDLE:
-                break;
-            case PREPARE_HANDOFF:
-                break;
-            case GROUND_ALGAE_INTAKE:
-                break;
-            case HIGH_REEF_ALGAE_INTAKE:
-                break;
-            case LOW_REEF_ALGAE_INTAKE:
-                break;
-            case SCORE_L1:
-                // add automatic transition???
-                break;
-            case SCORE_L4:
-                // add automatic transition???
-                break;
-            case BARGE_SCORE:
-                // add automatic transition???
-                break;
-            case PROCESSOR_SCORE:
-                // add automatic transition???
+            case WAIT_L1, WAIT_L4, BARGE_WAIT, PROCESSOR_WAIT, HANDOFF, CLIMB, IDLE:
+                // These states do not transition automatically
                 break;
 
+            case INTAKING_CORAL:
+                if (groundManager.getState() == GroundManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
+            case PREPARE_HANDOFF:
+                if ((armManager.getState() == ArmManagerStates.PREPARE_HANDOFF_LEFT ||
+                        armManager.getState() == ArmManagerStates.PREPARE_HANDOFF_MIDDLE ||
+                        armManager.getState() == ArmManagerStates.PREPARE_HANDOFF_RIGHT) &&
+                        groundManager.getState() == GroundManagerStates.HANDOFF) {
+                    nextState = RobotState.HANDOFF;
+                }
+                break;
+            case GROUND_ALGAE_INTAKE:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
+            case HIGH_REEF_ALGAE_INTAKE:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
+            case LOW_REEF_ALGAE_INTAKE:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
+            case SCORE_L1:
+                if (groundManager.getState() == GroundManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
+            case SCORE_L4:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
+            case BARGE_SCORE:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
+            case PROCESSOR_SCORE:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                    break;
+                }
+                flags.clear();
         }
-        flags.clear();
+
         return nextState;
-            
+
     }
 
     @Override
     protected void afterTransition(RobotState newState) {
         switch (newState) {
-            case IDLE, WAIT_L1, WAIT_L4, BARGE_WAIT, PROCESSOR_WAIT -> {
-
+            case IDLE, BARGE_WAIT, PROCESSOR_WAIT, HANDOFF -> {
             }
             case SCORE_L1 -> {
-
+                groundManager.setStateFromRequest(GroundManagerStates.SCORE_L1);
             }
             case SCORE_L4 -> {
-
+                armManager.setState(ArmManagerStates.SCORE_L4);
             }
             case PROCESSOR_SCORE -> {
-
+                armManager.setState(ArmManagerStates.SCORE_ALGAE_PROCESSOR);
             }
             case BARGE_SCORE -> {
-
-            }
-            case PREPARE_IDLE -> {
-                //fill after merge to main
+                armManager.setState(ArmManagerStates.SCORE_ALGAE_NET);
             }
             case PREPARE_HANDOFF -> {
-                //fill after merge to main
+                armManager.setState(ArmManagerStates.PREPARE_HANDOFF_LEFT);
             }
             case HIGH_REEF_ALGAE_INTAKE -> {
-
+                armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
             }
             case LOW_REEF_ALGAE_INTAKE -> {
-
+                armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE);
             }
             case GROUND_ALGAE_INTAKE -> {
-
+                armManager.setState(ArmManagerStates.PREPARE_INTAKE_GROUND_ALGAE);
             }
             case INTAKING_CORAL -> {
-
+                groundManager.setStateFromRequest(GroundManagerStates.PREPARE_INTAKE);
+            }
+            case WAIT_L1 -> {
+                groundManager.setStateFromRequest(GroundManagerStates.PREPARE_SCORE_L1);
+            }
+            case WAIT_L4 -> {
+                armManager.setState(ArmManagerStates.PREPARE_SCORE_L4);
             }
             case CLIMB -> {
-
-            }
-            case HANDOFF -> {
 
             }
         }
