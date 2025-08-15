@@ -1,5 +1,21 @@
 package frc.robot.stateMachine;
 
-public class RobotState {
-    
+public enum RobotState {
+    INTAKING_CORAL,
+    PREPARE_HANDOFF,
+    HANDOFF,
+    PREPARE_IDLE,
+    IDLE,
+    WAIT_L1,
+    WAIT_L4,
+    SCORE_L1,
+    SCORE_L4,
+    GROUND_ALGAE_INTAKE,
+    HIGH_REEF_ALGAE_INTAKE,
+    LOW_REEF_ALGAE_INTAKE,
+    BARGE_WAIT,
+    PROCESSOR_WAIT,
+    BARGE_SCORE,
+    PROCESSOR_SCORE,
+    CLIMB
 }
