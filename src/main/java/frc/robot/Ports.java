@@ -8,6 +8,11 @@ public class Ports {
     public static class IntakeRollersPorts {
         public static final int INTAKE_ROLLER_MOTOR = 0; //to do: add values
     }
+
+    public static class coralDetectorPorts{
+        public static final int LEFT_CAN_RANGE = 0;
+        public static final int RIGHT_CAN_RANGE = 0;
+    }
   
     public static class Climber {
         public static int WHEEL_CLIMBER_MOTOR_PORT = 0;

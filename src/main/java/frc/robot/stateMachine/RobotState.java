@@ -1,5 +1,5 @@
 package frc.robot.stateMachine;
 
-public class RobotState {
-    
+public enum RobotState {
+
 }
