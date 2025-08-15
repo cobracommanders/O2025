@@ -9,12 +9,12 @@ import frc.robot.subsystems.ground_manager.intakeRollers.IntakeRollersStates;
 public class GroundManager extends StateMachine<GroundManagerStates> {
     public final String name = getName();
 
-    private final IntakePivot intake;
+    private final IntakePivot intakePivot;
     private final IntakeRollers rollers;
 
     public GroundManager() {
         super(GroundManagerStates.PREPARE_IDLE);
-        intake = IntakePivot.getInstance();
+        intakePivot = IntakePivot.getInstance();
         rollers = IntakeRollers.getInstance();
     }
     @Override
@@ -22,14 +22,14 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         GroundManagerStates nextState = currentState;
         switch (currentState) {
             case PREPARE_IDLE -> {
-                if (intake.atGoal()){
+                if (intakePivot.atGoal()){
                     nextState = GroundManagerStates.IDLE;
                 }
             }
             case IDLE -> {
             }
             case PREPARE_INTAKE -> {
-                if (intake.atGoal()){
+                if (intakePivot.atGoal()){
                     nextState = GroundManagerStates.INTAKING;
                 }
              }
@@ -39,17 +39,16 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 }
             }
             case PREPARE_HANDOFF -> {
-                if (intake.atGoal()){
+                if (intakePivot.atGoal()){
                     nextState = GroundManagerStates.WAIT_HANDOFF;
                 }
             }
             case HANDOFF -> {
-                //robot manager to handle this transition to have coral in hand
             }
             case WAIT_HANDOFF -> {
             }
             case PREPARE_SCORE_L1 -> {
-                if (intake.atGoal()){
+                if (intakePivot.atGoal()){
                     nextState = GroundManagerStates.WAIT_SCORE_L1;
                 }
             }
@@ -67,27 +66,27 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
     public void afterTransition(GroundManagerStates newState) {
         switch (newState) {
             case PREPARE_IDLE -> {
-                intake.setState(IntakePivotStates.IDLE);
+                intakePivot.setState(IntakePivotStates.IDLE);
                 rollers.setState(IntakeRollersStates.IDLE);
             }
             case PREPARE_INTAKE -> {
-                intake.setState(IntakePivotStates.INTAKING);
+                intakePivot.setState(IntakePivotStates.INTAKING);
                 rollers.setState(IntakeRollersStates.INTAKING);
             }
             case PREPARE_HANDOFF -> {
-                intake.setState(IntakePivotStates.HANDOFF);
+                intakePivot.setState(IntakePivotStates.HANDOFF);
                 rollers.setState(IntakeRollersStates.HANDOFF);
             }
             case PREPARE_SCORE_L1 -> {
-                intake.setState(IntakePivotStates.SCORE_L1);
+                intakePivot.setState(IntakePivotStates.SCORE_L1);
                 rollers.setState(IntakeRollersStates.IDLE);
             }
             case SCORE_L1 -> {
-                intake.setState(IntakePivotStates.SCORE_L1);
+                intakePivot.setState(IntakePivotStates.SCORE_L1);
                 rollers.setState(IntakeRollersStates.SCORE_L1);
             }
             case CLIMB -> {
-                intake.setState(IntakePivotStates.CLIMB);
+                intakePivot.setState(IntakePivotStates.CLIMB);
                 rollers.setState(IntakeRollersStates.IDLE);
             }
             case WAIT_HANDOFF, WAIT_SCORE_L1, IDLE, INTAKING, HANDOFF -> {
