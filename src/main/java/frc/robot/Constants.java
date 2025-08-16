@@ -13,6 +13,7 @@ public final class Constants {
   }
 
   public static final class IntakePivotConstants{
+    public static final double PivotGearRatio = 0.0192;
     public static final double positionIncrement = 0;
     public static final double P = 0.0;
     public static final double I = 0.0;
@@ -24,6 +25,7 @@ public final class Constants {
   }
 
   public static final class IntakeRollersConstants{
+    public static final double RollersGearRatio = 52.0833;
     public static final double stallCurrent = 0.0;
   }
   public static final class DrivertrainConstants {
@@ -36,6 +38,7 @@ public final class Constants {
       public static final double DEPLOY_MOTION_MAGIC_ACCELERATION = 0;
       public static final double DEPLOY_MOTION_MAGIC_JERK = 0;
       public static final double CAGE_DETECECTION_CURRENT = 0;
+      public static final double ClimberGearRatio = 0.0;
   }
   public static final class HandConstants {
     public static final double coralStallCurrent = 0;

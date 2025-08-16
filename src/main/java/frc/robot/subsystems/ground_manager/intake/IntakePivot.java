@@ -12,6 +12,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycle;
 import frc.robot.Constants.IntakePivotConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
@@ -19,18 +21,21 @@ import frc.robot.stateMachine.StateMachine;
 public class IntakePivot extends StateMachine<IntakePivotStates> {
   public final String name = getName();
 //TODO update motor configs
+  private final DutyCycle encoder;
   private final TalonFX intakeMotor;
   private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
       .withSlot0(new Slot0Configs().withKP(IntakePivotConstants.P).withKI(IntakePivotConstants.I).withKD(IntakePivotConstants.D)
           .withKG(IntakePivotConstants.G).withGravityType(GravityTypeValue.Arm_Cosine))
-      .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio((8.0357 / 1.0)));
+      .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(IntakePivotConstants.PivotGearRatio)));
   private double intakePosition;
   private final double tolerance;
+  private double absolutePosition;
 
   private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
   private IntakePivot() {
     super(IntakePivotStates.IDLE);
+    encoder = new DutyCycle(new DigitalInput(Ports.IntakePivotPorts.INTAKE_PIVOT_DUTY_CYCLE_ENCODER));
     motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
     intakeMotor = new TalonFX(Ports.IntakePivotPorts.INTAKE_MOTOR);
@@ -59,6 +64,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   @Override
   public void collectInputs() {
     intakePosition = intakeMotor.getPosition().getValueAsDouble();
+    // absolutePosition = 
     DogLog.log(name + "/Intake Position", intakePosition);
   }
 

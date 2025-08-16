@@ -2,6 +2,7 @@ package frc.robot.subsystems.ground_manager.coraldetection;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
+import dev.doglog.DogLog;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.ArmManagerStates;
@@ -22,6 +23,9 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     protected void collectInputs() {
         lDetected = lCANRange.getIsDetected().getValue();
         rDetected = rCANRange.getIsDetected().getValue();
+        DogLog.log(this.getName() + "/L Detected", lDetected);
+        DogLog.log(this.getName() + "/R Detected", rDetected);
+
     }
 
     @Override
