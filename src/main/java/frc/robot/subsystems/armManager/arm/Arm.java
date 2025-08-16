@@ -1,5 +1,7 @@
 package frc.robot.subsystems.armManager.arm;
 
+import java.util.jar.Attributes.Name;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -20,6 +22,7 @@ import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
 public class Arm extends StateMachine<ArmStates> {
+    public String name = getName();
     public static TalonFX motor;
     private final CANcoder encoder;
     private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
@@ -90,8 +93,7 @@ public class Arm extends StateMachine<ArmStates> {
     @Override
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
-        DogLog.log(getName() + "/arm encoder position", absolutePosition);
-        DogLog.log(getName() + "/current arm state", getState());
+        DogLog.log(getName() + "/Current Position", absolutePosition);
     }
 
     public void setState(ArmStates state) {
@@ -99,6 +101,7 @@ public class Arm extends StateMachine<ArmStates> {
     }
 
     public void setArmPosition(double position) {
+        DogLog.log(name + "/Setpoint", position);
         motor.setControl(motor_request.withPosition(position));
     }
 

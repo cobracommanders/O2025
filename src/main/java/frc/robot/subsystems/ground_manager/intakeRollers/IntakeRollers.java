@@ -1,9 +1,12 @@
 package frc.robot.subsystems.ground_manager.intakeRollers;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+
+import dev.doglog.DogLog;
 import frc.robot.Ports;
 import frc.robot.Constants.IntakeRollersConstants;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 
 
 public class IntakeRollers extends StateMachine<IntakeRollersStates>{
@@ -11,6 +14,8 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
   
     private final TalonFX motor;
     private double motorStatorCurrent;
+
+    private CoralDetector coralDetector = CoralDetector.getInstance();
     
     public IntakeRollers() {
         super(IntakeRollersStates.IDLE);
@@ -20,6 +25,7 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
     @Override
     public void collectInputs() {
       motorStatorCurrent = motor.getStatorCurrent().getValueAsDouble();
+      DogLog.log(name + "/Stator Current", motorStatorCurrent);
     }
     public double getMotorStatorCurrent() {
       return motorStatorCurrent;
@@ -27,15 +33,11 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
   
     public void setState(IntakeRollersStates newState) {
         setStateFromRequest(newState);
-      }
+    }
 
-      public boolean hasCoral(){
-        if (motorStatorCurrent > IntakeRollersConstants.stallCurrent){
-          return true;
-        } else {
-          return false;
-        }
-      }
+    public boolean hasCoral(){
+      return coralDetector.hasCoral();
+    }
 
     public void setIntakeRollerSpeeds(double IntakeRollersSpeeds){
       motor.set(IntakeRollersSpeeds);

@@ -1,5 +1,6 @@
 package frc.robot.subsystems.ground_manager;
 
+import dev.doglog.DogLog;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 import frc.robot.subsystems.ground_manager.intake.IntakePivotStates;

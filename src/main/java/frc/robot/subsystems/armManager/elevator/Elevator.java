@@ -89,6 +89,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
     }
 
     public void setElevatorPosition(double position) {
+        DogLog.log(name + "/Setpoint", position);
         rMotor.setControl(right_motor_request);
         lMotor.setControl(motor_request.withPosition(position));
     }

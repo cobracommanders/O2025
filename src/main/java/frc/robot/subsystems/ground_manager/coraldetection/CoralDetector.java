@@ -2,6 +2,8 @@ package frc.robot.subsystems.ground_manager.coraldetection;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
+import dev.doglog.DogLog;
+import frc.robot.Constants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.ArmManagerStates;
@@ -12,16 +14,22 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     public CANrange rCANRange;
     public boolean lDetected = false;
     public boolean rDetected = false;
+    public final String name;
 
     public CoralDetector() {
         super(CoralDetectorStates.NONE);
         lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
         rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
+        this.name = getName();
     }
 
     protected void collectInputs() {
-        lDetected = lCANRange.getIsDetected().getValue();
-        rDetected = rCANRange.getIsDetected().getValue();
+        lDetected = lCANRange.getDistance().getValueAsDouble() < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
+        rDetected = rCANRange.getDistance().getValueAsDouble() < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
+        DogLog.log(name + "/left Detected", lDetected);
+        DogLog.log(name + "/right Detected", rDetected);
+        DogLog.log(name + "/left CAN Range Distance", lCANRange.getDistance().getValueAsDouble());
+        DogLog.log(name + "/right CAN Range Distance", rCANRange.getDistance().getValueAsDouble());
     }
 
     @Override
@@ -36,6 +44,10 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
             return CoralDetectorStates.RIGHT;
         }
 
+    }
+
+    public boolean hasCoral(){
+        return getState() != CoralDetectorStates.NONE;
     }
 
     private static CoralDetector instance;

@@ -44,8 +44,8 @@ public class Climber extends StateMachine<ClimberStates>{
     climberPosition = winchMotor.getPosition().getValueAsDouble();
     //TODO: update climberPosition
     //TODO: log important inputs
-    DogLog.log(name + "/ climber postions", climberPosition);
-    DogLog.log(name + "/ cage detection", cageDetected());
+    DogLog.log(name + "/Climber postions", climberPosition);
+    DogLog.log(name + "/Cage detection", cageDetected());
     //implement input collection (these values will be used in state transitions)
   }
 
@@ -117,10 +117,12 @@ public class Climber extends StateMachine<ClimberStates>{
     }
   }
 
-  public void setClimberPosition(double climberSetpoint){
-    winchMotor.setControl(winch_motor_request.withPosition(climberSetpoint));
+  public void setClimberPosition(double position){
+    DogLog.log(name + "/Setpoint", position);
+    winchMotor.setControl(winch_motor_request.withPosition(position));
   }
    public void setClimberWheelSpeed(double speed){
+    DogLog.log(name + "/Wheel Speed", speed);
     wheelMotor.set(speed);
    }
 
