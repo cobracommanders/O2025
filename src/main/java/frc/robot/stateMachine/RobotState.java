@@ -1,5 +1,9 @@
 package frc.robot.stateMachine;
 
+/*
+ * Naming Convention is: ACTION_LOCATION
+ */
+
 public enum RobotState {
     INTAKING_CORAL,
     PREPARE_HANDOFF,
@@ -12,9 +16,9 @@ public enum RobotState {
     GROUND_ALGAE_INTAKE,
     HIGH_REEF_ALGAE_INTAKE,
     LOW_REEF_ALGAE_INTAKE,
-    BARGE_WAIT,
-    PROCESSOR_WAIT,
-    BARGE_SCORE,
-    PROCESSOR_SCORE,
+    WAIT_BARGE,
+    WAIT_PROCESSOR,
+    SCORE_BARGE,
+    SCORE_PROCESSOR,
     CLIMB
 }
