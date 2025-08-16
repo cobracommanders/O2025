@@ -70,13 +70,24 @@ public class RobotManager extends StateMachine<RobotState> {
                             nextState = RobotState.WAIT_L1;
                             break;
                         case L4:
-                            nextState = RobotState.PREPARE_HANDOFF;
+                            if (armManager.hand.hasAlgae()) {
+                            } else if (armManager.hand.hasCoral()) {
+                                nextState = RobotState.WAIT_L4;
+                            } else {
+                                nextState = RobotState.PREPARE_HANDOFF;
+                            }
                             break;
                         case BARGE:
-                            nextState = RobotState.BARGE_WAIT;
+                            if (armManager.hand.hasCoral()) {
+                            } else {
+                                nextState = RobotState.BARGE_WAIT;
+                            }
                             break;
                         case PROCESSOR:
-                            nextState = RobotState.PROCESSOR_WAIT;
+                            if (armManager.hand.hasCoral()) {
+                            } else {
+                                nextState = RobotState.PROCESSOR_WAIT;
+                            }
                             break;
                         default:
                             break;
@@ -85,12 +96,22 @@ public class RobotManager extends StateMachine<RobotState> {
                 case INTAKE_ALGAE:
                     switch (operatorOptions.algaeIntakeLevel) {
                         case HIGH_REEF:
-                            nextState = RobotState.HIGH_REEF_ALGAE_INTAKE;
+                            if (armManager.hand.hasAlgae() || armManager.hand.hasCoral()) {
+                            } else {
+                                nextState = RobotState.HIGH_REEF_ALGAE_INTAKE;
+                            }
                             break;
                         case LOW_REEF:
-                            nextState = RobotState.LOW_REEF_ALGAE_INTAKE;
+                            if (armManager.hand.hasAlgae() || armManager.hand.hasCoral()) {
+                            } else {
+                                nextState = RobotState.LOW_REEF_ALGAE_INTAKE;
+                            }
                             break;
-                        case GROUND:
+                        case GROUND_ALGAE:
+                            if (armManager.hand.hasAlgae() || armManager.hand.hasCoral()) {
+                            } else {
+                                nextState = RobotState.GROUND_ALGAE_INTAKE;
+                            }
                             nextState = RobotState.GROUND_ALGAE_INTAKE;
                             break;
                         default:
@@ -124,8 +145,8 @@ public class RobotManager extends StateMachine<RobotState> {
                 break;
             case HANDOFF:
                 if (armManager.hand.hasCoral() || armManager.hand.hasAlgae()) {
-                        nextState = RobotState.WAIT_L4;
-                        //will be if else when we add more levels
+                    nextState = RobotState.WAIT_L4;
+                    // will be if else when we add more levels
                 }
                 break;
             case GROUND_ALGAE_INTAKE:
@@ -242,6 +263,7 @@ public class RobotManager extends StateMachine<RobotState> {
     public void intakeAlgaeRequest() {
         flags.check(RobotFlag.INTAKE_ALGAE);
     }
+
     public void algaeScoreLevelRequest() {
         flags.check(RobotFlag.INTAKE_ALGAE);
     }
@@ -250,40 +272,40 @@ public class RobotManager extends StateMachine<RobotState> {
         flags.check(RobotFlag.HANDOFF);
     }
 
-    public void setL1(){
+    public void setL1() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L1;
     }
 
-    public void setL2(){
+    public void setL2() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L2;
     }
 
-    public void setL3(){
+    public void setL3() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L3;
     }
 
-    public void setL4(){
+    public void setL4() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L4;
     }
 
-    public void setProcessor(){
+    public void setProcessor() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.PROCESSOR;
     }
 
-    public void setBarge(){
+    public void setBarge() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.BARGE;
     }
 
-    public void setHighReefAlgae(){
+    public void setHighReefAlgae() {
         operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
     }
 
-    public void setLowReefAlgae(){
+    public void setLowReefAlgae() {
         operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.LOW_REEF;
     }
 
-    public void setGroundAlgae(){
-        operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.GROUND;
+    public void setGroundAlgae() {
+        operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE;
     }
 
     private static RobotManager instance;

@@ -7,7 +7,7 @@ public class OperatorOptions {
 
     public OperatorOptions() {
         this.scoreLocation = ScoreLocation.L3;
-        this.algaeIntakeLevel = AlgaeIntakeLevel.GROUND;
+        this.algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE;
     }
 
     public enum ScoreLocation {
@@ -19,7 +19,7 @@ public class OperatorOptions {
         PROCESSOR
     }
     public enum AlgaeIntakeLevel {
-        GROUND,
+        GROUND_ALGAE,
         LOW_REEF,
         HIGH_REEF
     }
