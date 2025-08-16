@@ -13,6 +13,7 @@ public class RobotManager extends StateMachine<RobotState> {
     public final ArmManager armManager;
     public final GroundManager groundManager;
     public final Climber climber;
+    public OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
@@ -42,21 +43,6 @@ public class RobotManager extends StateMachine<RobotState> {
                 case CLIMB:
                     nextState = RobotState.CLIMB;
                     break;
-                case L1:
-                    nextState = RobotState.WAIT_L1;
-                    break;
-                case L4:
-                    nextState = RobotState.WAIT_L4;
-                    break;
-                case GROUND_ALGAE_INTAKE:
-                    nextState = RobotState.GROUND_ALGAE_INTAKE;
-                    break;
-                case HIGH_REEF_ALGAE_INTAKE:
-                    nextState = RobotState.HIGH_REEF_ALGAE_INTAKE;
-                    break;
-                case LOW_REEF_ALGAE_INTAKE:
-                    nextState = RobotState.LOW_REEF_ALGAE_INTAKE;
-                    break;
                 case HANDOFF:
                     nextState = RobotState.HANDOFF;
                     break;
@@ -78,6 +64,39 @@ public class RobotManager extends StateMachine<RobotState> {
                             break;
                     }
                     break;
+                case SCORE_LEVEL:
+                    switch (operatorOptions.scoreLocation) {
+                        case L1:
+                            nextState = RobotState.WAIT_L1;
+                            break;
+                        case L4:
+                            nextState = RobotState.PREPARE_HANDOFF;
+                            break;
+                        case BARGE:
+                            nextState = RobotState.BARGE_WAIT;
+                            break;
+                        case PROCESSOR:
+                            nextState = RobotState.PROCESSOR_WAIT;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case INTAKE_ALGAE:
+                    switch (operatorOptions.algaeIntakeLevel) {
+                        case HIGH_REEF:
+                            nextState = RobotState.HIGH_REEF_ALGAE_INTAKE;
+                            break;
+                        case LOW_REEF:
+                            nextState = RobotState.LOW_REEF_ALGAE_INTAKE;
+                            break;
+                        case GROUND:
+                            nextState = RobotState.GROUND_ALGAE_INTAKE;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
 
                 default:
                     break;
@@ -86,7 +105,7 @@ public class RobotManager extends StateMachine<RobotState> {
 
         switch (currentState) {
 
-            case WAIT_L1, WAIT_L4, BARGE_WAIT, PROCESSOR_WAIT, HANDOFF, CLIMB, IDLE:
+            case WAIT_L1, WAIT_L4, BARGE_WAIT, PROCESSOR_WAIT, CLIMB, IDLE:
                 // These states do not transition automatically
                 break;
 
@@ -101,6 +120,12 @@ public class RobotManager extends StateMachine<RobotState> {
                         armManager.getState() == ArmManagerStates.PREPARE_HANDOFF_RIGHT) &&
                         groundManager.getState() == GroundManagerStates.HANDOFF) {
                     nextState = RobotState.HANDOFF;
+                }
+                break;
+            case HANDOFF:
+                if (armManager.hand.hasCoral() || armManager.hand.hasAlgae()) {
+                        nextState = RobotState.WAIT_L4;
+                        //will be if else when we add more levels
                 }
                 break;
             case GROUND_ALGAE_INTAKE:
@@ -194,7 +219,7 @@ public class RobotManager extends StateMachine<RobotState> {
         super.periodic();
     }
 
-    public void intakeRequest() {
+    public void coralIntakeRequest() {
         flags.check(RobotFlag.INTAKE_CORAL);
     }
 
@@ -206,31 +231,66 @@ public class RobotManager extends StateMachine<RobotState> {
         flags.check(RobotFlag.CLIMB);
     }
 
-    public void L1Request() {
-        flags.check(RobotFlag.L1);
-    }
-
-    public void L4Request() {
-        flags.check(RobotFlag.L4);
+    public void scoreLevelRequest() {
+        flags.check(RobotFlag.SCORE_LEVEL);
     }
 
     public void idleRequest() {
         flags.check(RobotFlag.IDLE);
     }
 
-    public void groundAlgaeRequest() {
-        flags.check(RobotFlag.GROUND_ALGAE_INTAKE);
+    public void intakeAlgaeRequest() {
+        flags.check(RobotFlag.INTAKE_ALGAE);
     }
-
-    public void highReefAlgaeRequest() {
-        flags.check(RobotFlag.HIGH_REEF_ALGAE_INTAKE);
-    }
-
-    public void lowReefAlgaeRequest() {
-        flags.check(RobotFlag.LOW_REEF_ALGAE_INTAKE);
+    public void algaeScoreLevelRequest() {
+        flags.check(RobotFlag.INTAKE_ALGAE);
     }
 
     public void handoffRequest() {
         flags.check(RobotFlag.HANDOFF);
+    }
+
+    public void setL1(){
+        operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L1;
+    }
+
+    public void setL2(){
+        operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L2;
+    }
+
+    public void setL3(){
+        operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L3;
+    }
+
+    public void setL4(){
+        operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L4;
+    }
+
+    public void setProcessor(){
+        operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.PROCESSOR;
+    }
+
+    public void setBarge(){
+        operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.BARGE;
+    }
+
+    public void setHighReefAlgae(){
+        operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
+    }
+
+    public void setLowReefAlgae(){
+        operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.LOW_REEF;
+    }
+
+    public void setGroundAlgae(){
+        operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.GROUND;
+    }
+
+    private static RobotManager instance;
+
+    public static RobotManager getInstance() {
+        if (instance == null)
+            instance = new RobotManager(); // Make sure there is an instance (this will only run once)
+        return instance;
     }
 }
