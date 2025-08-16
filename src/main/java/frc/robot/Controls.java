@@ -16,18 +16,22 @@ import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 
 public class Controls {
-  private double maxSpeed = TunerConstants.kSpeedAt12Volts.magnitude();
-    private final double turtleSpeed = 0.1;
-    private double maxAngularRate = Math.PI * 3.5;
-    private final double turtleAngularRate = Math.PI * 0.5;
-    private double angularRate = maxAngularRate;
+    /*
+     *  BEGIN VARS FOR FUTURE USE
+     *  
+     *  private final double turtleSpeed = 0.1;
+     *  private final double turtleAngularRate = Math.PI * 0.5;
+     */
+
+    
+    private double angularRate = Constants.DrivertrainConstants.maxAngularRate;
     private double drivetrainSpeed = 0.75;
 
     CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
 
     SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withDeadband(maxSpeed * 0.1) // Deadband is handled on input
+            .withDeadband(Constants.DrivertrainConstants.maxSpeed * 0.1) // Deadband is handled on input
             .withRotationalDeadband(angularRate * 0.1);
 
      
@@ -45,10 +49,10 @@ public class Controls {
 
     private void newControlStyle() {
         controlStyle = () -> drive
-                .withVelocityX((-(driver.leftY() * .5) * (driver.leftY() * .5) * (driver.leftY() * .5) * maxSpeed) * .7) // Drive
+                .withVelocityX((-(driver.leftY() * .5) * (driver.leftY() * .5) * (driver.leftY() * .5) * Constants.DrivertrainConstants.maxSpeed) * .7) // Drive
                                                                                                                          // forward
                                                                                                                          // -Y
-                .withVelocityY((-(driver.leftX() * .5) * (driver.leftX() * .5) * (driver.leftX() * .5) * maxSpeed) * .7) // Drive
+                .withVelocityY((-(driver.leftX() * .5) * (driver.leftX() * .5) * (driver.leftX() * .5) * Constants.DrivertrainConstants.maxSpeed) * .7) // Drive
                                                                                                                          // left
                                                                                                                          // with
                                                                                                                          // negative
@@ -64,8 +68,8 @@ public class Controls {
                                                                                    // command periodically
                 runOnce(() -> CommandSwerveDrivetrain.getInstance()
                         .driveFieldRelative(new ChassisSpeeds(
-                                -(driver.leftY() * drivetrainSpeed) * (driver.leftY()) * (driver.leftY()) * maxSpeed,
-                                -(driver.leftX() * drivetrainSpeed) * (driver.leftX()) * (driver.leftX()) * maxSpeed,
+                                -(driver.leftY() * drivetrainSpeed) * (driver.leftY()) * (driver.leftY()) * Constants.DrivertrainConstants.maxSpeed,
+                                -(driver.leftX() * drivetrainSpeed) * (driver.leftX()) * (driver.leftX()) * Constants.DrivertrainConstants.maxSpeed,
                                 driver.rightX() * angularRate)),
                         CommandSwerveDrivetrain.getInstance())));
     }

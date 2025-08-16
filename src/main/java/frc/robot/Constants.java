@@ -1,5 +1,7 @@
 package frc.robot;
 
+import frc.robot.subsystems.drivetrain.TunerConstants;
+
 public final class Constants {
     public static final class ArmConstants {
         public static final double P = 0;
@@ -30,6 +32,10 @@ public final class Constants {
     public static final class DrivertrainConstants {
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 5.94;
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 300;
+
+
+        public static final double maxSpeed = TunerConstants.kSpeedAt12Volts.magnitude();
+        public static final double maxAngularRate = Math.PI * 3.5;
     }
 
     public static class ClimberConstants {
