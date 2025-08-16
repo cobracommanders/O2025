@@ -139,10 +139,10 @@ public class RobotManager extends StateMachine<RobotState> {
                     nextState = RobotState.IDLE;
                 }
                 break;
-            case PREPARE_HANDOFF: //TODO: This needs to be reworked.
-                if ((armManager.getState() == ArmManagerStates.PREPARE_HANDOFF_LEFT ||
-                        armManager.getState() == ArmManagerStates.PREPARE_HANDOFF_MIDDLE ||
-                        armManager.getState() == ArmManagerStates.PREPARE_HANDOFF_RIGHT) &&
+            case PREPARE_HANDOFF: //TODO: This is scary... I still think we need some more thought here.
+                if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
+                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
+                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
                         groundManager.getState() == GroundManagerStates.HANDOFF) {
                     nextState = RobotState.HANDOFF;
                 }
@@ -223,6 +223,7 @@ public class RobotManager extends StateMachine<RobotState> {
                 }else{
                     //if there is no coral, do nothing
                 }
+                groundManager.setState(GroundManagerStates.PREPARE_HANDOFF);
             }
             case HIGH_REEF_ALGAE_INTAKE -> {
                 armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
