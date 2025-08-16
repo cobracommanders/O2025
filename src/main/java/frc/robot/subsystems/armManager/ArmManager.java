@@ -94,9 +94,9 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     public void setState(ArmManagerStates state) {
         if (armScheduler.isReady()) {
             setStateFromRequest(state);
+        }else{
+            //do nothing
         }
-
-        setStateFromRequest(state);
     }
 
     @Override

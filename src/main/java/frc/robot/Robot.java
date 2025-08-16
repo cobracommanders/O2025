@@ -7,9 +7,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.RobotCommands;
+import frc.robot.stateMachine.OperatorOptions;
+import frc.robot.stateMachine.RobotManager;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
+
+  public static RobotManager robotManager = RobotManager.getInstance();
+  public static RobotCommands robotCommands = new RobotCommands();
+  public static OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
   private final RobotContainer m_robotContainer;
 
