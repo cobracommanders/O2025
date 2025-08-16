@@ -18,29 +18,30 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         intakePivot = IntakePivot.getInstance();
         rollers = IntakeRollers.getInstance();
     }
+
     @Override
     protected GroundManagerStates getNextState(GroundManagerStates currentState) {
         GroundManagerStates nextState = currentState;
         switch (currentState) {
             case PREPARE_IDLE -> {
-                if (intakePivot.atGoal()){
+                if (intakePivot.atGoal()) {
                     nextState = GroundManagerStates.IDLE;
                 }
             }
             case IDLE -> {
             }
             case PREPARE_INTAKE -> {
-                if (intakePivot.atGoal()){
+                if (intakePivot.atGoal()) {
                     nextState = GroundManagerStates.INTAKING;
                 }
-             }
+            }
             case INTAKING -> {
-                if (rollers.hasCoral()){
+                if (rollers.hasCoral()) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 }
             }
             case PREPARE_HANDOFF -> {
-                if (intakePivot.atGoal()){
+                if (intakePivot.atGoal()) {
                     nextState = GroundManagerStates.WAIT_HANDOFF;
                 }
             }
@@ -49,12 +50,12 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             case WAIT_HANDOFF -> {
             }
             case PREPARE_SCORE_L1 -> {
-                if (intakePivot.atGoal()){
+                if (intakePivot.atGoal()) {
                     nextState = GroundManagerStates.WAIT_SCORE_L1;
                 }
             }
             case SCORE_L1 -> {
-                //add timeout
+                // add timeout
             }
             case WAIT_SCORE_L1 -> {
             }
@@ -63,7 +64,8 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         }
         return nextState;
     }
-@Override
+
+    @Override
     public void afterTransition(GroundManagerStates newState) {
         switch (newState) {
             case PREPARE_IDLE -> {
@@ -76,7 +78,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
             case PREPARE_HANDOFF -> {
                 intakePivot.setState(IntakePivotStates.HANDOFF);
-                
+
             }
             case PREPARE_SCORE_L1 -> {
                 intakePivot.setState(IntakePivotStates.SCORE_L1);
@@ -98,14 +100,15 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         }
     }
 
-    public void setState(GroundManagerStates state){
+    public void setState(GroundManagerStates state) {
         setStateFromRequest(state);
     }
 
     private static GroundManager instance;
 
     public static GroundManager getInstance() {
-        if (instance == null) instance = new GroundManager(); 
+        if (instance == null)
+            instance = new GroundManager();
         return instance;
     }
 }

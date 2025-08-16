@@ -14,14 +14,13 @@ import frc.robot.stateMachine.RobotManager;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
+  // Uncomment as needed
   public static RobotManager robotManager = RobotManager.getInstance();
-  public static RobotCommands robotCommands = new RobotCommands();
-  public static OperatorOptions operatorOptions = OperatorOptions.getInstance();
-
-  private final RobotContainer m_robotContainer;
+  // public static RobotCommands robotCommands = new RobotCommands();
+  // public static OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+    
   }
 
   @Override
@@ -40,7 +39,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();

@@ -10,11 +10,14 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycle;
 import frc.robot.Constants.ClimberConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
 public class Climber extends StateMachine<ClimberStates>{
+    private final DutyCycle encoder;
     private final String name = getName();
     private final TalonFX wheelMotor;
     private final TalonFX winchMotor;
@@ -27,6 +30,7 @@ public class Climber extends StateMachine<ClimberStates>{
     public Climber(){
       super(ClimberStates.IDLE);
       //TODO: update configs
+      encoder = new DutyCycle(new DigitalInput(Ports.Climber.CLIMER_DUTY_CYCLE_ENCODER));
       winch_motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       wheel_motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       winch_motor_config.MotionMagic.MotionMagicCruiseVelocity = ClimberConstants.DEPLOY_MOTION_MAGIC_CRUISE_VELOCITY;
