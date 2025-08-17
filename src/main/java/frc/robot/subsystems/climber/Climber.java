@@ -32,8 +32,8 @@ public class Climber extends StateMachine<ClimberStates>{
       winch_motor_config.MotionMagic.MotionMagicCruiseVelocity = ClimberConstants.DEPLOY_MOTION_MAGIC_CRUISE_VELOCITY;
       winch_motor_config.MotionMagic.MotionMagicAcceleration = ClimberConstants.DEPLOY_MOTION_MAGIC_ACCELERATION;
       winch_motor_config.MotionMagic.MotionMagicJerk = ClimberConstants.DEPLOY_MOTION_MAGIC_JERK;
-      winchMotor = new TalonFX(Ports.Climber.WINCH_CLIMBER_MOTOR_PORT);
-      wheelMotor = new TalonFX(Ports.Climber.WHEEL_CLIMBER_MOTOR_PORT);
+      winchMotor = new TalonFX(Ports.ClimberPorts.WINCH_CLIMBER_MOTOR_PORT);
+      wheelMotor = new TalonFX(Ports.ClimberPorts.WHEEL_CLIMBER_MOTOR_PORT);
       climberPosition = 0; //fix this by linking it to absolute encoder
     }
    
@@ -44,8 +44,8 @@ public class Climber extends StateMachine<ClimberStates>{
     climberPosition = winchMotor.getPosition().getValueAsDouble();
     //TODO: update climberPosition
     //TODO: log important inputs
-    DogLog.log(name + "/ climber postions", climberPosition);
-    DogLog.log(name + "/ cage detection", cageDetected());
+    DogLog.log(name + "/Climber postions", climberPosition);
+    DogLog.log(name + "/Cage detection", cageDetected());
     //implement input collection (these values will be used in state transitions)
   }
 
@@ -117,10 +117,12 @@ public class Climber extends StateMachine<ClimberStates>{
     }
   }
 
-  public void setClimberPosition(double climberSetpoint){
-    winchMotor.setControl(winch_motor_request.withPosition(climberSetpoint));
+  public void setClimberPosition(double position){
+    DogLog.log(name + "/Setpoint", position);
+    winchMotor.setControl(winch_motor_request.withPosition(position));
   }
    public void setClimberWheelSpeed(double speed){
+    DogLog.log(name + "/Wheel Speed", speed);
     wheelMotor.set(speed);
    }
 
@@ -128,8 +130,9 @@ public class Climber extends StateMachine<ClimberStates>{
     return motorCurrent >  ClimberConstants.CAGE_DETECECTION_CURRENT;
   }
 
-  public Climber instance;
-  public Climber getInstance(){
+  public static Climber instance;
+
+  public static Climber getInstance(){
     if(instance == null){
       instance = new Climber();
     }

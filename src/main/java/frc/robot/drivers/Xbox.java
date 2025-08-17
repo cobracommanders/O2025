@@ -3,13 +3,17 @@ package frc.robot.drivers;
 import edu.wpi.first.hal.DriverStationJNI;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.util.RotationUtil;
 
 import java.util.EnumMap;
 
+import dev.doglog.DogLog;
+
 public class Xbox {
     private final int port;
+    public final String name;
     private double deadzone = 0;
     private double triggerThreshold = 0.1;
     private final EnumMap<Button, Trigger> buttonTriggers = new EnumMap<>(Button.class);
@@ -23,6 +27,7 @@ public class Xbox {
      */
     public Xbox(int port) {
         this.port = port;
+        this.name = "Xbox<port=" + this.port + ">";
     }
 
     public void setDeadzone(double deadzone) {
@@ -103,54 +108,60 @@ public class Xbox {
         return new Trigger(() -> getButton(button));
     }
 
+    private Trigger getLoggingButtonTrigger(Button button) {
+        Trigger baseTrigger = getButtonTrigger(button);
+        return baseTrigger.onTrue(Commands.runOnce(() -> 
+            DogLog.log(name + " /" + button.name(), " pressed")));
+        }
+
     /** @return a trigger object using the controller's left bumper */
     public Trigger leftBumper() {
-        return buttonTriggers.computeIfAbsent(Button.LeftBumper, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.LeftBumper, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's right bumper */
     public Trigger rightBumper() {
-        return buttonTriggers.computeIfAbsent(Button.RightBumper, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.RightBumper, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's left joystick button */
     public Trigger leftStick() {
-        return buttonTriggers.computeIfAbsent(Button.LeftStick, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.LeftStick, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's right joystick button */
     public Trigger rightStick() {
-        return buttonTriggers.computeIfAbsent(Button.RightStick, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.RightStick, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's A button */
     public Trigger A() {
-        return buttonTriggers.computeIfAbsent(Button.A, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.A, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's B button */
     public Trigger B() {
-        return buttonTriggers.computeIfAbsent(Button.B, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.B, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's X button */
     public Trigger X() {
-        return buttonTriggers.computeIfAbsent(Button.X, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.X, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's Y button */
     public Trigger Y() {
-        return buttonTriggers.computeIfAbsent(Button.Y, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.Y, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's back button */
     public Trigger back() {
-        return buttonTriggers.computeIfAbsent(Button.Back, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.Back, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's start button */
     public Trigger start() {
-        return buttonTriggers.computeIfAbsent(Button.Start, this::getButtonTrigger);
+        return buttonTriggers.computeIfAbsent(Button.Start, this::getLoggingButtonTrigger);
     }
 
     /** @return a trigger object using the controller's right trigger */

@@ -85,18 +85,12 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
         return nextState;
     }
 
-    @Override
-    public void collectInputs() {
-        DogLog.log(name + "current arm manager state", getState());
-        // TODO: log needed inputs
-    }
-
     public void setState(ArmManagerStates state) {
         if (armScheduler.isReady()) {
             setStateFromRequest(state);
+        }else{
+            //do nothing
         }
-
-        setStateFromRequest(state);
     }
 
     @Override

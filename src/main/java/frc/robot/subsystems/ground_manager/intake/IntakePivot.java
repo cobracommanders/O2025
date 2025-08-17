@@ -63,6 +63,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   }
 
   public void setIntakePosition(double position) {
+    DogLog.log(name + "/Setpoint", position);
     intakeMotor.setControl(motor_request.withPosition(position));
   }
 

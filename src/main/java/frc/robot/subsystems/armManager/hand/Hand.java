@@ -42,8 +42,8 @@ public class Hand extends StateMachine<HandStates> {
     }
 
     public void setHandSpeed(double speed) {
+        DogLog.log(getName() + "/Speed", speed);
         motor.set(speed);
-        DogLog.log(getName() + "hand speed", speed);
     }
 
     public boolean hasCoral(){
