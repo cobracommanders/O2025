@@ -1,6 +1,7 @@
 package frc.robot.stateMachine;
 
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
@@ -149,7 +150,7 @@ public class RobotManager extends StateMachine<RobotState> {
                 }
                 break;
             case HANDOFF:
-                if (armManager.hand.hasCoral() || armManager.hand.hasAlgae()) {
+                if (timeout(0.8)) {
                     nextState = RobotState.WAIT_L4;
                     // will check Operator Options when we are scoring on more Levels
                 }
@@ -187,11 +188,11 @@ public class RobotManager extends StateMachine<RobotState> {
             case SCORE_PROCESSOR:
                 if (armManager.getState() == ArmManagerStates.IDLE) {
                     nextState = RobotState.IDLE;
-                    break;
                 }
-                flags.clear();
+                break;
         }
 
+        flags.clear();
         return nextState;
 
     }
@@ -225,6 +226,7 @@ public class RobotManager extends StateMachine<RobotState> {
                 }else if(coralDetector.getState() == CoralDetectorStates.MIDDLE){
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
                 }else{
+                    armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
                     //if there is no coral, do nothing
                 }
                 groundManager.setState(GroundManagerStates.PREPARE_HANDOFF);
@@ -249,7 +251,8 @@ public class RobotManager extends StateMachine<RobotState> {
                 groundManager.setState(GroundManagerStates.PREPARE_IDLE);
             }
             case CLIMB -> {
-
+                climber.setState(ClimberStates.DEPLOYING);
+                //TODO: add intake and armManager climb states
             }
         }
     }

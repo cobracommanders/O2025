@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.util.Map;
+import java.util.ResourceBundle.Control;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 
@@ -70,6 +71,10 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    Controls.getInstance().configureDriverCommands();
+    Controls.getInstance().configureOperatorCommands();
+    Controls.getInstance().configureDefaultCommands();
   }
 
   @Override

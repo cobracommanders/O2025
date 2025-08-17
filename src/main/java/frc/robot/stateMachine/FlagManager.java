@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class FlagManager<T extends Enum<T>> {
   private final String loggerCategory;
@@ -22,6 +23,7 @@ public class FlagManager<T extends Enum<T>> {
   }
 
   public void check(T flag) {
+    System.out.println(flag.name());
     checked.add(flag);
   }
 

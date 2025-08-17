@@ -69,8 +69,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
         this.armState = armState;
         this.handState = handState;
         this.elevatorState = elevatorState;
-
-        begin = true;
+        this.setStateFromRequest(ArmSchedulerStates.ARM_UP);
     }
 
     @Override
@@ -83,8 +82,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
                 elevator.setState(elevatorState);
             }
             case ARM_TO_POSITION -> {
-                arm.setState(armState);
                 hand.setState(handState);
+                arm.setState(armState);
             }
             case READY -> {
                 armState = null;
