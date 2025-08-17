@@ -19,6 +19,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
@@ -116,6 +117,7 @@ public class Arm extends StateMachine<ArmStates> {
     public void setArmPosition(double position) {
         DogLog.log(name + "/Setpoint", position);
         motor.setControl(motor_request.withPosition(position));
+        MechanismVisualizer.logArm(position);
     }
 
     @Override

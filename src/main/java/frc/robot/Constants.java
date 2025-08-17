@@ -16,6 +16,7 @@ public final class Constants {
         public static final double MotionMagicAcceleration = 40;
         public static final double MotionMagicJerk = 100;
         public static final double encoderOffset = -0.64111328125 + 0.005371;
+        public static final double armLength = 1;
     }
 
     public static final class ElevatorConstants {
@@ -27,6 +28,8 @@ public final class Constants {
         public static final double MotionMagicCruiseVelocity = 2.5;
         public static final double MotionMagicAcceleration = 30;
         public static final double MotionMagicJerk = 100;
+        public static final double maxHeight = 1.3;
+        public static final double minHeight = 0.0;
     }
 
     public static final class IntakePivotConstants {

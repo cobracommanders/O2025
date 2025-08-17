@@ -15,6 +15,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.ArmStates;
@@ -105,6 +106,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
         DogLog.log(name + "/Setpoint", position);
         rMotor.setControl(right_motor_request);
         lMotor.setControl(motor_request.withPosition(position));
+        MechanismVisualizer.logElevator(position);
     }
 
     @Override
