@@ -1,7 +1,9 @@
 package frc.robot.subsystems.ground_manager;
 
 import dev.doglog.DogLog;
+import frc.robot.Ports.coralDetectorPorts;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 import frc.robot.subsystems.ground_manager.intake.IntakePivotStates;
 import frc.robot.subsystems.ground_manager.intakeRollers.IntakeRollers;
@@ -12,11 +14,13 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
 
     private final IntakePivot intakePivot;
     private final IntakeRollers rollers;
+    private final CoralDetector coralDetector;
 
     public GroundManager() {
         super(GroundManagerStates.PREPARE_IDLE);
         intakePivot = IntakePivot.getInstance();
         rollers = IntakeRollers.getInstance();
+        coralDetector = CoralDetector.getInstance();
     }
 
     @Override
@@ -36,7 +40,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 }
             }
             case INTAKING -> {
-                if (rollers.hasCoral()) {
+                if (coralDetector.hasCoral()) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 }
             }
@@ -55,6 +59,9 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 }
             }
             case SCORE_L1 -> {
+                if (timeout(1)) {
+                    nextState = GroundManagerStates.PREPARE_IDLE;
+                }
                 // add timeout
             }
             case WAIT_SCORE_L1 -> {

@@ -60,7 +60,7 @@ public class Arm extends StateMachine<ArmStates> {
         collectInputs();
         syncEncoder();
 
-        tolerance = 0.1;
+        tolerance = 0.005;
     }
 
     public boolean atGoal() {
@@ -86,7 +86,7 @@ public class Arm extends StateMachine<ArmStates> {
             case HANDOFF_MIDDLE ->
                 MathUtil.isNear(ArmPositions.HANDOFF_MIDDLE, armPosition, tolerance);
             case HANDOFF_RIGHT ->
-                MathUtil.isNear(ArmPositions.HANDOFF_LEFT, armPosition, tolerance);
+                MathUtil.isNear(ArmPositions.HANDOFF_RIGHT, armPosition, tolerance);
 
         };
 
@@ -99,8 +99,10 @@ public class Arm extends StateMachine<ArmStates> {
     @Override
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
+        armPosition = motor.getPosition().getValueAsDouble();
         DogLog.log(getName() + "/Encoder position", absolutePosition);
-        DogLog.log(getName() + "/Motor position", motor.getPosition().getValueAsDouble());
+        DogLog.log(getName() + "/Motor position", armPosition);
+        DogLog.log(getName() + "/at goal", atGoal());
     }
 
     public void setArmSpeed() {

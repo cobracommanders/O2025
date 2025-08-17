@@ -35,8 +35,8 @@ public class RobotCommands {
     }
 
     public Command scoreLevelCommand() {
-        return Commands.runOnce(robot::scoreLevelRequest, requirements)
-                .andThen(Commands.waitUntil(() -> robot.getState() == RobotState.WAIT_L1 || robot.getState() == RobotState.WAIT_L4));
+        return Commands.runOnce(robot::scoreLevelRequest, requirements);
+                //.andThen(Commands.waitUntil(() -> robot.getState() == RobotState.WAIT_L1 || robot.getState() == RobotState.WAIT_L4));
     }
 
     public Command climbCommand() {

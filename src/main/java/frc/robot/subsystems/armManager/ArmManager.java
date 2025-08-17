@@ -40,12 +40,39 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
 
+            case SCORE_L4 -> {
+                if(timeout(3)){
+                    nextState = ArmManagerStates.PREPARE_IDLE;
+                }
+            }
+
+            case PREPARE_HANDOFF_LEFT -> {
+                if (armScheduler.isReady()) {
+                    nextState = ArmManagerStates.WAIT_HANDOFF_LEFT;
+                }
+            }
+
+            case PREPARE_HANDOFF_RIGHT -> {
+                if (armScheduler.isReady()) {
+                    nextState = ArmManagerStates.WAIT_HANDOFF_RIGHT;
+                }
+            }
+
+            case PREPARE_HANDOFF_MIDDLE -> {
+                if (armScheduler.isReady()) {
+                    nextState = ArmManagerStates.WAIT_HANDOFF_MIDDLE;
+                }
+            }
+
             case PREPARE_INTAKE_GROUND_ALGAE -> {
                 if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_GROUND_ALGAE;
                 }
             }
             case INTAKE_GROUND_ALGAE -> {
+                if (hand.hasAlgae()) {
+                    nextState = ArmManagerStates.PREPARE_IDLE;
+                }
             }
             case PREPARE_INTAKE_HIGH_REEF_ALGAE -> {
                 if (armScheduler.isReady()) {
@@ -53,6 +80,9 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case INTAKE_HIGH_REEF_ALGAE -> {
+                if (hand.hasAlgae()){
+                    nextState = ArmManagerStates.ALGAE_LEAVE_REEF;
+                }
             }
             case PREPARE_INTAKE_LOW_REEF_ALGAE -> {
                 if (armScheduler.isReady()) {
@@ -60,6 +90,14 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case INTAKE_LOW_REEF_ALGAE -> {
+                if (hand.hasAlgae() && (timeout(2))){
+                    nextState = ArmManagerStates.ALGAE_LEAVE_REEF;
+                }
+            }
+            case ALGAE_LEAVE_REEF -> {
+                if(timeout(2)) {
+                    nextState = ArmManagerStates.PREPARE_IDLE;
+                }
             }
             case PREPARE_SCORE_ALGAE_NET -> {
                 if (armScheduler.isReady()) {
@@ -141,13 +179,14 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 hand.setState(HandStates.SCORE_ALGAE_PROCESSOR);
             }
             case PREPARE_SCORE_L4 -> {
-                armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.SCORE_L4, ElevatorStates.L4);
+                armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.IDLE, ElevatorStates.L4);
             }
             case WAIT_L4 -> {
                 armScheduler.scheduleStates(ArmStates.L4, HandStates.IDLE, ElevatorStates.L4);
             }
             case SCORE_L4 -> {
                 hand.setState(HandStates.SCORE_L4);
+                elevator.setState(ElevatorStates.SCORE_L4);
             }
             case PREPARE_HANDOFF_RIGHT -> {
                 armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);

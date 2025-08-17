@@ -67,11 +67,11 @@ public final class Constants {
     }
 
     public static final class HandConstants {
-        public static final double coralStallCurrent = 0;
-        public static final double algaeStallCurrent = 0;
+        public static final double coralStallCurrent = 40;
+        public static final double algaeStallCurrent = 80;
     }
     public static final class CoralDetectorConstants{
-        public static final double DETECTION_THRESHOLD = 0;
+        public static final double DETECTION_THRESHOLD = 0.065;
     }
 
     // 21.739

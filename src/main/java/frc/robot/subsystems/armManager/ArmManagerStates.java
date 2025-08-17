@@ -24,5 +24,6 @@ public enum ArmManagerStates {
     WAIT_HANDOFF_MIDDLE,
     PREPARE_HANDOFF_LEFT,
     WAIT_HANDOFF_LEFT,
+    ALGAE_LEAVE_REEF,
     CLIMB
 }
