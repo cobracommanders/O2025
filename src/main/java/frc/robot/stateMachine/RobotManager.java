@@ -143,7 +143,7 @@ public class RobotManager extends StateMachine<RobotState> {
                 if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
-                        groundManager.getState() == GroundManagerStates.HANDOFF) {
+                        groundManager.getState() == GroundManagerStates.WAIT_HANDOFF) {
                     nextState = RobotState.HANDOFF;
                 }
                 break;
