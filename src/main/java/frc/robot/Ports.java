@@ -34,4 +34,9 @@ public class Ports {
     public static class HandPorts {
         public static final int MOTOR = 44;
     }
+
+    public static final class OIPorts {
+        public static final int DRIVER_CONTROLLER_ID = 0;
+        public static final int OPERATOR_CONTROLLER_ID = 1;
+    }
 }

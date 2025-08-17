@@ -25,7 +25,7 @@ public class Robot extends TimedRobot {
 
   // Uncomment as needed
   public static RobotManager robotManager = RobotManager.getInstance();
-  // public static RobotCommands robotCommands = new RobotCommands();
+  public static RobotCommands robotCommands = new RobotCommands();
   // public static OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
   public Robot() {

@@ -9,7 +9,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Constants.OIConstants;
+import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
@@ -35,8 +35,8 @@ public class Controls {
             .withRotationalDeadband(angularRate * 0.1);
 
      
-    public final Xbox driver = new Xbox(OIConstants.DRIVER_CONTROLLER_ID);
-    public final Xbox operator = new Xbox(OIConstants.OPERATOR_CONTROLLER_ID);
+    public final Xbox driver = new Xbox(OIPorts.DRIVER_CONTROLLER_ID);
+    public final Xbox operator = new Xbox(OIPorts.OPERATOR_CONTROLLER_ID);
 
     public Controls() {
         driver.setTriggerThreshold(0.2);
