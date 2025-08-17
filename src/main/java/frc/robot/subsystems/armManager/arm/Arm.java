@@ -16,6 +16,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
@@ -23,13 +24,15 @@ import frc.robot.stateMachine.StateMachine;
 
 public class Arm extends StateMachine<ArmStates> {
     public String name = getName();
+
+    public final DoubleSubscriber armSpeed = DogLog.tunable("Arm/Speed [-1, 1]", 0.0);
     public static TalonFX motor;
     private final CANcoder encoder;
     private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
             .withSlot0(new Slot0Configs().withKP(ArmConstants.P).withKI(ArmConstants.I)
                     .withKD(ArmConstants.D).withKG(ArmConstants.G)
                     .withGravityType(GravityTypeValue.Arm_Cosine))
-            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio((8.0357 / 1.0)));
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ArmConstants.ArmGearRatio));
     private CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     private double armPosition;
@@ -45,7 +48,7 @@ public class Arm extends StateMachine<ArmStates> {
         motor_config.MotionMagic.MotionMagicAcceleration = ArmConstants.MotionMagicAcceleration;
         motor_config.MotionMagic.MotionMagicJerk = ArmConstants.MotionMagicJerk;
         canCoderConfig.MagnetSensor.MagnetOffset = Constants.ArmConstants.encoderOffset;
-        canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.9;
+        canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
 
         encoder = new CANcoder(Ports.ArmPorts.ENCODER);
@@ -53,6 +56,9 @@ public class Arm extends StateMachine<ArmStates> {
 
         motor.getConfigurator().apply(motor_config);
         encoder.getConfigurator().apply(canCoderConfig);
+
+        collectInputs();
+        syncEncoder();
 
         tolerance = 0.1;
     }
@@ -93,8 +99,13 @@ public class Arm extends StateMachine<ArmStates> {
     @Override
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
-        DogLog.log(getName() + "/Current Position", absolutePosition);
+        DogLog.log(getName() + "/Encoder position", absolutePosition);
+        DogLog.log(getName() + "/Motor position", motor.getPosition().getValueAsDouble());
     }
+
+    public void setArmSpeed() {
+        motor.set(armSpeed.get());
+      }
 
     public void setState(ArmStates state) {
         setStateFromRequest(state);

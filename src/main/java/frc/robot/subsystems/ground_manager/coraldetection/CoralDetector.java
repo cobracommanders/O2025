@@ -4,9 +4,9 @@ import com.ctre.phoenix6.hardware.CANrange;
 
 import dev.doglog.DogLog;
 import frc.robot.Constants;
+
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
 public class CoralDetector extends StateMachine<CoralDetectorStates> {
@@ -14,6 +14,8 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     public CANrange rCANRange;
     public boolean lDetected = false;
     public boolean rDetected = false;
+    public double lDistance;
+    public double rDistance;
     public final String name;
 
     public CoralDetector() {
@@ -24,12 +26,16 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     }
 
     protected void collectInputs() {
-        lDetected = lCANRange.getDistance().getValueAsDouble() < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
-        rDetected = rCANRange.getDistance().getValueAsDouble() < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
-        DogLog.log(name + "/left Detected", lDetected);
-        DogLog.log(name + "/right Detected", rDetected);
-        DogLog.log(name + "/left CAN Range Distance", lCANRange.getDistance().getValueAsDouble());
-        DogLog.log(name + "/right CAN Range Distance", rCANRange.getDistance().getValueAsDouble());
+        lDistance = lCANRange.getDistance().getValueAsDouble();
+        rDistance = rCANRange.getDistance().getValueAsDouble();
+        
+        //We can switch to using .isDetected() if we would like.
+        lDetected = lDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
+        rDetected = rDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
+        DogLog.log(name + "/Left Detected", lDetected);
+        DogLog.log(name + "/Right Detected", rDetected);
+        DogLog.log(name + "/Left Distance", lDistance);
+        DogLog.log(name + "/Right Distance", rDistance);
     }
 
     @Override

@@ -4,7 +4,16 @@
 
 package frc.robot;
 
+import java.util.Map;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.RobotCommands;
@@ -14,14 +23,13 @@ import frc.robot.stateMachine.RobotManager;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
+  // Uncomment as needed
   public static RobotManager robotManager = RobotManager.getInstance();
   public static RobotCommands robotCommands = new RobotCommands();
-  public static OperatorOptions operatorOptions = OperatorOptions.getInstance();
-
-  private final RobotContainer m_robotContainer;
+  // public static OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+    
   }
 
   @Override
@@ -36,11 +44,15 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {}
 
   @Override
+  public void robotInit(){
+    
+  }
+
+  @Override
   public void disabledExit() {}
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -61,7 +73,8 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
   public void teleopExit() {}
@@ -72,7 +85,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    // arm.setState(ArmStates.IDLE);
+    // elevator.setState(ElevatorStates.L4);
+  }
 
   @Override
   public void testExit() {}

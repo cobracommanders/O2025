@@ -12,20 +12,23 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.ArmStates;
 
 public class Elevator extends StateMachine<ElevatorStates> {
+    public final DoubleSubscriber elevatorSpeed = DogLog.tunable("elevator/Speed [-1, 1]", 0.0);
     private final String name = getName();
     public static TalonFX lMotor;
     public static TalonFX rMotor;
     private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(ArmConstants.P).withKI(ArmConstants.I)
-                    .withKD(ArmConstants.D).withKG(ArmConstants.G)
-                    .withGravityType(GravityTypeValue.Arm_Cosine))
-            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio((8.0357 / 1.0)));
+            .withSlot0(new Slot0Configs().withKP(ElevatorConstants.P).withKI(ElevatorConstants.I)
+                    .withKD(ElevatorConstants.D).withKG(ElevatorConstants.G)
+                    .withGravityType(GravityTypeValue.Elevator_Static))
+            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ElevatorConstants.ElevatorGearRatio));
 
     private double elevatorPosition;
     private final double tolerance;
@@ -34,11 +37,11 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
     public Elevator() {
         super(ElevatorStates.IDLE);
-        motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        motor_config.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MotionMagicCruiseVelocity;
-        motor_config.MotionMagic.MotionMagicAcceleration = ArmConstants.MotionMagicAcceleration;
-        motor_config.MotionMagic.MotionMagicJerk = ArmConstants.MotionMagicJerk;
+        motor_config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
+        motor_config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MotionMagicAcceleration;
+        motor_config.MotionMagic.MotionMagicJerk = ElevatorConstants.MotionMagicJerk;
 
         lMotor = new TalonFX(Ports.ElevatorPorts.LMOTOR);
         rMotor = new TalonFX(Ports.ElevatorPorts.RMOTOR);
@@ -46,7 +49,10 @@ public class Elevator extends StateMachine<ElevatorStates> {
         lMotor.getConfigurator().apply(motor_config);
         rMotor.getConfigurator().apply(motor_config);
 
-        tolerance = 0.1;
+        lMotor.setPosition(0);
+        rMotor.setPosition(0);
+
+        tolerance = 0;
     }
 
     protected ElevatorStates getNexState(ElevatorStates currentState) {
@@ -87,6 +93,11 @@ public class Elevator extends StateMachine<ElevatorStates> {
     public void setState(ElevatorStates state){
         setStateFromRequest(state);
     }
+
+    public void setElevatorSpeed() {
+        lMotor.set(elevatorSpeed.get());
+        rMotor.set(-elevatorSpeed.get());
+      }
 
     public void setElevatorPosition(double position) {
         DogLog.log(name + "/Setpoint", position);
