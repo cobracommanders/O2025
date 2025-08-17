@@ -76,7 +76,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
             case PREPARE_HANDOFF -> {
                 intakePivot.setState(IntakePivotStates.HANDOFF);
-                rollers.setState(IntakeRollersStates.HANDOFF);
+                
             }
             case PREPARE_SCORE_L1 -> {
                 intakePivot.setState(IntakePivotStates.SCORE_L1);
@@ -90,8 +90,10 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 intakePivot.setState(IntakePivotStates.CLIMB);
                 rollers.setState(IntakeRollersStates.IDLE);
             }
-            case WAIT_HANDOFF, WAIT_SCORE_L1, IDLE, INTAKING, HANDOFF -> {
-                
+            case HANDOFF -> {
+                rollers.setState(IntakeRollersStates.HANDOFF);
+            }
+            case WAIT_HANDOFF, WAIT_SCORE_L1, IDLE, INTAKING -> {
             }
         }
     }

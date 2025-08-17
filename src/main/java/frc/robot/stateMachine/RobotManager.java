@@ -5,6 +5,7 @@ import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
@@ -139,7 +140,7 @@ public class RobotManager extends StateMachine<RobotState> {
                     nextState = RobotState.IDLE;
                 }
                 break;
-            case PREPARE_HANDOFF: //TODO: This is scary... I still think we need some more thought here.
+            case PREPARE_HANDOFF:
                 if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
@@ -198,7 +199,10 @@ public class RobotManager extends StateMachine<RobotState> {
     @Override
     protected void afterTransition(RobotState newState) {
         switch (newState) {
-            case IDLE, WAIT_BARGE, WAIT_PROCESSOR, HANDOFF -> {
+            case IDLE, WAIT_BARGE, WAIT_PROCESSOR -> {
+            }
+            case HANDOFF -> {
+                groundManager.setStateFromRequest(GroundManagerStates.HANDOFF);
             }
             case SCORE_L1 -> {
                 groundManager.setState(GroundManagerStates.SCORE_L1);
@@ -242,6 +246,7 @@ public class RobotManager extends StateMachine<RobotState> {
             }
             case WAIT_L4 -> {
                 armManager.setState(ArmManagerStates.PREPARE_SCORE_L4);
+                groundManager.setState(GroundManagerStates.PREPARE_IDLE);
             }
             case CLIMB -> {
 
