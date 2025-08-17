@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycle;
 import frc.robot.Constants.ClimberConstants;
@@ -17,20 +18,22 @@ import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
 public class Climber extends StateMachine<ClimberStates>{
+    public final DoubleSubscriber climberSpeed = DogLog.tunable("climb/Speed [-1, 1]", 0.0);
     private final DutyCycle encoder;
     private final String name = getName();
     private final TalonFX wheelMotor;
     private final TalonFX winchMotor;
     private TalonFXConfiguration wheel_motor_config = new TalonFXConfiguration();
-    private TalonFXConfiguration winch_motor_config = new TalonFXConfiguration().withSlot0(new Slot0Configs().withKP(0.0).withKI(0.0).withKD(0.0).withKG(0.0).withGravityType(GravityTypeValue.Arm_Cosine)).withFeedback(new FeedbackConfigs().withSensorToMechanismRatio((122.449 / 1.0)));
+    private TalonFXConfiguration winch_motor_config = new TalonFXConfiguration();
     public double climberPosition;
     private MotionMagicVoltage winch_motor_request = new MotionMagicVoltage(0).withSlot(0);
-    private double tolerance = 0.0;
+    private double tolerance = 0.02;
     private double motorCurrent = 0.0;
+    private double absolutePosition;
     public Climber(){
       super(ClimberStates.IDLE);
       //TODO: update configs
-      encoder = new DutyCycle(new DigitalInput(Ports.Climber.CLIMER_DUTY_CYCLE_ENCODER));
+      encoder = new DutyCycle(new DigitalInput(Ports.ClimberPorts.CLIMER_DUTY_CYCLE_ENCODER));
       winch_motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       wheel_motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
       winch_motor_config.MotionMagic.MotionMagicCruiseVelocity = ClimberConstants.DEPLOY_MOTION_MAGIC_CRUISE_VELOCITY;
@@ -46,9 +49,10 @@ public class Climber extends StateMachine<ClimberStates>{
   public void collectInputs(){
     motorCurrent = wheelMotor.getStatorCurrent().getValueAsDouble();
     climberPosition = winchMotor.getPosition().getValueAsDouble();
+    absolutePosition = encoder.getOutput() - ClimberConstants.EncoderOffset;
     //TODO: update climberPosition
     //TODO: log important inputs
-    DogLog.log(name + "/Climber postions", climberPosition);
+    DogLog.log(name + "/Climber postions", absolutePosition);
     DogLog.log(name + "/Cage detection", cageDetected());
     //implement input collection (these values will be used in state transitions)
   }
@@ -58,14 +62,23 @@ public class Climber extends StateMachine<ClimberStates>{
     setStateFromRequest(newState);
   }
 
+  public void setClimberSpeed() {
+    winchMotor.set(climberSpeed.get());
+  }
+
   public ClimberStates getNextState(ClimberStates currentState){
       ClimberStates nextState = currentState;
       switch(currentState){
         case IDLE:
           //none
           break;
-        case DEPLOYED:
-          if (cageDetected()) {
+        case DEPLOYING:
+          if (atGoal()){
+            nextState = ClimberStates.WAIT_FOR_CAGE;
+          }
+        break;
+        case WAIT_FOR_CAGE:
+          if (atGoal()) {
             nextState = ClimberStates.CLIMBING;
           }
           break;
@@ -82,19 +95,16 @@ public class Climber extends StateMachine<ClimberStates>{
   }
 
   public boolean atGoal(){
-    ClimberStates currentState = getState();
-    switch(currentState){
-      case IDLE:
-        return MathUtil.isNear(ClimberPositions.IDLE, climberPosition, tolerance);
-      case DEPLOYED:
-        return MathUtil.isNear(ClimberPositions.DEPLOYED, climberPosition, tolerance);
-      case CLIMBING:
-        return MathUtil.isNear(ClimberPositions.DEPLOYED, climberPosition, tolerance);
-      case CLIMBED:
-        return MathUtil.isNear(ClimberPositions.CLIMBED, climberPosition, tolerance);
-      default:
-        return false;
-    }
+    return switch(getState()){
+      case DEPLOYING -> 
+        MathUtil.isNear(ClimberPositions.DEPLOYING, absolutePosition, tolerance);
+      case CLIMBING ->
+        MathUtil.isNear(ClimberPositions.CLIMBING, absolutePosition, tolerance);
+      case WAIT_FOR_CAGE ->
+        cageDetected();
+      default ->
+        false;
+    };
   }
 
   @Override
@@ -103,17 +113,21 @@ public class Climber extends StateMachine<ClimberStates>{
       case IDLE:
         //do nothing
         break;
-      case DEPLOYED:
+      case DEPLOYING:
+        setWinchSpeed(WinchSpeeds.DEPLOYING);
+      break;
+      case WAIT_FOR_CAGE:
         //set climber position, set wheels
-        setClimberPosition(ClimberPositions.DEPLOYED);
-        setClimberWheelSpeed(ClimberWheelSpeeds.DEPLOYED);
+        setWinchSpeed(WinchSpeeds.IDLE);
+        setClimberWheelSpeed(ClimberWheelSpeeds.INTAKE_CAGE);
         break;
       case CLIMBING:
         //set wheels, set climber position
-        setClimberPosition(ClimberPositions.CLIMBING);
-        setClimberWheelSpeed(ClimberWheelSpeeds.CLIMBING);
+        setWinchSpeed(WinchSpeeds.CLIMBING);
+        setClimberWheelSpeed(ClimberWheelSpeeds.IDLE);
         break;
       case CLIMBED:
+        setWinchSpeed(ClimberPositions.IDLE);
         //do nothing
         break;
       default:
@@ -121,9 +135,9 @@ public class Climber extends StateMachine<ClimberStates>{
     }
   }
 
-  public void setClimberPosition(double position){
-    DogLog.log(name + "/Setpoint", position);
-    winchMotor.setControl(winch_motor_request.withPosition(position));
+
+  public void setWinchSpeed(double winchSpeed){
+    winchMotor.set(winchSpeed);
   }
    public void setClimberWheelSpeed(double speed){
     DogLog.log(name + "/Wheel Speed", speed);
@@ -135,7 +149,6 @@ public class Climber extends StateMachine<ClimberStates>{
   }
 
   public static Climber instance;
-
   public static Climber getInstance(){
     if(instance == null){
       instance = new Climber();

@@ -16,8 +16,8 @@ public class Ports {
     }
 
     public static class ClimberPorts {
-        public static int WHEEL_CLIMBER_MOTOR_PORT = 30;
-        public static int WINCH_CLIMBER_MOTOR_PORT = 31;
+        public static int WHEEL_CLIMBER_MOTOR_PORT = 31;
+        public static int WINCH_CLIMBER_MOTOR_PORT = 30;
         public static int CLIMER_DUTY_CYCLE_ENCODER = 1; //this is plugged into DIO
     }
     

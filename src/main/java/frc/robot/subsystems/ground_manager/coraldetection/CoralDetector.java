@@ -7,7 +7,6 @@ import frc.robot.Constants;
 
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
 public class CoralDetector extends StateMachine<CoralDetectorStates> {

@@ -2,7 +2,8 @@ package frc.robot.subsystems.climber;
 
 public enum ClimberStates {
     IDLE,
-    DEPLOYED,
+    DEPLOYING,
+    WAIT_FOR_CAGE,
     CLIMBING,
     CLIMBED,   
 }
