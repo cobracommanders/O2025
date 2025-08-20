@@ -179,13 +179,13 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 hand.setState(HandStates.SCORE_ALGAE_PROCESSOR);
             }
             case PREPARE_SCORE_L4 -> {
-                armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.IDLE, ElevatorStates.L4);
+                armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case WAIT_L4 -> {
-                armScheduler.scheduleStates(ArmStates.L4, HandStates.IDLE, ElevatorStates.L4);
+                armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case SCORE_L4 -> {
-                hand.setState(HandStates.SCORE_L4);
+                hand.setState(HandStates.CORAL_IDLE);
                 elevator.setState(ElevatorStates.SCORE_L4);
             }
             case PREPARE_HANDOFF_RIGHT -> {

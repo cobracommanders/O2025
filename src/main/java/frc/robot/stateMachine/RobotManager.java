@@ -200,7 +200,14 @@ public class RobotManager extends StateMachine<RobotState> {
     @Override
     protected void afterTransition(RobotState newState) {
         switch (newState) {
-            case IDLE, WAIT_BARGE, WAIT_PROCESSOR -> {
+            case IDLE -> {
+            }
+            case WAIT_BARGE ->{
+                armManager.setState(ArmManagerStates.WAIT_SCORE_ALGAE_NET);
+                
+            }
+            case WAIT_PROCESSOR -> {
+                armManager.setState(ArmManagerStates.WAIT_SCORE_ALGAE_PROCESSOR);
             }
             case HANDOFF -> {
                 groundManager.setStateFromRequest(GroundManagerStates.HANDOFF);
