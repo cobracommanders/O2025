@@ -8,10 +8,12 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
+import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 
@@ -79,6 +81,9 @@ public class Controls {
         driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand());
         driver.rightBumper().onTrue(Robot.robotCommands.scoreLevelCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand());
+        driver.A().onTrue(runOnce(()->CommandSwerveDrivetrain.getInstance().setYaw(Rotation2d.kZero)));
+        driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
+        driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
     }
 
     public void configureOperatorCommands(){

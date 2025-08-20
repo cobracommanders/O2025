@@ -44,13 +44,19 @@ public class RobotManager extends StateMachine<RobotState> {
                 case IDLE:
                     nextState = RobotState.IDLE;
                 case INTAKE_CORAL:
-                    nextState = RobotState.INTAKING_CORAL;
+                    if (getState() == RobotState.IDLE) {
+                        nextState = RobotState.INTAKING_CORAL;
+                    }
                     break;
                 case CLIMB:
-                    nextState = RobotState.CLIMB;
+                    if (getState() == RobotState.IDLE) {
+                        nextState = RobotState.CLIMB;
+                    }
                     break;
                 case HANDOFF:
-                    nextState = RobotState.PREPARE_HANDOFF;
+                    if (getState() == RobotState.IDLE) {
+                        nextState = RobotState.PREPARE_HANDOFF;
+                    }
                     break;
                 case SCORE:
                     switch (nextState) {
@@ -76,24 +82,19 @@ public class RobotManager extends StateMachine<RobotState> {
                             nextState = RobotState.WAIT_L1;
                             break;
                         case L4:
-                            if (armManager.hand.hasAlgae()) {
-                            } else if (armManager.hand.hasCoral()) {
-                                nextState = RobotState.WAIT_L4;
-                            } else {
+                            if (coralDetector.hasCoral()) {
                                 nextState = RobotState.PREPARE_HANDOFF;
+                            } else {
+                                nextState = RobotState.WAIT_L4;
                             }
                             break;
                         case BARGE:
-                            if (armManager.hand.hasCoral()) {
-                            } else {
+                            if (getState() == RobotState.IDLE)
                                 nextState = RobotState.WAIT_BARGE;
-                            }
                             break;
                         case PROCESSOR:
-                            if (armManager.hand.hasCoral()) {
-                            } else {
+                            if (getState() == RobotState.IDLE)
                                 nextState = RobotState.WAIT_PROCESSOR;
-                            }
                             break;
                         default:
                             break;
@@ -150,7 +151,7 @@ public class RobotManager extends StateMachine<RobotState> {
                 }
                 break;
             case HANDOFF:
-                if (timeout(0.8)) {
+                if (timeout(0.3)) {
                     nextState = RobotState.WAIT_L4;
                     // will check Operator Options when we are scoring on more Levels
                 }
@@ -203,11 +204,11 @@ public class RobotManager extends StateMachine<RobotState> {
             case IDLE -> {
             }
             case WAIT_BARGE ->{
-                armManager.setState(ArmManagerStates.WAIT_SCORE_ALGAE_NET);
+                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_NET);
                 
             }
             case WAIT_PROCESSOR -> {
-                armManager.setState(ArmManagerStates.WAIT_SCORE_ALGAE_PROCESSOR);
+                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_PROCESSOR);
             }
             case HANDOFF -> {
                 groundManager.setStateFromRequest(GroundManagerStates.HANDOFF);

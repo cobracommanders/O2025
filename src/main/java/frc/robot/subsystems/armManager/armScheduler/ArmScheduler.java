@@ -76,13 +76,13 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
     protected void afterTransition(ArmSchedulerStates newState) {
         switch (newState) {
             case ARM_UP -> {
+                hand.setState(handState);
                 arm.setState(ArmStates.IDLE);
             }
             case ELEVATOR_TO_POSITION -> {
                 elevator.setState(elevatorState);
             }
             case ARM_TO_POSITION -> {
-                hand.setState(handState);
                 arm.setState(armState);
             }
             case READY -> {

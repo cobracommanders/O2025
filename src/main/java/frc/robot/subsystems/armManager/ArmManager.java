@@ -41,7 +41,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
 
             case SCORE_L4 -> {
-                if(timeout(3)){
+                if(timeout(1.5)){
                     nextState = ArmManagerStates.PREPARE_IDLE;
                 }
             }
@@ -107,6 +107,9 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             case WAIT_SCORE_ALGAE_NET -> {
             }
             case SCORE_ALGAE_NET -> {
+                if (timeout(1)) {
+                    nextState = ArmManagerStates.PREPARE_IDLE;
+                }
             }
             case PREPARE_SCORE_ALGAE_PROCESSOR -> {
                 if (armScheduler.isReady()) {
@@ -116,6 +119,9 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             case WAIT_SCORE_ALGAE_PROCESSOR -> {
             }
             case SCORE_ALGAE_PROCESSOR -> {
+                if (timeout(1)) {
+                    nextState = ArmManagerStates.PREPARE_IDLE;
+                }
             }
 
         }
@@ -179,14 +185,15 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 hand.setState(HandStates.SCORE_ALGAE_PROCESSOR);
             }
             case PREPARE_SCORE_L4 -> {
-                armScheduler.scheduleStates(ArmStates.SCORE_L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
+                armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case WAIT_L4 -> {
                 armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case SCORE_L4 -> {
-                hand.setState(HandStates.CORAL_IDLE);
+                hand.setState(HandStates.SCORE_L4);
                 elevator.setState(ElevatorStates.SCORE_L4);
+                arm.setState(ArmStates.SCORE_L4);
             }
             case PREPARE_HANDOFF_RIGHT -> {
                 armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);

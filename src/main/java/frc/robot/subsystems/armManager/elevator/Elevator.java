@@ -140,6 +140,25 @@ public class Elevator extends StateMachine<ElevatorStates> {
         }
     }
 
+    public void tickUp(){
+        switch(getState()){
+            case L4:
+                ElevatorPositions.L4 += .015;
+                setElevatorPosition(ElevatorPositions.L4);
+            break;
+
+        }
+    }
+
+    public void tickDown(){
+        switch(getState()){
+            case L4:
+                ElevatorPositions.L4 -= .015;
+                setElevatorPosition(ElevatorPositions.L4);
+            break;
+
+        }
+    }
     private static Elevator instance;
 
     public static Elevator getInstance() {
