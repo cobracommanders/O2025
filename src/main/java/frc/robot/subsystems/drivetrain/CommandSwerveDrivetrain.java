@@ -5,10 +5,23 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import dev.doglog.DogLog;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,7 +31,6 @@ import frc.robot.fms.FmsSubsystem;
 import frc.robot.subsystems.drivetrain.TunerConstants.TunerSwerveDrivetrain;
 
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-
     public void setYaw(Rotation2d rotation) {
         this.resetRotation(rotation);
     }
@@ -59,8 +71,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
     }
-
+    @Override
+    public void simulationPeriodic() {
+        this.updateSimState(Constants.SIM_LOOP_TIME, RobotController.getBatteryVoltage());
+    }
+    @Override
     public void update() {
+        DogLog.log("Robot Pose", this.getState().Pose);
+        
         if (!hasAppliedOperatorPerspective || FmsSubsystem.getInstance().isDisabled()) {
             DriverStation.getAlliance().ifPresent((allianceColor) -> {
                 this.setOperatorPerspectiveForward(

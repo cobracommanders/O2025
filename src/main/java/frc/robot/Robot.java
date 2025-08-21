@@ -14,6 +14,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import dev.doglog.DogLog;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -61,7 +62,14 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {
+  public void disabledInit() {}
+
+  @Override
+  public void disabledPeriodic() {}
+
+  @Override
+  public void robotInit(){
+    DriverStation.silenceJoystickConnectionWarning(true);
   }
 
   @Override

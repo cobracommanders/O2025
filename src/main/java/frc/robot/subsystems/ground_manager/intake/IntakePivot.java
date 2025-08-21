@@ -1,5 +1,7 @@
 package frc.robot.subsystems.ground_manager.intake;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -12,17 +14,24 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import dev.doglog.DogLog;
 import dev.doglog.internal.tunable.Tunable;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycle;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.robot.Constants;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.IntakePivotConstants;
 import frc.robot.Ports;
 import frc.robot.TunablePid;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.MechanismVisualizer;
 
 public class IntakePivot extends StateMachine<IntakePivotStates> {
   public final String name = getName();
@@ -47,7 +56,13 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   private double absolutePosition;
 
   private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
-
+  private double setpoint;
+  private final DCMotorSim pivotSim = new DCMotorSim(
+      LinearSystemId.createDCMotorSystem(
+          DCMotor.getKrakenX60Foc(1), 0.001, IntakePivotConstants.PivotGearRatio
+          ),
+      DCMotor.getKrakenX60Foc(1)
+  );
   private IntakePivot() {
     super(IntakePivotStates.IDLE);
     encoder = new DutyCycle(new DigitalInput(Ports.IntakePivotPorts.INTAKE_PIVOT_DUTY_CYCLE_ENCODER));
@@ -58,7 +73,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
     motor_config.MotionMagic.MotionMagicAcceleration = IntakePivotConstants.MotionMagicAcceleration;
     motor_config.MotionMagic.MotionMagicJerk = IntakePivotConstants.MotionMagicJerk;
     intakeMotor.getConfigurator().apply(motor_config);
-    tolerance = 0.003;
+    tolerance = 0.004;
     collectInputs();
     syncEncoder();
   }
@@ -82,13 +97,27 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   public void collectInputs() {
     intakePosition = intakeMotor.getPosition().getValueAsDouble();
     absolutePosition = 1 - encoder.getOutput() - 0.163;
+    if (Constants.isSim) 
+      updateSimPosition(setpoint);
+    MechanismVisualizer.setGroundPivotPosition(intakePosition);
     DogLog.log(name + "/motor Position", intakePosition);
     DogLog.log(name + "/absolute Position", absolutePosition);
   }
 
   public void setIntakePosition(double position) {
     DogLog.log(name + "/Setpoint", position);
+    setpoint = position;
     intakeMotor.setControl(motor_request.withPosition(position));
+  }
+
+  private void updateSimPosition(double position) {
+    var talonSim = intakeMotor.getSimState();
+    talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+    var motorVoltage = talonSim.getMotorVoltageMeasure();
+    pivotSim.setInputVoltage(motorVoltage.in(Volts));
+    pivotSim.update(Constants.SIM_LOOP_TIME);
+    talonSim.setRawRotorPosition(pivotSim.getAngularPosition().times(IntakePivotConstants.PivotGearRatio));
+    talonSim.setRotorVelocity(pivotSim.getAngularVelocity().times(IntakePivotConstants.PivotGearRatio));
   }
 
   public void setIntakeSpeed() {

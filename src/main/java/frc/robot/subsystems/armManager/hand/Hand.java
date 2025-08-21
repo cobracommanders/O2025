@@ -47,10 +47,16 @@ public class Hand extends StateMachine<HandStates> {
     }
 
     public boolean hasCoral(){
+        if (Constants.isSim) {
+            return true;
+        }
         return statorCurrent > Constants.HandConstants.coralStallCurrent;
     }
 
     public boolean hasAlgae(){
+        if (Constants.isSim) {
+            return true;
+        }
         return statorCurrent > Constants.HandConstants.algaeStallCurrent;
     }
 
