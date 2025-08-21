@@ -8,10 +8,12 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
+import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 
@@ -49,16 +51,16 @@ public class Controls {
 
     private void newControlStyle() {
         controlStyle = () -> drive
-                .withVelocityX((-(driver.leftY() * .5) * (driver.leftY() * .5) * (driver.leftY() * .5) * Constants.DrivertrainConstants.maxSpeed) * .7) // Drive
+                .withVelocityX((-(driver.leftY()) * (driver.leftY()) * (driver.leftY()) * Constants.DrivertrainConstants.maxSpeed) * 0.8) // Drive
                                                                                                                          // forward
                                                                                                                          // -Y
-                .withVelocityY((-(driver.leftX() * .5) * (driver.leftX() * .5) * (driver.leftX() * .5) * Constants.DrivertrainConstants.maxSpeed) * .7) // Drive
+                .withVelocityY((-(driver.leftX()) * (driver.leftX()) * (driver.leftX()) * Constants.DrivertrainConstants.maxSpeed) * 0.8) // Drive
                                                                                                                          // left
                                                                                                                          // with
                                                                                                                          // negative
                                                                                                                          // X
                                                                                                                          // (left)
-                .withRotationalRate((driver.rightX() * angularRate) * .1); // Drive counterclockwise with negative X
+                .withRotationalRate((driver.rightX() * driver.rightX() * driver.rightX() * angularRate) * .1); // Drive counterclockwise with negative X
                                                                            // (left)
     }
 
@@ -79,6 +81,10 @@ public class Controls {
         driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand());
         driver.rightBumper().onTrue(Robot.robotCommands.scoreLevelCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand());
+        driver.A().onTrue(runOnce(()->CommandSwerveDrivetrain.getInstance().setYaw(Rotation2d.kZero)));
+        driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
+        driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
+        driver.start().onTrue(runOnce(()->Robot.robotManager.resetToIdleRequest()));
     }
 
     public void configureOperatorCommands(){

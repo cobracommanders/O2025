@@ -1,5 +1,7 @@
 package frc.robot.subsystems.ground_manager.coraldetection;
 
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
 import dev.doglog.DogLog;

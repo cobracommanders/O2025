@@ -60,8 +60,8 @@ public class Hand extends StateMachine<HandStates> {
             case IDLE -> {
                 setHandSpeed(HandSpeeds.IDLE);
             }
-            case SCORE_L4 -> {
-                setHandSpeed(HandSpeeds.SCORE_L4);
+            case SCORE_CORAL -> {
+                setHandSpeed(HandSpeeds.SCORE_CORAL);
             }
             case HANDOFF -> {
                 setHandSpeed(HandSpeeds.HANDOFF);
@@ -80,6 +80,9 @@ public class Hand extends StateMachine<HandStates> {
             }
             case SCORE_ALGAE_PROCESSOR -> {
                 setHandSpeed(HandSpeeds.SCORE_ALGAE_PROCESSOR);
+            }
+            case CORAL_IDLE -> {
+                setHandSpeed(HandSpeeds.CORAL_IDLE);
             }
         }
     }

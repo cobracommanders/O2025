@@ -81,6 +81,14 @@ public class Arm extends StateMachine<ArmStates> {
                 MathUtil.isNear(ArmPositions.L4, armPosition, tolerance);
             case SCORE_L4 ->
                 MathUtil.isNear(ArmPositions.SCORE_L4, armPosition, tolerance);
+            case L3 ->
+                MathUtil.isNear(ArmPositions.L3, armPosition, tolerance);
+            case SCORE_L3 ->
+                MathUtil.isNear(ArmPositions.SCORE_L3, armPosition, tolerance);
+            case L2 ->
+                MathUtil.isNear(ArmPositions.L2, armPosition, tolerance);
+            case SCORE_L2 ->
+                MathUtil.isNear(ArmPositions.SCORE_L2, armPosition, tolerance);
             case HANDOFF_LEFT ->
                 MathUtil.isNear(ArmPositions.HANDOFF_LEFT, armPosition, tolerance);
             case HANDOFF_MIDDLE ->
@@ -153,6 +161,18 @@ public class Arm extends StateMachine<ArmStates> {
             }
             case HANDOFF_RIGHT -> {
                 setArmPosition(ArmPositions.HANDOFF_RIGHT);
+            }
+            case L3 -> {
+                setArmPosition(ArmPositions.L3);
+            }
+            case SCORE_L3 -> {
+                setArmPosition(ArmPositions.SCORE_L3);
+            }
+            case L2 -> {
+                setArmPosition(ArmPositions.L2);
+            }
+            case SCORE_L2 -> {
+                setArmPosition(ArmPositions.SCORE_L2);
             }
         }
     }

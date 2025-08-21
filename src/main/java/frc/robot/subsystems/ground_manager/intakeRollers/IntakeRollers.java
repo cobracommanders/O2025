@@ -21,7 +21,7 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
         super(IntakeRollersStates.IDLE);
         motor = new TalonFX(Ports.IntakeRollersPorts.INTAKE_ROLLER_MOTOR);
     }
-
+   
     @Override
     public void collectInputs() {
       motorStatorCurrent = motor.getStatorCurrent().getValueAsDouble();

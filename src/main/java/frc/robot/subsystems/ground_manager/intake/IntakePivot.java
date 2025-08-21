@@ -58,7 +58,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
     motor_config.MotionMagic.MotionMagicAcceleration = IntakePivotConstants.MotionMagicAcceleration;
     motor_config.MotionMagic.MotionMagicJerk = IntakePivotConstants.MotionMagicJerk;
     intakeMotor.getConfigurator().apply(motor_config);
-    tolerance = 0.001;
+    tolerance = 0.003;
     collectInputs();
     syncEncoder();
   }

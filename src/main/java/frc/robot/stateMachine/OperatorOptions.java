@@ -1,5 +1,7 @@
 package frc.robot.stateMachine;
 
+import dev.doglog.DogLog;
+
 public class OperatorOptions {
 
     public ScoreLocation scoreLocation;
@@ -8,6 +10,9 @@ public class OperatorOptions {
     public OperatorOptions() {
         this.scoreLocation = ScoreLocation.L3;
         this.algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE;
+        DogLog.log("Robot/ScoreLocation", "L3");
+        DogLog.log("Robot/AlgaeLocation", "GROUND");
+
     }
 
     public enum ScoreLocation {

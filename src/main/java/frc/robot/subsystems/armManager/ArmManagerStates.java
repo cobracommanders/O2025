@@ -25,5 +25,11 @@ public enum ArmManagerStates {
     PREPARE_HANDOFF_LEFT,
     WAIT_HANDOFF_LEFT,
     ALGAE_LEAVE_REEF,
-    CLIMB
+    CLIMB,
+    PREPARE_SCORE_L3,
+    WAIT_L3,
+    SCORE_L3,
+    PREPARE_SCORE_L2,
+    WAIT_L2,
+    SCORE_L2
 }
