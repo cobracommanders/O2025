@@ -12,7 +12,7 @@ import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.armManager.hand.HandStates;
 
 public class ArmManager extends StateMachine<ArmManagerStates> {
-    public static final double scoringTime = 1.5;
+    public static final double scoringTime = 0.75;
     private final String name = getName();
     public final Hand hand;
     public final Elevator elevator;

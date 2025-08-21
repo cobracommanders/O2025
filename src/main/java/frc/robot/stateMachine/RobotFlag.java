@@ -8,5 +8,6 @@ public enum RobotFlag {
     SCORE_LEVEL,
     HANDOFF,
     CLIMB,
-    ALGAE_SCORE_LEVEL
+    ALGAE_SCORE_LEVEL,
+    RESET_TO_IDLE
 }

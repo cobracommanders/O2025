@@ -84,6 +84,7 @@ public class Controls {
         driver.A().onTrue(runOnce(()->CommandSwerveDrivetrain.getInstance().setYaw(Rotation2d.kZero)));
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
+        driver.start().onTrue(runOnce(()->Robot.robotManager.resetToIdleRequest()));
     }
 
     public void configureOperatorCommands(){

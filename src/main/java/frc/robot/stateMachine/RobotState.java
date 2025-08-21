@@ -25,4 +25,5 @@ public enum RobotState {
     SCORE_BARGE,
     SCORE_PROCESSOR,
     CLIMB,
+    RESET_TO_IDLE
 }

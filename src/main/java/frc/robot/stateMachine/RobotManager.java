@@ -3,6 +3,7 @@ package frc.robot.stateMachine;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
+import dev.doglog.DogLog;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.climber.Climber;
@@ -41,8 +42,12 @@ public class RobotManager extends StateMachine<RobotState> {
         RobotState nextState = currentState;
         for (RobotFlag flag : flags.getChecked()) {
             switch (flag) {
+                case RESET_TO_IDLE:
+                    nextState = RobotState.RESET_TO_IDLE;
+                    break;
                 case IDLE:
                     nextState = RobotState.IDLE;
+                    break;
                 case INTAKE_CORAL:
                     if (getState() == RobotState.IDLE) {
                         nextState = RobotState.INTAKING_CORAL;
@@ -88,10 +93,18 @@ public class RobotManager extends StateMachine<RobotState> {
                             nextState = RobotState.WAIT_L1;
                             break;
                         case L2:
-                            nextState = RobotState.WAIT_L2;
+                            if (coralDetector.hasCoral()) {
+                                nextState = RobotState.PREPARE_HANDOFF;
+                            } else {
+                                nextState = RobotState.WAIT_L2;
+                            }
                             break;
                         case L3:
-                            nextState = RobotState.WAIT_L3;
+                            if (coralDetector.hasCoral()) {
+                                nextState = RobotState.PREPARE_HANDOFF;
+                            } else {
+                                nextState = RobotState.WAIT_L3;
+                            }
                             break;
                         case L4:
                             if (coralDetector.hasCoral()) {
@@ -148,7 +161,12 @@ public class RobotManager extends StateMachine<RobotState> {
             case WAIT_L1, WAIT_L2, WAIT_L3, WAIT_L4, WAIT_BARGE, WAIT_PROCESSOR, CLIMB, IDLE:
                 // These states do not transition automatically
                 break;
-
+            case RESET_TO_IDLE:
+                if (groundManager.getState() == GroundManagerStates.IDLE
+                        && armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+                break;
             case INTAKING_CORAL:
                 if (groundManager.getState() == GroundManagerStates.IDLE) {
                     nextState = RobotState.IDLE;
@@ -163,8 +181,20 @@ public class RobotManager extends StateMachine<RobotState> {
                 }
                 break;
             case HANDOFF:
-                if (timeout(0.3)) {
-                    nextState = RobotState.WAIT_L4;
+                if (timeout(0.2)) {
+                    switch (operatorOptions.scoreLocation) {
+                        case L2:
+                            nextState = RobotState.WAIT_L2;
+                            break;
+                        case L3:
+                            nextState = RobotState.WAIT_L3;
+                            break;
+                        case L4:
+                            nextState = RobotState.WAIT_L4;
+                            break;
+                        default:
+                            break;
+                    };
                     // will check Operator Options when we are scoring on more Levels
                 }
                 break;
@@ -223,9 +253,13 @@ public class RobotManager extends StateMachine<RobotState> {
         switch (newState) {
             case IDLE -> {
             }
-            case WAIT_BARGE ->{
+            case RESET_TO_IDLE -> {
+                armManager.setState(ArmManagerStates.PREPARE_IDLE);
+                groundManager.setState(GroundManagerStates.PREPARE_IDLE);
+            }
+            case WAIT_BARGE -> {
                 armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_NET);
-                
+
             }
             case WAIT_PROCESSOR -> {
                 armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_PROCESSOR);
@@ -253,15 +287,15 @@ public class RobotManager extends StateMachine<RobotState> {
             }
             case PREPARE_HANDOFF -> {
                 // need to figure out which handoff we are doing...
-                if(coralDetector.getState() == CoralDetectorStates.LEFT){
+                if (coralDetector.getState() == CoralDetectorStates.LEFT) {
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_LEFT);
-                }else if(coralDetector.getState() == CoralDetectorStates.RIGHT){
+                } else if (coralDetector.getState() == CoralDetectorStates.RIGHT) {
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_RIGHT);
-                }else if(coralDetector.getState() == CoralDetectorStates.MIDDLE){
+                } else if (coralDetector.getState() == CoralDetectorStates.MIDDLE) {
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
-                }else{
+                } else {
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
-                    //if there is no coral, do nothing
+                    // if there is no coral, do nothing
                 }
                 groundManager.setState(GroundManagerStates.PREPARE_HANDOFF);
             }
@@ -294,11 +328,10 @@ public class RobotManager extends StateMachine<RobotState> {
             }
             case CLIMB -> {
                 climber.setState(ClimberStates.DEPLOYING);
-                //TODO: add intake and armManager climb states
+                // TODO: add intake and armManager climb states
             }
         }
     }
-    
 
     @Override
     public void periodic() {
@@ -337,40 +370,54 @@ public class RobotManager extends StateMachine<RobotState> {
         flags.check(RobotFlag.HANDOFF);
     }
 
+    public void resetToIdleRequest() {
+        flags.check(RobotFlag.RESET_TO_IDLE);
+    }
+
     public void setL1() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L1;
+        DogLog.log("Robot/ScoreLocation", "L1");
     }
 
     public void setL2() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L2;
+        DogLog.log("Robot/ScoreLocation", "L2");
     }
 
     public void setL3() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L3;
+        DogLog.log("Robot/ScoreLocation", "L3");
     }
 
     public void setL4() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L4;
+        DogLog.log("Robot/ScoreLocation", "L4");
     }
 
     public void setProcessor() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.PROCESSOR;
+        DogLog.log("Robot/ScoreLocation", "PROCESSOR");
     }
 
     public void setBarge() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.BARGE;
+        DogLog.log("Robot/ScoreLocation", "BARGE");
+
     }
 
     public void setHighReefAlgae() {
         operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
+        DogLog.log("Robot/AlgaeLocation", "HIGH_REEF");
     }
 
     public void setLowReefAlgae() {
         operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.LOW_REEF;
+        DogLog.log("Robot/AlgaeLocation", "LOW_REEF");
     }
 
     public void setGroundAlgae() {
         operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE;
+        DogLog.log("Robot/AlgaeLocation", "GROUND");
     }
 
     private static RobotManager instance;
