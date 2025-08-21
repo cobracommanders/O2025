@@ -51,16 +51,16 @@ public class Controls {
 
     private void newControlStyle() {
         controlStyle = () -> drive
-                .withVelocityX((-(driver.leftY() * .5) * (driver.leftY() * .5) * (driver.leftY() * .5) * Constants.DrivertrainConstants.maxSpeed) * .7) // Drive
+                .withVelocityX((-(driver.leftY()) * (driver.leftY()) * (driver.leftY()) * Constants.DrivertrainConstants.maxSpeed) * 0.8) // Drive
                                                                                                                          // forward
                                                                                                                          // -Y
-                .withVelocityY((-(driver.leftX() * .5) * (driver.leftX() * .5) * (driver.leftX() * .5) * Constants.DrivertrainConstants.maxSpeed) * .7) // Drive
+                .withVelocityY((-(driver.leftX()) * (driver.leftX()) * (driver.leftX()) * Constants.DrivertrainConstants.maxSpeed) * 0.8) // Drive
                                                                                                                          // left
                                                                                                                          // with
                                                                                                                          // negative
                                                                                                                          // X
                                                                                                                          // (left)
-                .withRotationalRate((driver.rightX() * angularRate) * .1); // Drive counterclockwise with negative X
+                .withRotationalRate((driver.rightX() * driver.rightX() * driver.rightX() * angularRate) * .1); // Drive counterclockwise with negative X
                                                                            // (left)
     }
 

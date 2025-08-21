@@ -52,7 +52,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
         lMotor.setPosition(0);
         rMotor.setPosition(0);
 
-        tolerance = 0.01;
+        tolerance = 0.015;
     }
 
     protected ElevatorStates getNexState(ElevatorStates currentState) {
