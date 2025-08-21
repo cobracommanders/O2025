@@ -12,4 +12,8 @@ public class ArmPositions {
     public static final double HANDOFF_RIGHT = -0.245;
     public static final double HANDOFF_LEFT = -0.265;
     public static final double HANDOFF_MIDDLE = -0.25;
+    public static final double L3 = 0.15;
+    public static final double SCORE_L3 = 0.07;
+    public static final double L2 = 0.15;
+    public static final double SCORE_L2 = 0.07;
 }

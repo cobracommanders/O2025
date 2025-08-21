@@ -66,6 +66,12 @@ public class RobotManager extends StateMachine<RobotState> {
                         case WAIT_L4:
                             nextState = RobotState.SCORE_L4;
                             break;
+                        case WAIT_L2:
+                            nextState = RobotState.SCORE_L2;
+                            break;
+                        case WAIT_L3:
+                            nextState = RobotState.SCORE_L3;
+                            break;
                         case WAIT_BARGE:
                             nextState = RobotState.SCORE_BARGE;
                             break;
@@ -80,6 +86,12 @@ public class RobotManager extends StateMachine<RobotState> {
                     switch (operatorOptions.scoreLocation) {
                         case L1:
                             nextState = RobotState.WAIT_L1;
+                            break;
+                        case L2:
+                            nextState = RobotState.WAIT_L2;
+                            break;
+                        case L3:
+                            nextState = RobotState.WAIT_L3;
                             break;
                         case L4:
                             if (coralDetector.hasCoral()) {
@@ -133,7 +145,7 @@ public class RobotManager extends StateMachine<RobotState> {
 
         switch (currentState) {
 
-            case WAIT_L1, WAIT_L4, WAIT_BARGE, WAIT_PROCESSOR, CLIMB, IDLE:
+            case WAIT_L1, WAIT_L2, WAIT_L3, WAIT_L4, WAIT_BARGE, WAIT_PROCESSOR, CLIMB, IDLE:
                 // These states do not transition automatically
                 break;
 
@@ -173,6 +185,14 @@ public class RobotManager extends StateMachine<RobotState> {
                 break;
             case SCORE_L1:
                 if (groundManager.getState() == GroundManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+            case SCORE_L2:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
+                    nextState = RobotState.IDLE;
+                }
+            case SCORE_L3:
+                if (armManager.getState() == ArmManagerStates.IDLE) {
                     nextState = RobotState.IDLE;
                 }
                 break;
@@ -216,6 +236,12 @@ public class RobotManager extends StateMachine<RobotState> {
             case SCORE_L1 -> {
                 groundManager.setState(GroundManagerStates.SCORE_L1);
             }
+            case SCORE_L2 -> {
+                armManager.setState(ArmManagerStates.SCORE_L2);
+            }
+            case SCORE_L3 -> {
+                armManager.setState(ArmManagerStates.SCORE_L3);
+            }
             case SCORE_L4 -> {
                 armManager.setState(ArmManagerStates.SCORE_L4);
             }
@@ -253,6 +279,14 @@ public class RobotManager extends StateMachine<RobotState> {
             }
             case WAIT_L1 -> {
                 groundManager.setState(GroundManagerStates.PREPARE_SCORE_L1);
+            }
+            case WAIT_L2 -> {
+                armManager.setState(ArmManagerStates.PREPARE_SCORE_L2);
+                groundManager.setState(GroundManagerStates.PREPARE_IDLE);
+            }
+            case WAIT_L3 -> {
+                armManager.setState(ArmManagerStates.PREPARE_SCORE_L3);
+                groundManager.setState(GroundManagerStates.PREPARE_IDLE);
             }
             case WAIT_L4 -> {
                 armManager.setState(ArmManagerStates.PREPARE_SCORE_L4);

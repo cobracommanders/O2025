@@ -52,7 +52,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
         lMotor.setPosition(0);
         rMotor.setPosition(0);
 
-        tolerance = 0.01;
+        tolerance = 0.015;
     }
 
     protected ElevatorStates getNexState(ElevatorStates currentState) {
@@ -79,6 +79,14 @@ public class Elevator extends StateMachine<ElevatorStates> {
                 MathUtil.isNear(ElevatorPositions.HANDOFF, elevatorPosition, tolerance);
             case SCORE_L4 ->
                 MathUtil.isNear(ElevatorPositions.SCORE_L4, elevatorPosition, tolerance);
+            case L3 -> 
+                MathUtil.isNear(ElevatorPositions.L3, elevatorPosition, tolerance);
+            case SCORE_L3 -> 
+                MathUtil.isNear(ElevatorPositions.SCORE_L3, elevatorPosition, tolerance);
+            case L2 -> 
+                MathUtil.isNear(ElevatorPositions.L2, elevatorPosition, tolerance);
+            case SCORE_L2 -> 
+                MathUtil.isNear(ElevatorPositions.SCORE_L2, elevatorPosition, tolerance);
         };
 
     }
@@ -136,6 +144,18 @@ public class Elevator extends StateMachine<ElevatorStates> {
             }
             case SCORE_L4 -> {
                 setElevatorPosition(ElevatorPositions.SCORE_L4);
+            }
+            case L3 -> {
+                setElevatorPosition(ElevatorPositions.L3);
+            }
+            case SCORE_L3 -> {
+                setElevatorPosition(ElevatorPositions.SCORE_L3);
+            }
+            case L2 -> {
+                setElevatorPosition(ElevatorPositions.L2);
+            }
+            case SCORE_L2 -> {
+                setElevatorPosition(ElevatorPositions.SCORE_L2);
             }
         }
     }

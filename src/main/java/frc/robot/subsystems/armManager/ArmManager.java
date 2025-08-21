@@ -12,6 +12,7 @@ import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.armManager.hand.HandStates;
 
 public class ArmManager extends StateMachine<ArmManagerStates> {
+    public static final double scoringTime = 1.5;
     private final String name = getName();
     public final Hand hand;
     public final Elevator elevator;
@@ -41,7 +42,17 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
 
             case SCORE_L4 -> {
-                if(timeout(1.5)){
+                if(timeout(scoringTime)){
+                    nextState = ArmManagerStates.PREPARE_IDLE;
+                }
+            }
+            case SCORE_L3 -> {
+                if(timeout(scoringTime)){
+                    nextState = ArmManagerStates.PREPARE_IDLE;
+                }
+            }
+            case SCORE_L2 -> {
+                if(timeout(scoringTime)){
                     nextState = ArmManagerStates.PREPARE_IDLE;
                 }
             }
@@ -191,9 +202,31 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case SCORE_L4 -> {
-                hand.setState(HandStates.SCORE_L4);
+                hand.setState(HandStates.SCORE_CORAL);
                 elevator.setState(ElevatorStates.SCORE_L4);
                 arm.setState(ArmStates.SCORE_L4);
+            }
+            case PREPARE_SCORE_L3 -> {
+                armScheduler.scheduleStates(ArmStates.L3, HandStates.CORAL_IDLE, ElevatorStates.L3);
+            }
+            case WAIT_L3 -> {
+                armScheduler.scheduleStates(ArmStates.L3, HandStates.CORAL_IDLE, ElevatorStates.L3);
+            }
+            case SCORE_L3 -> {
+                hand.setState(HandStates.SCORE_CORAL);
+                elevator.setState(ElevatorStates.SCORE_L3);
+                arm.setState(ArmStates.SCORE_L3);
+            }
+            case PREPARE_SCORE_L2 -> {
+                armScheduler.scheduleStates(ArmStates.L2, HandStates.CORAL_IDLE, ElevatorStates.L2);
+            }
+            case WAIT_L2 -> {
+                armScheduler.scheduleStates(ArmStates.L2, HandStates.CORAL_IDLE, ElevatorStates.L2);
+            }
+            case SCORE_L2 -> {
+                hand.setState(HandStates.SCORE_CORAL);
+                elevator.setState(ElevatorStates.SCORE_L2);
+                arm.setState(ArmStates.SCORE_L2);
             }
             case PREPARE_HANDOFF_RIGHT -> {
                 armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);

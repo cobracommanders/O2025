@@ -11,5 +11,9 @@ public enum ArmStates {
     SCORE_L4,
     HANDOFF_RIGHT,
     HANDOFF_LEFT,
-    HANDOFF_MIDDLE
+    HANDOFF_MIDDLE,
+    L3,
+    SCORE_L3,
+    L2,
+    SCORE_L2
 }
