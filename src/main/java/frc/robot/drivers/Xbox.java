@@ -111,7 +111,7 @@ public class Xbox {
     private Trigger getLoggingButtonTrigger(Button button) {
         Trigger baseTrigger = getButtonTrigger(button);
         return baseTrigger.onTrue(Commands.runOnce(() -> 
-            DogLog.log(name + " /" + button.name(), " pressed")));
+            DogLog.timestamp(name + " /" + button.name() + " pressed")));
         }
 
     /** @return a trigger object using the controller's left bumper */
