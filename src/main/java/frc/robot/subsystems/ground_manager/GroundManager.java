@@ -1,6 +1,7 @@
 package frc.robot.subsystems.ground_manager;
 
 import dev.doglog.DogLog;
+import frc.robot.Constants;
 import frc.robot.Ports.coralDetectorPorts;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
@@ -42,6 +43,9 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             case INTAKING -> {
                 if (coralDetector.hasCoral()) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
+                } else if (Constants.isSim && intakePivot.atGoal()) {
+                    coralDetector.setHasSimCoral(true);
+                    nextState = GroundManagerStates.PREPARE_IDLE;
                 }
             }
             case PREPARE_HANDOFF -> {
@@ -60,6 +64,9 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
             case SCORE_L1 -> {
                 if (timeout(1)) {
+                    nextState = GroundManagerStates.PREPARE_IDLE;
+                } else if (Constants.isSim && intakePivot.atGoal()) {
+                    coralDetector.setHasSimCoral(false);
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 }
                 // add timeout
@@ -100,6 +107,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 rollers.setState(IntakeRollersStates.IDLE);
             }
             case HANDOFF -> {
+                coralDetector.setHasSimCoral(false);
                 rollers.setState(IntakeRollersStates.HANDOFF);
             }
             case WAIT_HANDOFF, WAIT_SCORE_L1, IDLE, INTAKING -> {

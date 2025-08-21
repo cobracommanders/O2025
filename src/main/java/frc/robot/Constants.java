@@ -5,6 +5,8 @@ import frc.robot.subsystems.drivetrain.TunerConstants;
 public final class Constants {
 
     public static boolean tuningMode = true;
+    public static boolean isSim = true;
+    public static double SIM_LOOP_TIME = 0.02;
 
     public static final class ArmConstants {
         public static final double ArmGearRatio = 50.2232;

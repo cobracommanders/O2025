@@ -18,6 +18,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -26,8 +27,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -43,7 +42,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     // private LimelightLocalization limelightLocalization = new
     // LimelightLocalization();
-
     public void setYaw(Rotation2d rotation) {
         // this.getPigeon2().setYaw(angle);
         this.resetRotation(rotation);
@@ -105,7 +103,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
-
+        // SmartDashboard.putData(field);
         RobotConfig config = null;
         try {
             config = RobotConfig.fromGUISettings();
@@ -114,32 +112,32 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             e.printStackTrace();
         }
 
-        AutoBuilder.configure(
-                () -> this.getState().Pose, // Robot pose supplier
-                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                () -> this.getState().Speeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT
-                                                                      // RELATIVE ChassisSpeeds
-                new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your
-                                                // Constants class
-                        new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-                ),
-                config, // The robot configuration
-                () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red
-                    // alliance
-                    // This will flip the path being followed to the red side of the field.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        // AutoBuilder.configure(
+        //         () -> this.getState().Pose, // Robot pose supplier
+        //         this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+        //         () -> this.getState().Speeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+        //         (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT
+        //                                                               // RELATIVE ChassisSpeeds
+        //         new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your
+        //                                         // Constants class
+        //                 new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
+        //                 new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+        //         ),
+        //         config, // The robot configuration
+        //         () -> {
+        //             // Boolean supplier that controls when the path will be mirrored for the red
+        //             // alliance
+        //             // This will flip the path being followed to the red side of the field.
+        //             // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                },
-                this // Reference to this subsystem to set requirements
-        );
+        //             var alliance = DriverStation.getAlliance();
+        //             if (alliance.isPresent()) {
+        //                 return alliance.get() == DriverStation.Alliance.Red;
+        //             }
+        //             return false;
+        //         },
+        //         this // Reference to this subsystem to set requirements
+        // );
         // Boolean supplier that controls when the path will be mirrored for the red
         // alliance
         // This will flip the path being followed to the red side of the field.
@@ -157,25 +155,31 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     // private void startSimThread() {
-    // m_lastSimTime = Utils.getCurrentTimeSeconds();
-
-    // /* Run simulation at a faster rate so PID gains behave more reasonably */
-    // m_simNotifier = new Notifier(() -> {
-    // final double currentTime = Utils.getCurrentTimeSeconds();
-    // double deltaTime = currentTime - m_lastSimTime;
-    // m_lastSimTime = currentTime;
-
-    // /* use the measured time delta, get battery voltage from WPILib */
-    // updateSimState(deltaTime, RobotController.getBatteryVoltage());
-    // });
-    // m_simNotifier.startPeriodic(kSimLoopPeriod);
-    // }
-
+    //     lastSimTime = Utils.getCurrentTimeSeconds();
+    
+    //     /* Run simulation at a faster rate so PID gains behave more reasonably */
+    //     simNotifier =
+    //         new Notifier(
+    //             () -> {
+    //               double currentTime = Utils.getCurrentTimeSeconds();
+    //               double deltaTime = currentTime - lastSimTime;
+    //               lastSimTime = currentTime;
+    
+    //               /* use the measured time delta, get battery voltage from WPILib */
+    //               this.updateSimState(deltaTime, RobotController.getBatteryVoltage());
+    //             });
+    //     simNotifier.startPeriodic(SIM_LOOP_PERIOD);
+    //   }
+    @Override
+    public void simulationPeriodic() {
+        this.updateSimState(Constants.SIM_LOOP_TIME, RobotController.getBatteryVoltage());
+    }
     @Override
     public void periodic() {
         // limelightLocalization.update();
-        field.setRobotPose(this.getState().Pose);
-        // SmartDashboard.putData(field);
+        // field.setRobotPose(this.getState().Pose);
+        DogLog.log("Robot Pose", this.getState().Pose);
+        
         /* Periodically try to apply the operator perspective */
         /*
          * If we haven't applied the operator perspective before, then we should apply

@@ -70,9 +70,9 @@ public class Controls {
                                                                                    // command periodically
                 runOnce(() -> CommandSwerveDrivetrain.getInstance()
                         .driveFieldRelative(new ChassisSpeeds(
-                                -(driver.leftY() * drivetrainSpeed) * (driver.leftY()) * (driver.leftY()) * Constants.DrivertrainConstants.maxSpeed,
-                                -(driver.leftX() * drivetrainSpeed) * (driver.leftX()) * (driver.leftX()) * Constants.DrivertrainConstants.maxSpeed,
-                                driver.rightX() * angularRate)),
+                                -(driver.leftY()) * (driver.leftY()) * (driver.leftY()) * Constants.DrivertrainConstants.maxSpeed * drivetrainSpeed,
+                                -(driver.leftX()) * (driver.leftX()) * (driver.leftX()) * Constants.DrivertrainConstants.maxSpeed * drivetrainSpeed,
+                                driver.rightX() * driver.rightX() * driver.rightX() * angularRate)),
                         CommandSwerveDrivetrain.getInstance())));
     }
 

@@ -20,6 +20,8 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     public double rDistance;
     public final String name;
 
+    public boolean hasSimCoral = true;
+
     public CoralDetector() {
         super(CoralDetectorStates.NONE);
         lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
@@ -42,6 +44,13 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
 
     @Override
     protected CoralDetectorStates getNextState(CoralDetectorStates currentState) {
+        if (Constants.isSim) {
+            if (hasSimCoral) {
+                return CoralDetectorStates.MIDDLE;
+            } else {
+                return CoralDetectorStates.NONE;
+            }
+        }
         if (lDetected && rDetected) {
             return CoralDetectorStates.MIDDLE;
         } else if (!lDetected && !rDetected) {
@@ -55,7 +64,14 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     }
 
     public boolean hasCoral(){
+        if (Constants.isSim) {
+            return hasSimCoral;
+        }
         return getState() != CoralDetectorStates.NONE;
+    }
+
+    public void setHasSimCoral(boolean hasCoral) {
+        hasSimCoral = hasCoral;
     }
 
     private static CoralDetector instance;

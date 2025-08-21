@@ -1,5 +1,7 @@
 package frc.robot.subsystems.armManager.arm;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import java.util.jar.Attributes.Name;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -16,11 +18,16 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.MechanismVisualizer;
 
 public class Arm extends StateMachine<ArmStates> {
     public String name = getName();
@@ -40,6 +47,13 @@ public class Arm extends StateMachine<ArmStates> {
     private double absolutePosition;
     private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
+    private double setpoint;
+    private final DCMotorSim armSim = new DCMotorSim(
+        LinearSystemId.createDCMotorSystem(
+            DCMotor.getKrakenX60Foc(1), 0.001, ArmConstants.ArmGearRatio
+            ),
+        DCMotor.getKrakenX60Foc(1)
+    );
     public Arm() {
         super(ArmStates.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -108,6 +122,9 @@ public class Arm extends StateMachine<ArmStates> {
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
         armPosition = motor.getPosition().getValueAsDouble();
+        if (Constants.isSim)
+            updateSimPosition(setpoint);
+        MechanismVisualizer.setArmPosition(armPosition);
         DogLog.log(getName() + "/Encoder position", absolutePosition);
         DogLog.log(getName() + "/Motor position", armPosition);
         DogLog.log(getName() + "/at goal", atGoal());
@@ -123,7 +140,20 @@ public class Arm extends StateMachine<ArmStates> {
 
     public void setArmPosition(double position) {
         DogLog.log(name + "/Setpoint", position);
+        setpoint = position;
         motor.setControl(motor_request.withPosition(position));
+    }
+
+    private void updateSimPosition(double position) {
+        var talonSim = motor.getSimState();
+        var cancoderSim = encoder.getSimState();
+        talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+        var motorVoltage = talonSim.getMotorVoltageMeasure();
+        armSim.setInputVoltage(motorVoltage.in(Volts));
+        armSim.update(Constants.SIM_LOOP_TIME);
+        talonSim.setRawRotorPosition(armSim.getAngularPosition().times(ArmConstants.ArmGearRatio));
+        talonSim.setRotorVelocity(armSim.getAngularVelocity().times(ArmConstants.ArmGearRatio));
+        cancoderSim.setRawPosition(armSim.getAngularPosition().times(ArmConstants.ArmGearRatio));
     }
 
     @Override
