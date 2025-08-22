@@ -18,6 +18,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -39,8 +40,6 @@ import frc.robot.subsystems.drivetrain.TunerConstants.TunerSwerveDrivetrain;
  * subsystem so it can be used in command-based projects easily.
  */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-    private Field2d field = new Field2d();
-
     // private LimelightLocalization limelightLocalization = new
     // LimelightLocalization();
 
@@ -70,12 +69,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private boolean hasAppliedOperatorPerspective = false;
 
     private final SlewRateLimiter xLimiter = new SlewRateLimiter(
-            Constants.DrivertrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+            Constants.DrivetrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
     private final SlewRateLimiter yLimiter = new SlewRateLimiter(
-            Constants.DrivertrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
+            Constants.DrivetrainConstants.MAX_ACCELERATION_METERS_PER_SECOND_SQUARED);
 
     public SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     public SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
+    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
+        super(driveTrainConstants, modules);
+    }
 
     public boolean isMoving() {
         return (Math.abs(this.getState().Speeds.vxMetersPerSecond) >= 1
@@ -83,116 +86,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 || Math.abs(this.getState().Speeds.omegaRadiansPerSecond) >= 0.5);
     }
 
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency,
-            SwerveModuleConstants... modules) {
-        super(driveTrainConstants, OdometryUpdateFrequency, modules);
-        // if (Utils.isSimulation()) {
-        // startSimThread();
-        // }
-    }
-
-    public void driveRobotRelative(ChassisSpeeds speeds) {
-        this.setControl(new SwerveRequest.RobotCentric().withVelocityX(speeds.vxMetersPerSecond)
-                .withVelocityY(speeds.vyMetersPerSecond).withRotationalRate(speeds.omegaRadiansPerSecond)
-                .withDriveRequestType(DriveRequestType.Velocity));
-    }
-
-    public void driveFieldRelative(ChassisSpeeds speeds) {
-        this.setControl(new SwerveRequest.FieldCentric().withVelocityX(xLimiter.calculate(speeds.vxMetersPerSecond))
-                .withVelocityY(yLimiter.calculate(speeds.vyMetersPerSecond))
-                .withRotationalRate(speeds.omegaRadiansPerSecond));
-    }
-
-    public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
-        super(driveTrainConstants, modules);
-
-        RobotConfig config = null;
-        try {
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            // Handle exception as needed
-            e.printStackTrace();
-        }
-
-        AutoBuilder.configure(
-                () -> this.getState().Pose, // Robot pose supplier
-                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                () -> this.getState().Speeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT
-                                                                      // RELATIVE ChassisSpeeds
-                new PPHolonomicDriveController( // HolonomicPathFollowerConfig, this should likely live in your
-                                                // Constants class
-                        new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-                ),
-                config, // The robot configuration
-                () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red
-                    // alliance
-                    // This will flip the path being followed to the red side of the field.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                },
-                this // Reference to this subsystem to set requirements
-        );
-        // Boolean supplier that controls when the path will be mirrored for the red
-        // alliance
-        // This will flip the path being followed to the red side of the field.
-        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-        // Reference to this subsystem to set requirements
-
-        // if (Utils.isSimulation()) {
-        // startSimThread();
-        // }
-    }
-
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
-    // private void startSimThread() {
-    // m_lastSimTime = Utils.getCurrentTimeSeconds();
-
-    // /* Run simulation at a faster rate so PID gains behave more reasonably */
-    // m_simNotifier = new Notifier(() -> {
-    // final double currentTime = Utils.getCurrentTimeSeconds();
-    // double deltaTime = currentTime - m_lastSimTime;
-    // m_lastSimTime = currentTime;
-
-    // /* use the measured time delta, get battery voltage from WPILib */
-    // updateSimState(deltaTime, RobotController.getBatteryVoltage());
-    // });
-    // m_simNotifier.startPeriodic(kSimLoopPeriod);
-    // }
-
     @Override
     public void periodic() {
-        // limelightLocalization.update();
-        field.setRobotPose(this.getState().Pose);
-        // SmartDashboard.putData(field);
-        /* Periodically try to apply the operator perspective */
-        /*
-         * If we haven't applied the operator perspective before, then we should apply
-         * it regardless of DS state
-         */
-        /*
-         * This allows us to correct the perspective in case the robot code restarts
-         * mid-match
-         */
-        /*
-         * Otherwise, only check and apply the operator perspective if the DS is
-         * disabled
-         */
-        /*
-         * This ensures driving behavior doesn't change until an explicit disable event
-         * occurs during testing
-         */
+        DogLog.log("Swerve/Pose", getState().Pose);
+
         if (!hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent((allianceColor) -> {
                 this.setOperatorPerspectiveForward(
@@ -209,6 +110,5 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (instance == null)
             instance = TunerConstants.createDrivetrain();
         return instance;
-
     }
 }
