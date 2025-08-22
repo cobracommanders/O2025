@@ -62,6 +62,11 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void simulationPeriodic() {
+    MechanismVisualizer.publishData();
+  }
+
+  @Override
   public void disabledInit() {}
 
   @Override
