@@ -67,4 +67,5 @@ public class Controls {
         if (instance == null)
             instance = new Controls(); // Make sure there is an instance (this will only run once)
         return instance;
+    }
 }
