@@ -244,7 +244,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             case WAIT_HANDOFF_LEFT -> {
             }
             case CLIMB -> {
-                armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
+                armScheduler.scheduleStates(ArmStates.CLIMB, HandStates.IDLE, ElevatorStates.IDLE);
             }
 
         }

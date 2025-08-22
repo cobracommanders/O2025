@@ -333,7 +333,8 @@ public class RobotManager extends StateMachine<RobotState> {
             }
             case CLIMB -> {
                 climber.setState(ClimberStates.DEPLOYING);
-                // TODO: add intake and armManager climb states
+                armManager.setState(ArmManagerStates.CLIMB);
+                groundManager.setState(GroundManagerStates.CLIMB);
             }
         }
     }

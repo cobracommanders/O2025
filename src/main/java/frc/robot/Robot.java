@@ -39,7 +39,13 @@ public class Robot extends TimedRobot {
   // OperatorOptions.getInstance();
 
   public Robot() {
-    autoChooser = AutoBuilder.buildAutoChooser();
+    for (Command command : robotCommands.getPathplannerCommands()) {
+      NamedCommands.registerCommand(command.getName(), command);
+    }
+    Command centerL1 = AutoBuilder.buildAuto("CenterL1");
+    autoChooser = new SendableChooser<Command>();
+    // autoChooser.addOption("CenterL1", centerL1);
+    autoChooser.setDefaultOption("CenterL1", centerL1);
 
   }
 

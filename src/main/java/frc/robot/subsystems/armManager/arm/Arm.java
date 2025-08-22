@@ -95,6 +95,8 @@ public class Arm extends StateMachine<ArmStates> {
                 MathUtil.isNear(ArmPositions.HANDOFF_MIDDLE, armPosition, tolerance);
             case HANDOFF_RIGHT ->
                 MathUtil.isNear(ArmPositions.HANDOFF_RIGHT, armPosition, tolerance);
+            case CLIMB ->
+                MathUtil.isNear(ArmPositions.CLIMB, armPosition, tolerance);
 
         };
 
@@ -115,7 +117,7 @@ public class Arm extends StateMachine<ArmStates> {
 
     public void setArmSpeed() {
         motor.set(armSpeed.get());
-      }
+    }
 
     public void setState(ArmStates state) {
         setStateFromRequest(state);
@@ -173,6 +175,9 @@ public class Arm extends StateMachine<ArmStates> {
             }
             case SCORE_L2 -> {
                 setArmPosition(ArmPositions.SCORE_L2);
+            }
+            case CLIMB -> {
+                setArmPosition(ArmPositions.CLIMB);
             }
         }
     }

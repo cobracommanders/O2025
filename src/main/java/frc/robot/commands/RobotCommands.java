@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.stateMachine.RobotManager;
 import frc.robot.stateMachine.RobotState;
+import frc.robot.subsystems.ground_manager.GroundManagerStates;
 
 public class RobotCommands {
 
@@ -35,11 +36,15 @@ public class RobotCommands {
             setHighReefAlgaeCommand(),
             setLowReefAlgaeCommand(),
             setGroundAlgaeCommand(),
-            waitForState(null)
+            waitForState(RobotState.IDLE),
+            waitForGroundReady()
         };
     }
     public Command waitForState(RobotState state) {
         return robotManager.waitForState(state).withName("waitForState/" + state.toString());
+    }
+    public Command waitForGroundReady() {
+        return robotManager.groundManager.waitForState(GroundManagerStates.WAIT_SCORE_L1).withName("waitForGroundState/WAIT_SCORE_L1");
     }
     public Command scoreCommand() {
         return Commands.runOnce(robotManager::scoreRequest, requirements)

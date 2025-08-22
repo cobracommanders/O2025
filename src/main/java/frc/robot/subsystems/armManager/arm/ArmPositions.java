@@ -16,4 +16,5 @@ public class ArmPositions {
     public static final double SCORE_L3 = 0.07;
     public static final double L2 = 0.15;
     public static final double SCORE_L2 = 0.07;
+    public static final double CLIMB = 0.0;
 }
