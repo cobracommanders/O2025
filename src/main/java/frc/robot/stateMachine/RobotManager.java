@@ -6,8 +6,10 @@ import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 import dev.doglog.DogLog;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
+import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
@@ -34,6 +36,7 @@ public class RobotManager extends StateMachine<RobotState> {
 
     @Override
     protected void collectInputs() {
+        DriveSubsystem.getInstance().setElevatorHeight(armManager.elevator.getHeight());
     }
 
     @Override
@@ -87,7 +90,7 @@ public class RobotManager extends StateMachine<RobotState> {
                             break;
                     }
                     break;
-                case SCORE_LEVEL:
+                case PREPARE_SCORE:
                     switch (operatorOptions.scoreLocation) {
                         case L1:
                             nextState = RobotState.WAIT_L1;
@@ -351,7 +354,7 @@ public class RobotManager extends StateMachine<RobotState> {
     }
 
     public void scoreLevelRequest() {
-        flags.check(RobotFlag.SCORE_LEVEL);
+        flags.check(RobotFlag.PREPARE_SCORE);
     }
 
     public void idleRequest() {

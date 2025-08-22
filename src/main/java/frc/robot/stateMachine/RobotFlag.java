@@ -5,7 +5,7 @@ public enum RobotFlag {
     INTAKE_CORAL,
     INTAKE_ALGAE,
     SCORE,
-    SCORE_LEVEL,
+    PREPARE_SCORE,
     HANDOFF,
     CLIMB,
     ALGAE_SCORE_LEVEL,
