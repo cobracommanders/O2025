@@ -1,42 +1,18 @@
 package frc.robot;
 
-
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
-import java.util.function.Supplier;
-
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
-import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
-import frc.robot.subsystems.drivetrain.TunerConstants;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
 
 public class Controls {
-    /*
-     *  BEGIN VARS FOR FUTURE USE
-     *  
-     *  private final double turtleSpeed = 0.1;
-     *  private final double turtleAngularRate = Math.PI * 0.5;
-     */
+    DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
 
-    
-    private double angularRate = Constants.DrivertrainConstants.maxAngularRate;
-    private double drivetrainSpeed = 0.75;
-
-    CommandSwerveDrivetrain drivetrain = CommandSwerveDrivetrain.getInstance();
-
-    SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withDeadband(Constants.DrivertrainConstants.maxSpeed * 0.1) // Deadband is handled on input
-            .withRotationalDeadband(angularRate * 0.1);
-
-     
     public final Xbox driver = new Xbox(OIPorts.DRIVER_CONTROLLER_ID);
     public final Xbox operator = new Xbox(OIPorts.OPERATOR_CONTROLLER_ID);
 
@@ -47,33 +23,17 @@ public class Controls {
         operator.setDeadzone(0.2);
     }
 
-        private Supplier<SwerveRequest> controlStyle;
-
-    private void newControlStyle() {
-        controlStyle = () -> drive
-                .withVelocityX((-(driver.leftY()) * (driver.leftY()) * (driver.leftY()) * Constants.DrivertrainConstants.maxSpeed) * 0.8) // Drive
-                                                                                                                         // forward
-                                                                                                                         // -Y
-                .withVelocityY((-(driver.leftX()) * (driver.leftX()) * (driver.leftX()) * Constants.DrivertrainConstants.maxSpeed) * 0.8) // Drive
-                                                                                                                         // left
-                                                                                                                         // with
-                                                                                                                         // negative
-                                                                                                                         // X
-                                                                                                                         // (left)
-                .withRotationalRate((driver.rightX() * driver.rightX() * driver.rightX() * angularRate) * .1); // Drive counterclockwise with negative X
-                                                                           // (left)
-    }
-
     public void configureDefaultCommands() {
-        newControlStyle();
-        CommandSwerveDrivetrain.getInstance().setDefaultCommand(repeatingSequence( // Drivetrain will execute this
-                                                                                   // command periodically
-                runOnce(() -> CommandSwerveDrivetrain.getInstance()
-                        .driveFieldRelative(new ChassisSpeeds(
-                                -(driver.leftY() * drivetrainSpeed) * (driver.leftY()) * (driver.leftY()) * Constants.DrivertrainConstants.maxSpeed,
-                                -(driver.leftX() * drivetrainSpeed) * (driver.leftX()) * (driver.leftX()) * Constants.DrivertrainConstants.maxSpeed,
-                                driver.rightX() * angularRate)),
-                        CommandSwerveDrivetrain.getInstance())));
+        driveSubsystem.setDefaultCommand(
+            driveSubsystem.run(
+                () -> {
+                    if (FmsSubsystem.getInstance().isTeleop()) {
+                        driveSubsystem.setTeleopSpeeds(
+                            driver.leftX(),
+                            driver.leftY(),
+                            driver.rightX());
+                    }
+                }));
     }
 
     public void configureDriverCommands() {
