@@ -3,7 +3,7 @@ package frc.robot.subsystems.armManager.hand;
 public class HandSpeeds {
     public static final double IDLE = -0.1;
     public static final double SCORE_CORAL = 0.05;
-    public static final double HANDOFF = -0.6;
+    public static final double HANDOFF = -1.0;
     public static final double INTAKE_LOW_REEF_ALGAE = -1;
     public static final double INTAKE_HIGH_REEF_ALGAE = -1;
     public static final double INTAKE_GROUND_ALAGAE = -1;

@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import java.util.List;
+import java.util.Map;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -19,6 +20,27 @@ public class RobotCommands {
         requirements = requirementsList.toArray(Subsystem[]::new);
     }
 
+    public Command[] getPathplannerCommands() {
+        return new Command[] {
+            scoreCommand(),
+            algaeIntakeCommand(),
+            coralIntakeCommand(),
+            prepareScoreCommand(),
+            setProcessorCommand(),
+            setBargeCommand(),
+            setL1Command(),
+            setL2Command(),
+            setL3Command(),
+            setL4Command(),
+            setHighReefAlgaeCommand(),
+            setLowReefAlgaeCommand(),
+            setGroundAlgaeCommand(),
+            waitForState(null)
+        };
+    }
+    public Command waitForState(RobotState state) {
+        return robotManager.waitForState(state).withName("waitForState/" + state.toString());
+    }
     public Command scoreCommand() {
         return Commands.runOnce(robotManager::scoreRequest, requirements)
                 .andThen(Commands.waitUntil(() -> robotManager.getState() == RobotState.IDLE)).withName("score");

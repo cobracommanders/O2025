@@ -9,6 +9,7 @@ import java.util.ResourceBundle.Control;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -38,7 +39,6 @@ public class Robot extends TimedRobot {
   // OperatorOptions.getInstance();
 
   public Robot() {
-
     autoChooser = AutoBuilder.buildAutoChooser();
 
   }

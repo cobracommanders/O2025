@@ -186,7 +186,7 @@ public class RobotManager extends StateMachine<RobotState> {
                 }
                 break;
             case HANDOFF:
-                if (timeout(0.2)) {
+                if (timeout(0.08)) {
                     switch (operatorOptions.scoreLocation) {
                         case L2:
                             nextState = RobotState.WAIT_L2;
