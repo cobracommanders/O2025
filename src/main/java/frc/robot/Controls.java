@@ -39,34 +39,32 @@ public class Controls {
     public void configureDriverCommands() {
         driver.leftBumper().onTrue(Robot.robotCommands.algaeIntakeCommand());
         driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand());
-        driver.rightBumper().onTrue(Robot.robotCommands.scoreLevelCommand());
+        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand());
-        driver.A().onTrue(runOnce(()->CommandSwerveDrivetrain.getInstance().setYaw(Rotation2d.kZero)));
+        driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYaw(Rotation2d.kZero)));
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
-        driver.start().onTrue(runOnce(()->Robot.robotManager.resetToIdleRequest()));
+        driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
     }
 
-    public void configureOperatorCommands(){
-      operator.leftBumper().onTrue(runOnce(()->Robot.robotManager.setProcessor()));
-      operator.leftTrigger().and(operator.rightTrigger()).onTrue(Robot.robotCommands.climbCommand());
-      operator.rightBumper().onTrue(runOnce(()->Robot.robotManager.setBarge()));
-      operator.Y().onTrue(runOnce(()->Robot.robotManager.setL3()));
-      operator.B().onTrue(runOnce(()->Robot.robotManager.setL4()));
-      operator.X().onTrue(runOnce(()->Robot.robotManager.setL2()));
-      operator.A().onTrue(runOnce(()->Robot.robotManager.setL1()));
-      operator.POV0().onTrue(runOnce(()->Robot.robotManager.setHighReefAlgae()));
-      operator.POV90().onTrue(runOnce(()->Robot.robotManager.setGroundAlgae()));
-      operator.POVMinus90().onTrue(runOnce(()->Robot.robotManager.setGroundAlgae()));
-      operator.POV180().onTrue(runOnce(()->Robot.robotManager.setLowReefAlgae()));
+    public void configureOperatorCommands() {
+        operator.leftBumper().onTrue(Robot.robotCommands.setProcessorCommand());
+        operator.leftTrigger().and(operator.rightTrigger()).onTrue(Robot.robotCommands.climbCommand());
+        operator.rightBumper().onTrue(Robot.robotCommands.setBargeCommand());
+        operator.Y().onTrue(Robot.robotCommands.setL3Command());
+        operator.B().onTrue(Robot.robotCommands.setL4Command());
+        operator.X().onTrue(Robot.robotCommands.setL2Command());
+        operator.A().onTrue(Robot.robotCommands.setL1Command());
+        operator.POV0().onTrue(Robot.robotCommands.setHighReefAlgaeCommand());
+        operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
+        operator.POVMinus90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
+        operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
     }
-
-
 
     private static Controls instance;
 
     public static Controls getInstance() {
-      if (instance == null) instance = new Controls(); // Make sure there is an instance (this will only run once)
-      return instance;
-  }
+        if (instance == null)
+            instance = new Controls(); // Make sure there is an instance (this will only run once)
+        return instance;
 }
