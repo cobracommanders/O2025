@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
@@ -115,20 +116,26 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
 
     teleopSpeeds = new ChassisSpeeds(
         // TODO if robot is driving backwards, get rid of the invert here
-        -1.0 * mappedY * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
+        mappedY * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
         mappedX * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
         rightX * DrivetrainConstants.maxAngularRate * teleopSlowModePercent);
   }
 
   @Override
+  public void simulationPeriodic() {
+    drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
+  }
+  @Override
   protected void collectInputs() {
     teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
     DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);
+    DogLog.log("Swerve/Pose", drivetrain.getState().Pose);
   }
 
   @Override
   public void periodic() {
     super.periodic();
+    drivetrain.update();
     sendSwerveRequest(getState());
   }
 

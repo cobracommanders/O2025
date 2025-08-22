@@ -22,6 +22,7 @@ public class RobotManager extends StateMachine<RobotState> {
     public final Climber climber;
     public final CoralDetector coralDetector;
     public OperatorOptions operatorOptions = OperatorOptions.getInstance();
+    public final DriveSubsystem driveSubsystem;
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
@@ -32,11 +33,12 @@ public class RobotManager extends StateMachine<RobotState> {
         this.groundManager = GroundManager.getInstance();
         this.climber = Climber.getInstance();
         this.coralDetector = CoralDetector.getInstance();
+        this.driveSubsystem = DriveSubsystem.getInstance();
     }
 
     @Override
     protected void collectInputs() {
-        DriveSubsystem.getInstance().setElevatorHeight(armManager.elevator.getHeight());
+        driveSubsystem.setElevatorHeight(armManager.elevator.getHeight());
     }
 
     @Override

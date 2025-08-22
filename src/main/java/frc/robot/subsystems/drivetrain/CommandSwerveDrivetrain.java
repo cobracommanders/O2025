@@ -1,65 +1,34 @@
 package frc.robot.subsystems.drivetrain;
 
-import static edu.wpi.first.units.Units.Rotation;
-
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
 import dev.doglog.DogLog;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.subsystems.drivetrain.TunerConstants.TunerSwerveDrivetrain;
 
-/**
- * Class that extends the Phoenix SwerveDrivetrain class and implements
- * subsystem so it can be used in command-based projects easily.
- */
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
-    // private LimelightLocalization limelightLocalization = new
-    // LimelightLocalization();
 
     public void setYaw(Rotation2d rotation) {
-        // this.getPigeon2().setYaw(angle);
         this.resetRotation(rotation);
     }
 
     public void setYaw(Alliance alliance) {
         setYaw((alliance == Alliance.Red) ? RedAlliancePerspectiveRotation : BlueAlliancePerspectiveRotation);
     }
-    // public void setYaw(Alliance alliance) {
-    // if (alliance == Alliance.Red) {
-    // setYaw(RedAlliancePerspectiveRotation);
-    // }
-
-    // else {
-    // setYaw(BlueAlliancePerspectiveRotation);
-    // }
-    // }
+    public void setYawFromFMS() {
+        setYaw((FmsSubsystem.getInstance().isRedAlliance()) ? RedAlliancePerspectiveRotation : BlueAlliancePerspectiveRotation);
+    }
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
@@ -78,6 +47,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
+        
     }
 
     public boolean isMoving() {
@@ -90,11 +60,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
-    @Override
-    public void periodic() {
-        DogLog.log("Swerve/Pose", getState().Pose);
-
-        if (!hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
+    public void update() {
+        if (!hasAppliedOperatorPerspective || FmsSubsystem.getInstance().isDisabled()) {
             DriverStation.getAlliance().ifPresent((allianceColor) -> {
                 this.setOperatorPerspectiveForward(
                         allianceColor == Alliance.Red ? RedAlliancePerspectiveRotation

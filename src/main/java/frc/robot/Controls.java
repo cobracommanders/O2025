@@ -41,7 +41,7 @@ public class Controls {
         driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand());
         driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand());
-        driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYaw(Rotation2d.kZero)));
+        driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
