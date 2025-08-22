@@ -94,10 +94,14 @@ public class Elevator extends StateMachine<ElevatorStates> {
     @Override
     public void collectInputs() {
         elevatorPosition = lMotor.getPosition().getValueAsDouble();
-        double leftElevatorPosition = lMotor.getPosition().getValueAsDouble();
+        double leftElevatorPosition = elevatorPosition;
         double rightElevatorPosition = rMotor.getPosition().getValueAsDouble();
         DogLog.log(name + "/Left Elevator Position", leftElevatorPosition);
         DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
+    }
+
+    public double getHeight(){
+        return elevatorPosition;
     }
 
     public void setState(ElevatorStates state){
