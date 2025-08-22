@@ -4,24 +4,13 @@
 
 package frc.robot;
 
-import java.util.Map;
-import java.util.ResourceBundle.Control;
-
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-
-import edu.wpi.first.hal.DriverStationJNI;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.RobotCommands;
-import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RobotManager;
+import frc.robot.subsystems.MechanismVisualizer;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -38,6 +27,11 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    MechanismVisualizer.publishData();
   }
 
   @Override

@@ -4,10 +4,14 @@ import static edu.wpi.first.units.Units.Volts;
 
 import java.util.jar.Attributes.Name;
 
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -49,11 +53,10 @@ public class Arm extends StateMachine<ArmStates> {
 
     private double setpoint;
     private final DCMotorSim armSim = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(
-            DCMotor.getKrakenX60Foc(1), 0.001, ArmConstants.ArmGearRatio
-            ),
-        DCMotor.getKrakenX60Foc(1)
-    );
+            LinearSystemId.createDCMotorSystem(
+                    DCMotor.getKrakenX60Foc(1), 0.001, ArmConstants.ArmGearRatio),
+            DCMotor.getKrakenX60Foc(1));
+
     public Arm() {
         super(ArmStates.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -70,7 +73,7 @@ public class Arm extends StateMachine<ArmStates> {
 
         motor.getConfigurator().apply(motor_config);
         encoder.getConfigurator().apply(canCoderConfig);
-
+        // motor.setPosition(ArmPositions.IDLE);
         collectInputs();
         syncEncoder();
 
@@ -115,6 +118,8 @@ public class Arm extends StateMachine<ArmStates> {
     }
 
     public void syncEncoder() {
+        if (Utils.isSimulation())
+            return;
         motor.setPosition(absolutePosition);
     }
 
@@ -122,8 +127,9 @@ public class Arm extends StateMachine<ArmStates> {
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
         armPosition = motor.getPosition().getValueAsDouble();
-        if (Constants.isSim)
-            updateSimPosition(setpoint);
+        if (Utils.isSimulation())
+            SimArm.updateSimPosition(motor, encoder);
+        // updateSimPosition(setpoint);
         MechanismVisualizer.setArmPosition(armPosition);
         DogLog.log(getName() + "/Encoder position", absolutePosition);
         DogLog.log(getName() + "/Motor position", armPosition);
@@ -132,7 +138,7 @@ public class Arm extends StateMachine<ArmStates> {
 
     public void setArmSpeed() {
         motor.set(armSpeed.get());
-      }
+    }
 
     public void setState(ArmStates state) {
         setStateFromRequest(state);

@@ -1,5 +1,13 @@
 package frc.robot.subsystems;
 
+import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -17,9 +25,39 @@ public class MechanismVisualizer {
     static MechanismRoot2d groundRoot = groundManager.getRoot("GroundManager", 0.3, 0.2);
     static MechanismLigament2d groundPivot = groundRoot.append(new MechanismLigament2d("GroundPivot", 0.2, 90, 6, new Color8Bit(Color.kGreen)));
 
-    static {
+    public static void publishData() {
+        // publish Mechanism2d
         SmartDashboard.putData("ArmManagerVisualizer", armManager);
         SmartDashboard.putData("GroundManagerVisualizer", groundManager);
+        // publish 3d custom components
+        var elevatorHeight = elevator.getLength();
+        var armAngle = arm.getAngle() - 90;
+        var groundPivotAngle = 180 + groundPivot.getAngle();
+
+        var minCarriageHeight = 0.304800;
+
+        var carriageOffset = -0.171450;
+
+        var carriagePose = new Pose3d(new Translation3d(carriageOffset, 0, minCarriageHeight + elevatorHeight), Rotation3d.kZero);
+        var armPose = new Pose3d(
+                new Translation3d(carriageOffset, 0, minCarriageHeight + elevatorHeight),
+                new Rotation3d(Units.degreesToRadians(armAngle), 0, 0)
+            );
+        var groundPivotPose = new Pose3d(
+                new Translation3d(0.292100, 0, 0.1778), 
+                new Rotation3d(0, Units.degreesToRadians(groundPivotAngle), 0)
+            );
+        DogLog.log(
+        "SuperstructureVisualization/Superstructure3d",
+        new Pose3d[] {carriagePose, armPose, groundPivotPose});
+    }
+
+    public static void publishCoral(Pose3d pose) {
+
+    }
+    
+    public static void publishAlgae(Pose3d pose) {
+
     }
 
     public static void setElevatorPosition(double length) {
@@ -28,9 +66,7 @@ public class MechanismVisualizer {
     public static void setArmPosition(double rotations) {
         arm.setAngle(elevator.getAngle() - rotations * 360);
     }
-
     public static void setGroundPivotPosition(double rotations) {
         groundPivot.setAngle(180 - rotations * 360);
     }
-
 }

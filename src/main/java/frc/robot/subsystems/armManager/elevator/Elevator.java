@@ -110,7 +110,8 @@ public class Elevator extends StateMachine<ElevatorStates> {
         double leftElevatorPosition = lMotor.getPosition().getValueAsDouble();
         double rightElevatorPosition = rMotor.getPosition().getValueAsDouble();
         if (Constants.isSim)
-            updateSimPosition(setpoint);
+            SimElevator.updateSimPosition(lMotor, rMotor);
+            // updateSimPosition(setpoint);
         MechanismVisualizer.setElevatorPosition(leftElevatorPosition);
         DogLog.log(name + "/Left Elevator Position", leftElevatorPosition);
         DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
