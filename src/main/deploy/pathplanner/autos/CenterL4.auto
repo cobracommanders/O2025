@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CenterL1"
+            "pathName": "CenterL4"
           }
         },
         {
@@ -23,9 +23,9 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "waitForArmState/WAIT_L4"
+            "waitTime": 4.0
           }
         },
         {

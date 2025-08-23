@@ -40,11 +40,11 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                     nextState = ArmManagerStates.IDLE;
                 }
             }
-            case PREPARE_SCORE_L4 -> {
-                if (armScheduler.isReady()) {
-                    nextState = ArmManagerStates.WAIT_L4;
-                }
-            }
+            // case PREPARE_SCORE_L4 -> {
+            //     if (armScheduler.isReady()) {
+            //         nextState = ArmManagerStates.WAIT_L4;
+            //     }
+            // }
 
             case SCORE_L4 -> {
                 if(timeout(scoringTime)){
