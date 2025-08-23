@@ -61,7 +61,7 @@ public final class Constants {
         public static final double DEPLOY_MOTION_MAGIC_CRUISE_VELOCITY = 0;
         public static final double DEPLOY_MOTION_MAGIC_ACCELERATION = 0;
         public static final double DEPLOY_MOTION_MAGIC_JERK = 0;
-        public static final double CAGE_DETECECTION_CURRENT = 25;
+        public static final double CAGE_DETECECTION_CURRENT = 45;
         public static final double ClimberGearRatio = 0.0;
         public static final double EncoderOffset = 0.314;
     }

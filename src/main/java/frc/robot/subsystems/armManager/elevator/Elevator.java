@@ -173,12 +173,12 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
             case L3:
                 ElevatorPositions.L3 += .015;
-                setElevatorPosition(ElevatorPositions.L4);
+                setElevatorPosition(ElevatorPositions.L3);
             break;
 
             case L2:
                 ElevatorPositions.L2 += .015;
-                setElevatorPosition(ElevatorPositions.L4);
+                setElevatorPosition(ElevatorPositions.L2);
             break;
 
             case ALGAE_NET:
@@ -218,12 +218,12 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
             case L3:
                 ElevatorPositions.L3 -= .015;
-                setElevatorPosition(ElevatorPositions.L4);
+                setElevatorPosition(ElevatorPositions.L3);
             break;
 
             case L2:
                 ElevatorPositions.L2 -= .015;
-                setElevatorPosition(ElevatorPositions.L4);
+                setElevatorPosition(ElevatorPositions.L2);
             break;
 
             case ALGAE_NET:

@@ -2,7 +2,7 @@ package frc.robot.subsystems.climber;
 
 public class WinchSpeeds {
     public static final double IDLE = 0;
-    public static final double CLIMBING = 0.5;
-    public static final double DEPLOYING = 0.6;
+    public static final double CLIMBING = 1.0;
+    public static final double DEPLOYING = 1;
 }
     

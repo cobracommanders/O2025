@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RobotManager;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 
 public class Robot extends TimedRobot {
@@ -114,11 +116,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
+    Climber.getInstance().setWinchSpeed(-WinchSpeeds.DEPLOYING);
     // arm.setState(ArmStates.IDLE);
     // elevator.setState(ElevatorStates.L4);
   }
 
   @Override
   public void testExit() {
+    Climber.getInstance().setWinchSpeed(0);
   }
 }

@@ -27,7 +27,7 @@ public class Climber extends StateMachine<ClimberStates>{
     private TalonFXConfiguration winch_motor_config = new TalonFXConfiguration();
     public double climberPosition;
     private MotionMagicVoltage winch_motor_request = new MotionMagicVoltage(0).withSlot(0);
-    private double tolerance = 0.02;
+    private double tolerance = 0.05;
     private double motorCurrent = 0.0;
     private double absolutePosition;
     public Climber(){
@@ -54,16 +54,13 @@ public class Climber extends StateMachine<ClimberStates>{
     //TODO: log important inputs
     DogLog.log(name + "/Climber postions", absolutePosition);
     DogLog.log(name + "/Cage detection", cageDetected());
+    DogLog.log(name+"/Current", motorCurrent);
     //implement input collection (these values will be used in state transitions)
   }
 
 
   public void setState(ClimberStates newState) {
     setStateFromRequest(newState);
-  }
-
-  public void setClimberSpeed() {
-    winchMotor.set(climberSpeed.get());
   }
 
   public ClimberStates getNextState(ClimberStates currentState){
@@ -96,10 +93,14 @@ public class Climber extends StateMachine<ClimberStates>{
 
   public boolean atGoal(){
     return switch(getState()){
-      case DEPLOYING -> 
-        MathUtil.isNear(ClimberPositions.DEPLOYING, absolutePosition, tolerance);
-      case CLIMBING ->
-        MathUtil.isNear(ClimberPositions.CLIMBING, absolutePosition, tolerance);
+      case DEPLOYING -> {
+        DogLog.log(name + "/setpoint", ClimberPositions.DEPLOYING);
+       yield  absolutePosition > ClimberPositions.DEPLOYING;
+      }
+      case CLIMBING ->{
+        DogLog.log(name + "/setpoint", ClimberPositions.CLIMBING);
+        yield absolutePosition < ClimberPositions.CLIMBED;
+      }
       case WAIT_FOR_CAGE ->
         cageDetected();
       default ->
@@ -124,7 +125,7 @@ public class Climber extends StateMachine<ClimberStates>{
       case CLIMBING:
         //set wheels, set climber position
         setWinchSpeed(WinchSpeeds.CLIMBING);
-        setClimberWheelSpeed(ClimberWheelSpeeds.IDLE);
+        setClimberWheelSpeed(ClimberWheelSpeeds.INTAKE_CAGE);
         break;
       case CLIMBED:
         setWinchSpeed(ClimberPositions.IDLE);

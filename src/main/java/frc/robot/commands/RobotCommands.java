@@ -95,6 +95,10 @@ public class RobotCommands {
         return Commands.runOnce(() -> robotManager.setL4()).withName("setL4");
     }
 
+    public Command invertedHandoffCommand(){
+        return Commands.runOnce(() -> robotManager.invertedHandoffRequest()).withName("invertedHandoff");
+    }
+
     public Command setHighReefAlgaeCommand(){
         return Commands.runOnce(() -> robotManager.setHighReefAlgae()).withName("setHighReefAlgae");
     }

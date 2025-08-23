@@ -6,7 +6,7 @@ public class ElevatorPositions {
     public static double HIGH_REEF_ALGAE = 0.92;
     public static double LOW_REEF_ALGAE = 0.55;
     public static double GROUND_ALGAE = 0;
-    public static double ALGAE_NET = 1.39;
+    public static double ALGAE_NET = 1.43;
     public static double ALGAE_PROCESSOR = 0.1;
     public static double HANDOFF = 0.75;
     public static double SCORE_L4 = 0.82;

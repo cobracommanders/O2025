@@ -31,5 +31,7 @@ public enum ArmManagerStates {
     SCORE_L3,
     PREPARE_SCORE_L2,
     WAIT_L2,
-    SCORE_L2
+    SCORE_L2,
+    PREPARE_INVERTED_HANDOFF,
+    WAIT_INVERTED_HANDOFF
 }

@@ -5,5 +5,6 @@ public enum IntakeRollersStates {
     INTAKING,       
     HANDOFF, 
     SCORE_L1,
+    INVERTED_HANDOFF
 }
 

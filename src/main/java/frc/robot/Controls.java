@@ -45,6 +45,7 @@ public class Controls {
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
+       
     }
 
     public void configureOperatorCommands() {
@@ -59,6 +60,8 @@ public class Controls {
         operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.POVMinus90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
+        operator.back().onTrue(Robot.robotCommands.invertedHandoffCommand());
+        operator.start().onTrue(Robot.robotCommands.resetToIdleCommand());
     }
 
     private static Controls instance;

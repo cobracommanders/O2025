@@ -84,6 +84,9 @@ public class Hand extends StateMachine<HandStates> {
             case CORAL_IDLE -> {
                 setHandSpeed(HandSpeeds.CORAL_IDLE);
             }
+            case INVERTED_HANDOFF -> {
+                setHandSpeed(HandSpeeds.INVERTED_HANDOFF);
+            }
         }
     }
 

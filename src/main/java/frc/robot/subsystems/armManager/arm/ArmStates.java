@@ -16,5 +16,5 @@ public enum ArmStates {
     SCORE_L3,
     L2,
     SCORE_L2,
-    CLIMB
+    CLIMB,
 }

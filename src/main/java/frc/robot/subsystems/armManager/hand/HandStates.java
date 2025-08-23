@@ -9,6 +9,6 @@ public enum HandStates {
     INTAKE_GROUND_ALGAE,
     SCORE_ALGAE_NET,
     SCORE_ALGAE_PROCESSOR,
-    CORAL_IDLE
-
+    CORAL_IDLE,
+    INVERTED_HANDOFF
 }
