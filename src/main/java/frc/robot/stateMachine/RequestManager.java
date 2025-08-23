@@ -1,5 +1,7 @@
 package frc.robot.stateMachine;
 
+import java.util.concurrent.Flow.Processor;
+
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
@@ -81,43 +83,43 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                 default:
                     break;
             }
+        }
 
-            switch (currentState) {
-                case PREPARE_HANDOFF:
-                    if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
-                            armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
-                            armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
-                            groundManager.getState() == GroundManagerStates.WAIT_HANDOFF) {
-                        nextState = RequestManagerStates.HANDOFF;
-                    }
-                    break;
-                case HANDOFF:
-                    if (timeout(0.1)) {
-                        nextState = RequestManagerStates.INDEPENDENT;
+        switch (currentState) {
+            case PREPARE_HANDOFF:
+                if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
+                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
+                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
+                        groundManager.getState() == GroundManagerStates.WAIT_HANDOFF) {
+                    nextState = RequestManagerStates.HANDOFF;
+                }
+                break;
+            case HANDOFF:
+                if (timeout(0.1)) {
+                    nextState = RequestManagerStates.INDEPENDENT;
 
-                    }
-                    break;
-                case PREPARE_INVERTED_HANDOFF:
-                    if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE) &&
-                            groundManager.getState() == GroundManagerStates.WAIT_INVERTED_HANDOFF) {
-                        nextState = RequestManagerStates.INVERTED_HANDOFF;
-                    }
-                    break;
-                case INVERTED_HANDOFF:
-                    if (coralDetector.hasCoral() || timeout(0.5)) {
-                        nextState = RequestManagerStates.INDEPENDENT;
-                    }
-                    break;
-                case PREPARE_IDLE:
-                    if ((armManager.getState() == ArmManagerStates.IDLE) &&
-                            groundManager.getState() == GroundManagerStates.IDLE) {
-                        nextState = RequestManagerStates.INDEPENDENT;
-                    }
-                    break;
-                case CLIMB:
-                case INDEPENDENT:
-                    break;
-            }
+                }
+                break;
+            case PREPARE_INVERTED_HANDOFF:
+                if ((armManager.getState() == ArmManagerStates.WAIT_INVERTED_HANDOFF) &&
+                        groundManager.getState() == GroundManagerStates.WAIT_INVERTED_HANDOFF) {
+                    nextState = RequestManagerStates.INVERTED_HANDOFF;
+                }
+                break;
+            case INVERTED_HANDOFF:
+                if (coralDetector.hasCoral() || timeout(0.5)) {
+                    nextState = RequestManagerStates.INDEPENDENT;
+                }
+                break;
+            case PREPARE_IDLE:
+                if ((armManager.getState() == ArmManagerStates.IDLE) &&
+                        groundManager.getState() == GroundManagerStates.IDLE) {
+                    nextState = RequestManagerStates.INDEPENDENT;
+                }
+                break;
+            case CLIMB:
+            case INDEPENDENT:
+                break;
         }
         return nextState;
     }
@@ -222,7 +224,12 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                                 // desiredArmState = ArmManagerStates.PREPARE_SCORE_L4;
                                 armManager.setState(ArmManagerStates.PREPARE_SCORE_L4);
                                 break;
-
+                            case BARGE:
+                                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_NET);
+                                break;
+                            case PROCESSOR:
+                                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_PROCESSOR);
+                                break;
                             default:
                                 break;
                         }
@@ -291,6 +298,13 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                         }
                     }
                     break;
+                case GROUND_IDLE:
+                    flags.remove(flag);
+                    if (getState() != RequestManagerStates.INDEPENDENT) {
+                        // do nothing
+                    } else {
+                        groundManager.setState(GroundManagerStates.PREPARE_IDLE);
+                    }
                 default:
                     break;
             }
@@ -339,6 +353,10 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
     public void resetToIdleRequest() {
         flags.check(RobotFlag.RESET_TO_IDLE);
+    }
+
+    public void groundIdleRequest() {
+        flags.check(RobotFlag.GROUND_IDLE);
     }
 
     public void setL1() {

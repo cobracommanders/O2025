@@ -10,5 +10,6 @@ public enum RobotFlag {
     CLIMB,
     RESET_TO_IDLE,
     INVERTED_HANDOFF,
-    HANDOFF
+    HANDOFF,
+    GROUND_IDLE;
 }

@@ -45,6 +45,7 @@ public class Controls {
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
+        driver.back().onTrue(Robot.robotCommands.groundIdleCommand());
        
     }
 
