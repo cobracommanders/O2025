@@ -155,6 +155,10 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
         }
     }
 
+    public boolean isReady() {
+        return armScheduler.isReady();
+    }
+
     @Override
     protected void afterTransition(ArmManagerStates newState) {
         synced = false;

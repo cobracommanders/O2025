@@ -5,9 +5,11 @@ import java.util.Map;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerStates;
+import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 
 public class RobotCommands {
@@ -95,6 +97,10 @@ public class RobotCommands {
     public Command invertedHandoffCommand(){
         return Commands.runOnce(() -> robotManager.invertedHandoffRequest()).withName("invertedHandoff");
     }
+    
+    public Command handoffCommand(){
+        return Commands.runOnce(() -> robotManager.handoffRequest()).withName("handoff");
+    }
 
     public Command setHighReefAlgaeCommand(){
         return Commands.runOnce(() -> robotManager.setHighReefAlgae()).withName("setHighReefAlgae");
@@ -113,5 +119,14 @@ public class RobotCommands {
     }
     public Command invertedHandoffToIdleCommand(){
         return invertedHandoffCommand().andThen(robotManager.waitForState(RequestManagerStates.INDEPENDENT).andThen(resetToIdleCommand()));
+    }
+
+    public Command prepareScoreWithHandoffCheckCommand() {
+        return new ConditionalCommand(handoffCommand().andThen(robotManager.waitForState(RequestManagerStates.INDEPENDENT)).andThen(prepareScoreCommand()), prepareScoreCommand(), 
+        ()-> robotManager.coralDetector.hasCoral() && 
+        (robotManager.operatorOptions.scoreLocation != ScoreLocation.BARGE && 
+        robotManager.operatorOptions.scoreLocation != ScoreLocation.PROCESSOR && 
+        robotManager.operatorOptions.scoreLocation != ScoreLocation.L1));
+
     }
 }

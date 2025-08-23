@@ -28,8 +28,8 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
-    private ArmManagerStates desiredArmState;
-    private GroundManagerStates desiredGroundState;
+    // private ArmManagerStates desiredArmState;
+    // private GroundManagerStates desiredGroundState;
 
     public RequestManager() {
         super(RequestManagerStates.INDEPENDENT);
@@ -39,8 +39,8 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
         this.climber = Climber.getInstance();
         this.coralDetector = CoralDetector.getInstance();
         this.driveSubsystem = DriveSubsystem.getInstance();
-        this.desiredArmState = armManager.getState();
-        this.desiredGroundState = groundManager.getState();
+        // this.desiredArmState = armManager.getState();
+        // this.desiredGroundState = groundManager.getState();
     }
 
     @Override
@@ -55,20 +55,28 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
         for (RobotFlag flag : flags.getChecked()) {
             switch (flag) {
                 case CLIMB:
-                    nextState = RequestManagerStates.CLIMB;
-                    flags.remove(flag);
+                    if (armManager.isReady()) {
+                        nextState = RequestManagerStates.CLIMB;
+                        flags.remove(flag);
+                    }
                     break;
                 case HANDOFF:
-                    nextState = RequestManagerStates.PREPARE_HANDOFF;
-                    flags.remove(flag);
+                    if (armManager.isReady()) {
+                        nextState = RequestManagerStates.PREPARE_HANDOFF;
+                        flags.remove(flag);
+                    }
                     break;
                 case INVERTED_HANDOFF:
-                    nextState = RequestManagerStates.PREPARE_INVERTED_HANDOFF;
-                    flags.remove(flag);
+                    if (armManager.isReady()) {
+                        nextState = RequestManagerStates.PREPARE_INVERTED_HANDOFF;
+                        flags.remove(flag);
+                    }
                     break;
                 case RESET_TO_IDLE:
-                    nextState = RequestManagerStates.PREPARE_IDLE;
-                    flags.remove(flag);
+                    if (armManager.isReady()) {
+                        nextState = RequestManagerStates.PREPARE_IDLE;
+                        flags.remove(flag);
+                    }
                     break;
                 default:
                     break;
@@ -166,28 +174,8 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
     public void sendManagerRequests() {
         for (RobotFlag flag : flags.getChecked()) {
             switch (flag) {
-                case ALGAE_SCORE_LEVEL:
-                    flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        switch (operatorOptions.scoreLocation) {
-                            case BARGE:
-                                // desiredArmState = ArmManagerStates.PREPARE_SCORE_ALGAE_NET;
-                                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_NET);
-                                break;
-                            case PROCESSOR:
-                                // desiredArmState = ArmManagerStates.PREPARE_SCORE_ALGAE_PROCESSOR;
-                                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_PROCESSOR);
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-                    break;
                 case INTAKE_ALGAE:
-                flags.remove(flag);
+                    flags.remove(flag);
                     if (getState() != RequestManagerStates.INDEPENDENT) {
                         // do nothing
                     } else {
@@ -208,7 +196,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                     }
                     break;
                 case INTAKE_CORAL:
-                flags.remove(flag);
+                    flags.remove(flag);
                     if (getState() != RequestManagerStates.INDEPENDENT) {
                         // do nothing
                     } else {
@@ -217,7 +205,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                     }
                     break;
                 case PREPARE_SCORE_ARM:
-                flags.remove(flag);
+                    flags.remove(flag);
                     if (getState() != RequestManagerStates.INDEPENDENT) {
                         // do nothing
                     } else {
@@ -241,7 +229,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                     }
                     break;
                 case PREPARE_SCORE_GROUND:
-                flags.remove(flag);
+                    flags.remove(flag);
                     if (getState() != RequestManagerStates.INDEPENDENT) {
                         // do nothing
                     } else {
@@ -256,7 +244,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                     }
                     break;
                 case SCORE_ARM:
-                flags.remove(flag);
+                    flags.remove(flag);
                     if (getState() != RequestManagerStates.INDEPENDENT) {
                         // do nothing
                     } else {
@@ -289,7 +277,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
                     break;
                 case SCORE_GROUND:
-                flags.remove(flag);
+                    flags.remove(flag);
                     if (getState() != RequestManagerStates.INDEPENDENT) {
                         // do nothing
                     } else {
@@ -303,8 +291,8 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                         }
                     }
                     break;
-                    default:
-                        break;
+                default:
+                    break;
             }
         }
     }
