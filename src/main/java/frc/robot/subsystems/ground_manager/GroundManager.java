@@ -68,6 +68,13 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
             case CLIMB -> {
             }
+            case PREPARE_INVERTED_HANDOFF -> {
+                if (intakePivot.atGoal()) {
+                    nextState = GroundManagerStates.WAIT_INVERTED_HANDOFF;
+                }
+            }
+            case WAIT_INVERTED_HANDOFF -> {
+            }
         }
         return nextState;
     }
@@ -102,7 +109,11 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             case HANDOFF -> {
                 rollers.setState(IntakeRollersStates.HANDOFF);
             }
-            case WAIT_HANDOFF, WAIT_SCORE_L1, IDLE, INTAKING -> {
+            case PREPARE_INVERTED_HANDOFF -> {
+                intakePivot.setState(IntakePivotStates.HANDOFF);
+                rollers.setState(IntakeRollersStates.INTAKING);
+            }
+            case WAIT_HANDOFF, WAIT_SCORE_L1, IDLE, INTAKING, WAIT_INVERTED_HANDOFF -> {
             }
         }
     }

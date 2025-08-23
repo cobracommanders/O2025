@@ -13,8 +13,8 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.24;
         public static final double MotionMagicCruiseVelocity = 2.5;
-        public static final double MotionMagicAcceleration = 40;
-        public static final double MotionMagicJerk = 100;
+        public static final double MotionMagicAcceleration = 50;
+        public static final double MotionMagicJerk = 150;
         public static final double encoderOffset = -0.64111328125 + 0.005371;
     }
 
@@ -48,11 +48,11 @@ public final class Constants {
         public static final double stallCurrent = 0.0;
     }
 
-    public static final class DrivertrainConstants {
+    public static final class DrivetrainConstants {
         public static final double MAX_VELOCITY_METERS_PER_SECOND = 5.94;
         public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 300;
 
-        public static final double maxSpeed = TunerConstants.kSpeedAt12Volts.magnitude();
+        public static final double maxSpeed = TunerConstants.kSpeedAt12Volts;
         public static final double maxAngularRate = Math.PI * 3.5;
     }
 
@@ -61,7 +61,7 @@ public final class Constants {
         public static final double DEPLOY_MOTION_MAGIC_CRUISE_VELOCITY = 0;
         public static final double DEPLOY_MOTION_MAGIC_ACCELERATION = 0;
         public static final double DEPLOY_MOTION_MAGIC_JERK = 0;
-        public static final double CAGE_DETECECTION_CURRENT = 25;
+        public static final double CAGE_DETECECTION_CURRENT = 45;
         public static final double ClimberGearRatio = 0.0;
         public static final double EncoderOffset = 0.314;
     }

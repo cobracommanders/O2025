@@ -23,7 +23,7 @@ public class FlagManager<T extends Enum<T>> {
   }
 
   public void check(T flag) {
-    System.out.println(flag.name());
+    // System.out.println(flag.name());
     checked.add(flag);
   }
 

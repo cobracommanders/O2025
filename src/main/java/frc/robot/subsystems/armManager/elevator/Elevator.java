@@ -94,10 +94,14 @@ public class Elevator extends StateMachine<ElevatorStates> {
     @Override
     public void collectInputs() {
         elevatorPosition = lMotor.getPosition().getValueAsDouble();
-        double leftElevatorPosition = lMotor.getPosition().getValueAsDouble();
+        double leftElevatorPosition = elevatorPosition;
         double rightElevatorPosition = rMotor.getPosition().getValueAsDouble();
         DogLog.log(name + "/Left Elevator Position", leftElevatorPosition);
         DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
+    }
+
+    public double getHeight(){
+        return elevatorPosition;
     }
 
     public void setState(ElevatorStates state){
@@ -167,6 +171,41 @@ public class Elevator extends StateMachine<ElevatorStates> {
                 setElevatorPosition(ElevatorPositions.L4);
             break;
 
+            case L3:
+                ElevatorPositions.L3 += .015;
+                setElevatorPosition(ElevatorPositions.L3);
+            break;
+
+            case L2:
+                ElevatorPositions.L2 += .015;
+                setElevatorPosition(ElevatorPositions.L2);
+            break;
+
+            case ALGAE_NET:
+                ElevatorPositions.ALGAE_NET += .015;
+                setElevatorPosition(ElevatorPositions.ALGAE_NET);
+            break;
+
+            case ALGAE_PROCESSOR:
+                ElevatorPositions.ALGAE_PROCESSOR += .015;
+                setElevatorPosition(ElevatorPositions.ALGAE_PROCESSOR);
+            break;
+
+            case HIGH_REEF_ALGAE:
+                ElevatorPositions.HIGH_REEF_ALGAE += .015;
+                setElevatorPosition(ElevatorPositions.HIGH_REEF_ALGAE);
+            break;
+
+            case LOW_REEF_ALGAE:
+                ElevatorPositions.LOW_REEF_ALGAE += .015;
+                setElevatorPosition(ElevatorPositions.LOW_REEF_ALGAE);
+            break;
+
+            case GROUND_ALGAE:
+                ElevatorPositions.GROUND_ALGAE += .015;
+                setElevatorPosition(ElevatorPositions.GROUND_ALGAE);
+            break;
+
         }
     }
 
@@ -177,6 +216,40 @@ public class Elevator extends StateMachine<ElevatorStates> {
                 setElevatorPosition(ElevatorPositions.L4);
             break;
 
+            case L3:
+                ElevatorPositions.L3 -= .015;
+                setElevatorPosition(ElevatorPositions.L3);
+            break;
+
+            case L2:
+                ElevatorPositions.L2 -= .015;
+                setElevatorPosition(ElevatorPositions.L2);
+            break;
+
+            case ALGAE_NET:
+                ElevatorPositions.ALGAE_NET -= .015;
+                setElevatorPosition(ElevatorPositions.ALGAE_NET);
+            break;
+
+            case ALGAE_PROCESSOR:
+                ElevatorPositions.ALGAE_PROCESSOR -= .015;
+                setElevatorPosition(ElevatorPositions.ALGAE_PROCESSOR);
+            break;
+
+            case HIGH_REEF_ALGAE:
+                ElevatorPositions.HIGH_REEF_ALGAE -= .015;
+                setElevatorPosition(ElevatorPositions.HIGH_REEF_ALGAE);
+            break;
+
+            case LOW_REEF_ALGAE:
+                ElevatorPositions.LOW_REEF_ALGAE -= .015;
+                setElevatorPosition(ElevatorPositions.LOW_REEF_ALGAE);
+            break;
+
+            case GROUND_ALGAE:
+                ElevatorPositions.GROUND_ALGAE -= .015;
+                setElevatorPosition(ElevatorPositions.GROUND_ALGAE);
+            break;
         }
     }
     private static Elevator instance;

@@ -11,5 +11,7 @@ public enum GroundManagerStates {
     PREPARE_SCORE_L1,
     WAIT_SCORE_L1,
     SCORE_L1,
-    CLIMB
+    CLIMB,
+    PREPARE_INVERTED_HANDOFF,
+    WAIT_INVERTED_HANDOFF
 }

@@ -134,6 +134,13 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                     nextState = ArmManagerStates.PREPARE_IDLE;
                 }
             }
+            case PREPARE_INVERTED_HANDOFF -> {
+                if (armScheduler.isReady()) {
+                    nextState = ArmManagerStates.WAIT_INVERTED_HANDOFF;
+                }
+            }
+            case WAIT_INVERTED_HANDOFF -> {
+            }
 
         }
 
@@ -244,7 +251,12 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             case WAIT_HANDOFF_LEFT -> {
             }
             case CLIMB -> {
-                armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
+                armScheduler.scheduleStates(ArmStates.CLIMB, HandStates.IDLE, ElevatorStates.IDLE);
+            }
+            case PREPARE_INVERTED_HANDOFF -> {
+                armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.IDLE, ElevatorStates.HANDOFF);
+            }
+            case WAIT_INVERTED_HANDOFF -> {
             }
 
         }

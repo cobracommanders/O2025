@@ -6,8 +6,11 @@ import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 import dev.doglog.DogLog;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
+import frc.robot.subsystems.armManager.elevator.Elevator;
+import frc.robot.subsystems.armManager.hand.HandStates;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
@@ -20,6 +23,7 @@ public class RobotManager extends StateMachine<RobotState> {
     public final Climber climber;
     public final CoralDetector coralDetector;
     public OperatorOptions operatorOptions = OperatorOptions.getInstance();
+    public final DriveSubsystem driveSubsystem;
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
@@ -30,10 +34,12 @@ public class RobotManager extends StateMachine<RobotState> {
         this.groundManager = GroundManager.getInstance();
         this.climber = Climber.getInstance();
         this.coralDetector = CoralDetector.getInstance();
+        this.driveSubsystem = DriveSubsystem.getInstance();
     }
 
     @Override
     protected void collectInputs() {
+        driveSubsystem.setElevatorHeight(armManager.elevator.getHeight());
     }
 
     @Override
@@ -42,6 +48,9 @@ public class RobotManager extends StateMachine<RobotState> {
         RobotState nextState = currentState;
         for (RobotFlag flag : flags.getChecked()) {
             switch (flag) {
+                case INVERTED_HANDOFF:
+                    nextState = RobotState.PREPARE_INVERTED_HANDOFF;
+                    break;
                 case RESET_TO_IDLE:
                     nextState = RobotState.RESET_TO_IDLE;
                     break;
@@ -87,7 +96,7 @@ public class RobotManager extends StateMachine<RobotState> {
                             break;
                     }
                     break;
-                case SCORE_LEVEL:
+                case PREPARE_SCORE:
                     switch (operatorOptions.scoreLocation) {
                         case L1:
                             nextState = RobotState.WAIT_L1;
@@ -158,7 +167,7 @@ public class RobotManager extends StateMachine<RobotState> {
 
         switch (currentState) {
 
-            case WAIT_L1, WAIT_L2, WAIT_L3, WAIT_L4, WAIT_BARGE, WAIT_PROCESSOR, CLIMB, IDLE:
+            case WAIT_L1, WAIT_L2, WAIT_L3, WAIT_L4, WAIT_BARGE, WAIT_PROCESSOR, CLIMB, IDLE :
                 // These states do not transition automatically
                 break;
             case RESET_TO_IDLE:
@@ -181,7 +190,7 @@ public class RobotManager extends StateMachine<RobotState> {
                 }
                 break;
             case HANDOFF:
-                if (timeout(0.2)) {
+                if (timeout(0.08)) {
                     switch (operatorOptions.scoreLocation) {
                         case L2:
                             nextState = RobotState.WAIT_L2;
@@ -239,6 +248,16 @@ public class RobotManager extends StateMachine<RobotState> {
             case SCORE_PROCESSOR:
                 if (armManager.getState() == ArmManagerStates.IDLE) {
                     nextState = RobotState.IDLE;
+                }
+                break;
+            case PREPARE_INVERTED_HANDOFF:
+                if (armManager.getState() == ArmManagerStates.WAIT_INVERTED_HANDOFF && groundManager.getState() == GroundManagerStates.WAIT_INVERTED_HANDOFF) {
+                    nextState = RobotState.INVERTED_HANDOFF;
+                }
+                break;
+            case INVERTED_HANDOFF:
+                if (coralDetector.hasCoral() || timeout(0.5)) {
+                    nextState = RobotState.RESET_TO_IDLE;
                 }
                 break;
         }
@@ -328,7 +347,15 @@ public class RobotManager extends StateMachine<RobotState> {
             }
             case CLIMB -> {
                 climber.setState(ClimberStates.DEPLOYING);
-                // TODO: add intake and armManager climb states
+                armManager.setState(ArmManagerStates.CLIMB);
+                groundManager.setState(GroundManagerStates.CLIMB);
+            }
+            case PREPARE_INVERTED_HANDOFF -> {
+                armManager.setState(ArmManagerStates.PREPARE_INVERTED_HANDOFF);
+                groundManager.setState(GroundManagerStates.PREPARE_INVERTED_HANDOFF);
+            }
+            case INVERTED_HANDOFF -> {
+              armManager.hand.setState(HandStates.INVERTED_HANDOFF);
             }
         }
     }
@@ -351,7 +378,11 @@ public class RobotManager extends StateMachine<RobotState> {
     }
 
     public void scoreLevelRequest() {
-        flags.check(RobotFlag.SCORE_LEVEL);
+        flags.check(RobotFlag.PREPARE_SCORE);
+    }
+
+    public void invertedHandoffRequest() {
+        flags.check(RobotFlag.INVERTED_HANDOFF);
     }
 
     public void idleRequest() {
