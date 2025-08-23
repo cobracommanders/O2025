@@ -1,14 +1,15 @@
 package frc.robot.stateMachine;
 
 public enum RobotFlag {
-    IDLE,
     INTAKE_CORAL,
     INTAKE_ALGAE,
-    SCORE,
-    PREPARE_SCORE,
-    HANDOFF,
+    SCORE_ARM,
+    SCORE_GROUND,
+    PREPARE_SCORE_ARM,
+    PREPARE_SCORE_GROUND,
     CLIMB,
-    ALGAE_SCORE_LEVEL,
     RESET_TO_IDLE,
-    INVERTED_HANDOFF
+    INVERTED_HANDOFF,
+    HANDOFF,
+    GROUND_IDLE;
 }
