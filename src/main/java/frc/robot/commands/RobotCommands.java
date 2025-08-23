@@ -6,17 +6,17 @@ import java.util.Map;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.stateMachine.RobotManager;
-import frc.robot.stateMachine.RobotState;
+import frc.robot.stateMachine.RequestManager;
+import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 
 public class RobotCommands {
 
-    private final RobotManager robotManager;
+    private final RequestManager robotManager;
     private final Subsystem[] requirements;
 
     public RobotCommands(){
-        this.robotManager = RobotManager.getInstance();
+        this.robotManager = RequestManager.getInstance();
         var requirementsList = List.of(robotManager.armManager, robotManager.groundManager, robotManager.climber);
         requirements = requirementsList.toArray(Subsystem[]::new);
     }
@@ -36,29 +36,26 @@ public class RobotCommands {
             setHighReefAlgaeCommand(),
             setLowReefAlgaeCommand(),
             setGroundAlgaeCommand(),
-            waitForState(RobotState.IDLE),
+            waitForState(RequestManagerStates.INDEPENDENT),
             waitForGroundReady()
         };
     }
-    public Command waitForState(RobotState state) {
+    public Command waitForState(RequestManagerStates state) {
         return robotManager.waitForState(state).withName("waitForState/" + state.toString());
     }
     public Command waitForGroundReady() {
         return robotManager.groundManager.waitForState(GroundManagerStates.WAIT_SCORE_L1).withName("waitForGroundState/WAIT_SCORE_L1");
     }
     public Command scoreCommand() {
-        return Commands.runOnce(robotManager::scoreRequest, requirements)
-                .andThen(Commands.waitUntil(() -> robotManager.getState() == RobotState.IDLE)).withName("score");
+        return Commands.runOnce(robotManager::scoreRequest, requirements).withName("score");
     }
 
     public Command algaeIntakeCommand() {
-        return Commands.runOnce(robotManager::intakeAlgaeRequest, requirements)
-                .andThen(Commands.waitUntil(() -> robotManager.getState() == RobotState.IDLE)).withName("algaeIntake");
+        return Commands.runOnce(robotManager::intakeAlgaeRequest, requirements).withName("algaeIntake");
     }
 
     public Command coralIntakeCommand() {
-        return Commands.runOnce(robotManager::coralIntakeRequest, requirements)
-                .andThen(Commands.waitUntil(() -> robotManager.getState() == RobotState.IDLE)).withName("coralIntake");
+        return Commands.runOnce(robotManager::coralIntakeRequest, requirements).withName("coralIntake");
     }
 
     public Command prepareScoreCommand() {
@@ -68,7 +65,7 @@ public class RobotCommands {
 
     public Command climbCommand() {
         return Commands.runOnce(robotManager::climbRequest, requirements)
-                .andThen(Commands.waitUntil(() -> robotManager.getState() == RobotState.CLIMB)).withName("climb");
+                .andThen(Commands.waitUntil(() -> robotManager.getState() == RequestManagerStates.CLIMB)).withName("climb");
     }
 
     public Command setProcessorCommand(){
@@ -113,5 +110,8 @@ public class RobotCommands {
 
     public Command resetToIdleCommand(){
         return Commands.runOnce(() -> robotManager.resetToIdleRequest()).withName("resetToIdle");
+    }
+    public Command invertedHandoffToIdleCommand(){
+        return invertedHandoffCommand().andThen(robotManager.waitForState(RequestManagerStates.INDEPENDENT).andThen(resetToIdleCommand()));
     }
 }

@@ -34,4 +34,8 @@ public class FlagManager<T extends Enum<T>> {
   public void clear() {
     checked.clear();
   }
+
+  public void remove(T Flag) {
+    checked.remove(Flag);
+  }
 }

@@ -60,7 +60,7 @@ public class Controls {
         operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.POVMinus90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
-        operator.back().onTrue(Robot.robotCommands.invertedHandoffCommand());
+        operator.back().onTrue(Robot.robotCommands.invertedHandoffToIdleCommand());
         operator.start().onTrue(Robot.robotCommands.resetToIdleCommand());
     }
 

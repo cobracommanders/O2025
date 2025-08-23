@@ -37,7 +37,7 @@
         {
           "type": "named",
           "data": {
-            "name": "waitForState/IDLE"
+            "name": "waitForState/INDEPENDENT"
           }
         }
       ]
