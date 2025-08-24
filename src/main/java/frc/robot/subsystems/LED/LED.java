@@ -22,7 +22,7 @@ public class LED extends SubsystemBase {
   public LED() {
     blinkTimer.start();
     glowbra_commander = new AddressableLED(9);
-    m_ledBuffer = new AddressableLEDBuffer(150);
+    m_ledBuffer = new AddressableLEDBuffer(21);
     glowbra_commander.setLength(m_ledBuffer.getLength());
     glowbra_commander.setData(m_ledBuffer);
     glowbra_commander.start();
@@ -32,10 +32,10 @@ public class LED extends SubsystemBase {
 
     switch (OperatorOptions.getInstance().scoreLocation) {
       case L1 -> {
-        setLED(Color.kAliceBlue);
+        setLED(Color.kBlue);
       }
       case L2 -> {
-        setLED(Color.kCoral);
+        setLED(Color.kPurple);
       }
       case L3 -> {
         setLED(Color.kGreen);
@@ -63,6 +63,10 @@ public class LED extends SubsystemBase {
   public void setLED(Color color){
     LEDPattern.solid(color).applyTo(m_ledBuffer);
   }
+
+  // public packRGB(){
+  //   Color.packRGB(80, 40, 79);
+  // }
   
     private static LED instance;
 
