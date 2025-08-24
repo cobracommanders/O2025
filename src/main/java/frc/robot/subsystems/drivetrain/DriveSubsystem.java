@@ -125,6 +125,7 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   public void simulationPeriodic() {
     drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
   }
+  
   @Override
   protected void collectInputs() {
     teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);

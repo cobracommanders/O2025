@@ -4,32 +4,21 @@
 
 package frc.robot;
 
-import java.util.Map;
-import java.util.ResourceBundle.Control;
-
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
 import dev.doglog.DogLog;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.RobotCommands;
-import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
-import frc.robot.subsystems.LED.LED;
+import frc.robot.subsystems.MechanismVisualizer;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
-import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -39,8 +28,6 @@ public class Robot extends TimedRobot {
   public static RobotCommands robotCommands = new RobotCommands();
   public static final Controls controls = new Controls();
   private SendableChooser<Command> autoChooser;
-  // public static OperatorOptions operatorOptions =
-  // OperatorOptions.getInstance();
 
   public Robot() {
     for (Command command : robotCommands.getPathplannerCommands()) {
@@ -50,7 +37,6 @@ public class Robot extends TimedRobot {
     Command centerL4 = AutoBuilder.buildAuto("CenterL4");
 
     autoChooser = new SendableChooser<Command>();
-    // autoChooser.addOption("CenterL1", centerL1);
     autoChooser.setDefaultOption("CenterL1", centerL1);
     autoChooser.addOption("CenterL4", centerL4);
 
@@ -67,14 +53,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void robotInit(){
-    DriverStation.silenceJoystickConnectionWarning(true);
+  public void disabledInit() {
   }
 
   @Override
@@ -84,9 +63,8 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     SmartDashboard.putData(autoChooser);
-
+    DriverStation.silenceJoystickConnectionWarning(true);
   }
-
 
   @Override
   public void disabledExit() {
