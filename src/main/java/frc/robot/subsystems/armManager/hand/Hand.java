@@ -9,7 +9,6 @@ import dev.doglog.DogLog;
 import frc.robot.Constants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.armManager.elevator.ElevatorStates;
 
 public class Hand extends StateMachine<HandStates> {
     private String name = getName();

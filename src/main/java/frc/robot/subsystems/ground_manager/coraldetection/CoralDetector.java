@@ -1,7 +1,5 @@
 package frc.robot.subsystems.ground_manager.coraldetection;
 
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
 import dev.doglog.DogLog;
@@ -9,7 +7,6 @@ import frc.robot.Constants;
 
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
 public class CoralDetector extends StateMachine<CoralDetectorStates> {
     public CANrange lCANRange;

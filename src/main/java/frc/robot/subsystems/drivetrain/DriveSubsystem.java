@@ -3,7 +3,6 @@ package frc.robot.subsystems.drivetrain;
 import java.util.Map;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
@@ -16,7 +15,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.fms.FmsSubsystem;
@@ -28,7 +26,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
   private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
   public final CommandSwerveDrivetrain drivetrain;
-  private SwerveDriveState drivetrainState = new SwerveDriveState();
   public final Pigeon2 drivetrainPigeon = CommandSwerveDrivetrain.getInstance().getPigeon2();
   private double teleopSlowModePercent = 1.0;
   private double rawControllerXValue = 0.0;

@@ -1,11 +1,9 @@
 package frc.robot.subsystems.armManager;
 
-import dev.doglog.DogLog;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmStates;
 import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
-import frc.robot.subsystems.armManager.armScheduler.ArmSchedulerStates;
 import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.armManager.elevator.ElevatorStates;
 import frc.robot.subsystems.armManager.hand.Hand;

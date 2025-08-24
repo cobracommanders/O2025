@@ -1,8 +1,6 @@
 package frc.robot.subsystems.ground_manager;
 
-import dev.doglog.DogLog;
 import frc.robot.Constants;
-import frc.robot.Ports.coralDetectorPorts;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;

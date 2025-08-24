@@ -4,7 +4,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import dev.doglog.DogLog;
 import frc.robot.Ports;
-import frc.robot.Constants.IntakeRollersConstants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 

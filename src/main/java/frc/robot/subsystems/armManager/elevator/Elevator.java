@@ -1,7 +1,5 @@
 package frc.robot.subsystems.armManager.elevator;
 
-import static edu.wpi.first.units.Units.Volts;
-
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -14,11 +12,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Ports;
@@ -41,13 +35,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
     private final double tolerance;
     private Follower right_motor_request = new Follower(Ports.ElevatorPorts.LMOTOR, true);
     private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
-    private double setpoint;
-    private final DCMotorSim elevatorSim = new DCMotorSim(
-        LinearSystemId.createDCMotorSystem(
-            DCMotor.getKrakenX60Foc(2), 0.001, ElevatorConstants.ElevatorGearRatio
-            ),
-        DCMotor.getKrakenX60Foc(2)
-    );
+
     public Elevator() {
         super(ElevatorStates.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
@@ -132,23 +120,8 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
     public void setElevatorPosition(double position) {
         DogLog.log(name + "/Setpoint", position);
-        setpoint = position;
         rMotor.setControl(right_motor_request);
         lMotor.setControl(motor_request.withPosition(position));
-    }
-
-    private void updateSimPosition(double position) {
-        var leftSim = lMotor.getSimState();
-        var rightSim = rMotor.getSimState();
-        leftSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-        rightSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-        var motorVoltage = leftSim.getMotorVoltageMeasure();
-        elevatorSim.setInputVoltage(motorVoltage.in(Volts));
-        elevatorSim.update(Constants.SIM_LOOP_TIME);
-        leftSim.setRawRotorPosition(elevatorSim.getAngularPosition().times(ElevatorConstants.ElevatorGearRatio));
-        leftSim.setRotorVelocity(elevatorSim.getAngularVelocity().times(ElevatorConstants.ElevatorGearRatio));
-        rightSim.setRawRotorPosition(elevatorSim.getAngularPosition().times(ElevatorConstants.ElevatorGearRatio));
-        rightSim.setRotorVelocity(elevatorSim.getAngularVelocity().times(ElevatorConstants.ElevatorGearRatio));
     }
 
     @Override

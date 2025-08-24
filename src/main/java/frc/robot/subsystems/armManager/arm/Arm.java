@@ -1,17 +1,10 @@
 package frc.robot.subsystems.armManager.arm;
 
-import static edu.wpi.first.units.Units.Volts;
-
-import java.util.jar.Attributes.Name;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicExpoTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -22,11 +15,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
@@ -50,12 +39,6 @@ public class Arm extends StateMachine<ArmStates> {
     private final double tolerance;
     private double absolutePosition;
     private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
-
-    private double setpoint;
-    private final DCMotorSim armSim = new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(
-                    DCMotor.getKrakenX60Foc(1), 0.001, ArmConstants.ArmGearRatio),
-            DCMotor.getKrakenX60Foc(1));
 
     public Arm() {
         super(ArmStates.IDLE);
@@ -148,20 +131,7 @@ public class Arm extends StateMachine<ArmStates> {
 
     public void setArmPosition(double position) {
         DogLog.log(name + "/Setpoint", position);
-        setpoint = position;
         motor.setControl(motor_request.withPosition(position));
-    }
-
-    private void updateSimPosition(double position) {
-        var talonSim = motor.getSimState();
-        var cancoderSim = encoder.getSimState();
-        talonSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-        var motorVoltage = talonSim.getMotorVoltageMeasure();
-        armSim.setInputVoltage(motorVoltage.in(Volts));
-        armSim.update(Constants.SIM_LOOP_TIME);
-        talonSim.setRawRotorPosition(armSim.getAngularPosition().times(ArmConstants.ArmGearRatio));
-        talonSim.setRotorVelocity(armSim.getAngularVelocity().times(ArmConstants.ArmGearRatio));
-        cancoderSim.setRawPosition(armSim.getAngularPosition().times(ArmConstants.ArmGearRatio));
     }
 
     @Override

@@ -1,15 +1,10 @@
 package frc.robot.subsystems.climber;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycle;
@@ -26,8 +21,6 @@ public class Climber extends StateMachine<ClimberStates>{
     private TalonFXConfiguration wheel_motor_config = new TalonFXConfiguration();
     private TalonFXConfiguration winch_motor_config = new TalonFXConfiguration();
     public double climberPosition;
-    private MotionMagicVoltage winch_motor_request = new MotionMagicVoltage(0).withSlot(0);
-    private double tolerance = 0.05;
     private double motorCurrent = 0.0;
     private double absolutePosition;
     public Climber(){
