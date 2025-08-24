@@ -24,7 +24,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.OperatorOptions;
-import frc.robot.stateMachine.RobotManager;
+import frc.robot.stateMachine.RequestManager;
+import frc.robot.subsystems.LED.LED;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
@@ -33,7 +34,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   // Uncomment as needed
-  public static RobotManager robotManager = RobotManager.getInstance();
+  public static RequestManager robotManager = RequestManager.getInstance();
   public static RobotCommands robotCommands = new RobotCommands();
   public static final Controls controls = new Controls();
   private SendableChooser<Command> autoChooser;
@@ -45,9 +46,12 @@ public class Robot extends TimedRobot {
       NamedCommands.registerCommand(command.getName(), command);
     }
     Command centerL1 = AutoBuilder.buildAuto("CenterL1");
+    Command centerL4 = AutoBuilder.buildAuto("CenterL4");
+
     autoChooser = new SendableChooser<Command>();
     // autoChooser.addOption("CenterL1", centerL1);
     autoChooser.setDefaultOption("CenterL1", centerL1);
+    autoChooser.addOption("CenterL4", centerL4);
 
   }
 
@@ -69,6 +73,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putData(autoChooser);
 
   }
+
 
   @Override
   public void disabledExit() {

@@ -39,12 +39,13 @@ public class Controls {
     public void configureDriverCommands() {
         driver.leftBumper().onTrue(Robot.robotCommands.algaeIntakeCommand());
         driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand());
-        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreCommand());
+        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand());
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
+        driver.back().onTrue(Robot.robotCommands.groundIdleCommand());
        
     }
 
@@ -60,7 +61,7 @@ public class Controls {
         operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.POVMinus90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
-        operator.back().onTrue(Robot.robotCommands.invertedHandoffCommand());
+        operator.back().onTrue(Robot.robotCommands.invertedHandoffToIdleCommand());
         operator.start().onTrue(Robot.robotCommands.resetToIdleCommand());
     }
 
