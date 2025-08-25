@@ -28,8 +28,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   public final CommandSwerveDrivetrain drivetrain;
   public final Pigeon2 drivetrainPigeon = CommandSwerveDrivetrain.getInstance().getPigeon2();
   private double teleopSlowModePercent = 1.0;
-  private double rawControllerXValue = 0.0;
-  private double rawControllerYValue = 0.0;
 
   private double elevatorHeight;
 
@@ -95,8 +93,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   }
 
   public void setTeleopSpeeds(double x, double y, double theta) {
-    rawControllerXValue = x;
-    rawControllerYValue = y;
     double leftY = -1.0
         * MathHelpers.signedExp(ControllerHelpers.deadbandJoystickValue(y, LEFT_Y_DEADBAND), 2.0);
     double leftX = -1.0
