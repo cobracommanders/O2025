@@ -124,6 +124,15 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
     }
   }
 
+  public void tickUp(){
+    IntakePivotPositions.INTAKING += .004;
+    setIntakePosition(IntakePivotPositions.INTAKING);
+  }
+  public void tickDown(){
+    IntakePivotPositions.INTAKING -= .004;
+    setIntakePosition(IntakePivotPositions.INTAKING);
+  }
+
   private static IntakePivot instance;
 
   public static IntakePivot getInstance() {
