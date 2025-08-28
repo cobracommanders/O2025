@@ -9,6 +9,7 @@ import frc.robot.fms.FmsSubsystem;
 import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 
 public class Controls {
     DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
@@ -44,6 +45,8 @@ public class Controls {
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
+        driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));
+        driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
         driver.back().onTrue(Robot.robotCommands.groundIdleCommand());
        
