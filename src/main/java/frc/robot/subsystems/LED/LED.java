@@ -20,7 +20,6 @@ public class LED extends SubsystemBase {
   private LEDState state = new LEDState(Color.kBlue);
 
   public LED() {
-    setLED(Color.kWhiteSmoke);
     blinkTimer.start();
     glowbra_commander = new AddressableLED(9);
     m_ledBuffer = new AddressableLEDBuffer(21);

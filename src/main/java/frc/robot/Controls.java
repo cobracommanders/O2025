@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
-import frc.robot.subsystems.LED.LED;
 import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
@@ -17,8 +16,6 @@ public class Controls {
 
     public final Xbox driver = new Xbox(OIPorts.DRIVER_CONTROLLER_ID);
     public final Xbox operator = new Xbox(OIPorts.OPERATOR_CONTROLLER_ID);
-
-//    LED glowbra = LED.getInstance();
 
     public Controls() {
         driver.setTriggerThreshold(0.2);
