@@ -37,7 +37,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
     public Elevator() {
         super(ElevatorStates.IDLE);
-        motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
         motor_config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MotionMagicAcceleration;
