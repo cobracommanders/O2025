@@ -7,7 +7,7 @@ public class ArmPositions {
     public static final double INTAKE_LOW_REEF_ALGAE = 0;
     public static final double ALGAE_PROCESSOR = 0;
     public static final double ALGAE_NET = 0.2;
-    public static final double L4 = 0.125;
+    public static final double L4 = 0.1255;
     public static final double SCORE_L4 = 0.07;
     public static final double HANDOFF_RIGHT = -0.235;
     public static final double HANDOFF_LEFT = -0.265;
