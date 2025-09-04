@@ -4,6 +4,8 @@ import java.nio.channels.Pipe;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.config.RobotConfig;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
@@ -15,34 +17,35 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.util.MathHelpers;
 import frc.robot.vision.VisionSubsystem;
 import frc.robot.vision.results.TagResult;
 
 public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
-  private static final Vector<N3> MT1_VISION_STD_DEVS =
-      VecBuilder.fill(
-          RobotConfig.get().vision().xyStdDev(),
-          RobotConfig.get().vision().xyStdDev(),
-          RobotConfig.get().vision().thetaStdDev());
-  private static final Vector<N3> MT2_VISION_STD_DEVS =
-      VecBuilder.fill(
-          RobotConfig.get().vision().xyStdDev(),
-          RobotConfig.get().vision().xyStdDev(),
-          Double.MAX_VALUE);
-  private final Pigeon2 imu;
+  private static final Vector<N3> MT1_VISION_STD_DEVS = VecBuilder.fill(
+      VisionConstants.xyStandardDeviation, // xy standard deviation
+      VisionConstants.xyStandardDeviation, // xy standard deviation
+      VisionConstants.thetaStandardDeviation // theta standard deviation
+  );
+  private static final Vector<N3> MT2_VISION_STD_DEVS = VecBuilder.fill(
+      VisionConstants.xyStandardDeviation, //xy standard deviation
+      VisionConstants.thetaStandardDeviation, //xy standard deviation
+      Double.MAX_VALUE);
   private final VisionSubsystem vision;
   private final DriveSubsystem swerve;
+  private final CommandSwerveDrivetrain drivetrain;
   private Pose2d robotPose = Pose2d.kZero;
 
   public LocalizationSubsystem(Pigeon2 imu, VisionSubsystem vision, DriveSubsystem swerve) {
     super(LocalizationStates.DEFAULT_STATE);
     this.swerve = swerve;
-    this.imu = imu;
+    this.drivetrain = swerve.drivetrain;
     this.vision = vision;
 
     if (FeatureFlags.FIELD_CALIBRATION.getAsBoolean()) {
@@ -82,14 +85,14 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
   }
 
   public Pose2d getLookaheadPose(double lookahead) {
-    return MathHelpers.poseLookahead(getPose2d(), swerve.getFieldRelativeSpeeds(), lookahead);
+    return MathHelpers.poseLookahead(getPose2d(), swerve.getTeleopSpeeds(), lookahead);
   }
 
   @Override
-  public void robotPeriodic() {
-    super.robotPeriodic();
+  public void periodic() {
+    super.periodic();
 
-    DogLog.log("Localization/EstimatedPose", getPose());
+    DogLog.log("Localization/EstimatedPose", getPose2d());
   }
 
   private void ingestTagResult(TagResult result) {
@@ -103,17 +106,19 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
   }
 
   private void resetGyro(Rotation2d gyroAngle) {
-    imu.setAngle(gyroAngle.getDegrees());
+    drivetrain.getPigeon2().setYaw(gyroAngle.getDegrees());
     swerve.drivetrain.resetRotation(gyroAngle);
   }
 
   public void resetPose(Pose2d estimatedPose) {
     // Reset the gyro when requested in teleop
-    // Otherwise, if we are in auto, only reset it if we aren't already at the correct heading
+    // Otherwise, if we are in auto, only reset it if we aren't already at the
+    // correct heading
     if (DriverStation.isTeleop()
         || !MathUtil.isNear(
-            estimatedPose.getRotation().getDegrees(), imu., 1.5, -180, 180)) {
-      imu.setAngle(estimatedPose.getRotation().getDegrees());
+            estimatedPose.getRotation().getDegrees(), drivetrain.getPigeon2().getYaw().getValueAsDouble(), 1.5, -180,
+            180)) {
+      drivetrain.setYaw(estimatedPose.getRotation());
     }
 
     swerve.drivetrain.resetPose(estimatedPose);

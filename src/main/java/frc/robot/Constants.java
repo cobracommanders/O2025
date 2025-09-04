@@ -74,5 +74,10 @@ public final class Constants {
         public static final double DETECTION_THRESHOLD = 0.065;
     }
 
+    public static final class VisionConstants{
+        public static final double xyStandardDeviation = 0.0;
+        public static final double thetaStandardDeviation = 0.0;
+    }
+
     // 21.739
 }

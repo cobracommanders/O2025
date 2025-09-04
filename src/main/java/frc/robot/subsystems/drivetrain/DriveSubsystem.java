@@ -121,6 +121,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
         rightX * DrivetrainConstants.maxAngularRate * teleopSlowModePercent);
   }
 
+  public ChassisSpeeds getTeleopSpeeds() {
+    return teleopSpeeds;
+  }
+
+
   @Override
   public void simulationPeriodic() {
     drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());

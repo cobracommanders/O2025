@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.config.FeatureFlags;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.vision.limelight.Limelight;
 import frc.robot.vision.limelight.LimelightStates;
 import frc.robot.vision.results.OptionalTagResult;
@@ -18,8 +19,6 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
   private final Debouncer seeingTagDebouncer = new Debouncer(1.0, DebounceType.kFalling);
   private final Debouncer seeingTagForPoseResetDebouncer =
       new Debouncer(5.0, DebounceType.kFalling);
-
-  private final Pigeon2 imu;
   private final Limelight leftBackLimelight;
   private final Limelight leftFrontLimelight;
   private final Limelight rightLimelight;
@@ -43,13 +42,11 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
   private boolean seenTagRecentlyForReset = true;
 
   public VisionSubsystem(
-      Pigeon2 imu,
       Limelight leftBackLimelight,
       Limelight leftFrontLimelight,
       Limelight rightLimelight,
       Limelight gamePieceDetectionLimelight) {
     super(VisionStates.TAGS);
-    this.imu = imu;
     this.leftBackLimelight = leftBackLimelight;
     this.leftFrontLimelight = leftFrontLimelight;
     this.rightLimelight = rightLimelight;
@@ -58,7 +55,7 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
 
   @Override
   protected void collectInputs() {
-    angularVelocity = imu.getAngularVelocityZWorld().getValueAsDouble();
+    angularVelocity = CommandSwerveDrivetrain.getInstance().getPigeon2().getAngularVelocityYWorld().getValueAsDouble();
 
     leftBackTagResult = leftBackLimelight.getTagResult();
     leftFrontTagResult = leftFrontLimelight.getTagResult();
@@ -89,6 +86,7 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
   public OptionalTagResult getLeftBackTagResult() {
     return leftBackTagResult;
   }
+
 
   public OptionalTagResult getLeftFrontTagResult() {
     return leftFrontTagResult;

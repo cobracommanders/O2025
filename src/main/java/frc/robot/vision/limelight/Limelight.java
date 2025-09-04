@@ -43,7 +43,6 @@ public class Limelight extends StateMachine<LimelightStates> {
             String name,
             LimelightStates initialState,
             boolean mt1Compatible) {
-        // TODO(jonahsnider): Make Limelight state logging work with multiple instances,
         // not just
         // singleton
         super(initialState);
@@ -178,13 +177,6 @@ public class Limelight extends StateMachine<LimelightStates> {
 
         // TODO: Remove once Limelights are upgraded
         LimelightHelpers.SetIMUMode(limelightTableName, 0);
-        // if (limelightModel == LimelightModel.FOUR) {
-        // LimelightHelpers.SetIMUMode(limelightTableName, seedIMUTimer.hasElapsed(2.0)
-        // ? 4 : 3);
-        // } else {
-        // // TODO: Can remove once we have upgraded all the Limelights
-        // LimelightHelpers.SetIMUMode(limelightTableName, 0);
-        // }
     }
 
     private void updateHealth(ReusableOptional<?> result) {
@@ -196,13 +188,12 @@ public class Limelight extends StateMachine<LimelightStates> {
         limelightHeartbeat = newHeartbeat;
     }
 
-    public void setBlinkEnabled(boolean enabled) {
-        if (enabled) {
-            LimelightHelpers.setLEDMode_ForceBlink(limelightTableName);
-        } else {
-            LimelightHelpers.setLEDMode_ForceOff(limelightTableName);
-        }
-    }
+    // public void setBlinkEnabled(boolean enabled) {
+    //     if (enabled) {
+    //         LimelightHelpers.setLEDMode_ForceBlink(limelightTableName);
+    //     } else {
+    //         LimelightHelpers.setLEDMode_ForceOff(limelightTableName);
+    //     }
 
     public void logCameraPositionCalibrationValues() {
         var cameraPoseTargetSpace = LimelightHelpers.getCameraPose3d_TargetSpace(limelightTableName);
