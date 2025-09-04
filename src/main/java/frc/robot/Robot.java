@@ -15,6 +15,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -29,6 +30,7 @@ import frc.robot.subsystems.LED.LED;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
+import frc.robot.vision.limelight.Limelight;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -38,6 +40,7 @@ public class Robot extends TimedRobot {
   public static RobotCommands robotCommands = new RobotCommands();
   public static final Controls controls = new Controls();
   private SendableChooser<Command> autoChooser;
+  private final Timer seedImuTimer = new Timer();
   // public static OperatorOptions operatorOptions =
   // OperatorOptions.getInstance();
 
@@ -81,6 +84,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+
+    seedImuTimer.reset();
+    seedImuTimer.start();
 
     if (autoChooser.getSelected() != null)
       autoChooser.getSelected().schedule();
