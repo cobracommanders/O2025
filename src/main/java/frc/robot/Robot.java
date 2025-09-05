@@ -14,6 +14,8 @@ import com.pathplanner.lib.auto.NamedCommands;
 import dev.doglog.DogLog;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -25,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
+import frc.robot.subsystems.LED.LED;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
@@ -32,11 +35,13 @@ import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
+  public static OperatorOptions operatorOptions = OperatorOptions.getInstance();
+
   // Uncomment as needed
   public static RequestManager robotManager = RequestManager.getInstance();
   public static RobotCommands robotCommands = new RobotCommands();
   public static final Controls controls = new Controls();
-  private SendableChooser<Command> autoChooser;
+  private SendableChooser<Command> autoChooser;    //LED.getInstance();
   // public static OperatorOptions operatorOptions =
   // OperatorOptions.getInstance();
 
@@ -51,6 +56,7 @@ public class Robot extends TimedRobot {
     // autoChooser.addOption("CenterL1", centerL1);
     autoChooser.setDefaultOption("CenterL1", centerL1);
     autoChooser.addOption("CenterL4", centerL4);
+    //LED Initilization
 
   }
 
@@ -70,8 +76,11 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     SmartDashboard.putData(autoChooser);
+    LED led = new LED(operatorOptions);
+
 
   }
+
 
   @Override
   public void disabledExit() {

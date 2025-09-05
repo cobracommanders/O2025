@@ -11,64 +11,52 @@ import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 import frc.robot.stateMachine.OperatorOptions;
 
 public class LED extends SubsystemBase {
-  private final AddressableLED glowbra_commander;
-  private final AddressableLEDBuffer m_ledBuffer;
-  private final Timer blinkTimer = new Timer();
-  private LEDState state = new LEDState(Color.kBlue);
 
-  public LED() {
+  AddressableLED glowbra_commander;
+  AddressableLEDBuffer m_ledBuffer;
+
+  private final Timer blinkTimer = new Timer();
+
+  private final OperatorOptions operatorOptions;
+
+  public LED(OperatorOptions operatorOptions) {
+    this.operatorOptions = operatorOptions;
     blinkTimer.start();
     glowbra_commander = new AddressableLED(9);
-    m_ledBuffer = new AddressableLEDBuffer(150);
+    m_ledBuffer = new AddressableLEDBuffer(21);
     glowbra_commander.setLength(m_ledBuffer.getLength());
     glowbra_commander.setData(m_ledBuffer);
     glowbra_commander.start();
   }
-  @Override
+
   public void periodic() {
 
-    switch (OperatorOptions.getInstance().scoreLocation) {
+    switch (operatorOptions.scoreLocation) {
       case L1 -> {
-        setLED(Color.kAliceBlue);
+        LEDPattern.solid(Color.kAliceBlue);
       }
       case L2 -> {
-        setLED(Color.kCoral);
+        LEDPattern.solid(Color.kCoral);
       }
       case L3 -> {
-        setLED(Color.kGreen);
+        LEDPattern.solid(Color.kGreen);
       }
       case L4 -> {
-        setLED(Color.kYellow);
+        LEDPattern.solid(Color.kYellow);
       }
       case BARGE -> {
-        setLED(Color.kRed);
+        LEDPattern.solid(Color.kRed);
       }
       case PROCESSOR -> {
-        setLED(Color.kOrange);
+        LEDPattern.solid(Color.kOrange);
       }
-    }
-    
-    
-    if (DriverStation.isDisabled()) {
-      LEDPattern.solid(Color.kPurple).applyTo(m_ledBuffer);
     }
 
     glowbra_commander.setData(m_ledBuffer);
     
-  }
-
-  public void setLED(Color color){
-    LEDPattern.solid(color).applyTo(m_ledBuffer);
-  }
-  
-    private static LED instance;
-
-    public static LED getInstance() {
-    if (instance == null)
-      instance = new LED(); // Make sure there is an instance (this will only run once)
-    return instance;
   }
 }
