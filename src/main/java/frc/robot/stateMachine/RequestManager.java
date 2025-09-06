@@ -1,15 +1,9 @@
 package frc.robot.stateMachine;
 
-import java.util.concurrent.Flow.Processor;
-
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
-import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
-
 import dev.doglog.DogLog;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
-import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.armManager.hand.HandStates;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
@@ -18,6 +12,7 @@ import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
+//import frc.robot.subsystems.Lights.LED;
 
 public class RequestManager extends StateMachine<RequestManagerStates> {
 
@@ -27,6 +22,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
     public final CoralDetector coralDetector;
     public OperatorOptions operatorOptions = OperatorOptions.getInstance();
     public final DriveSubsystem driveSubsystem;
+//    public final LED globra = LED.getInstance();
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
@@ -361,31 +357,38 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
     public void setL1() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L1;
+//        LED.getInstance().setL1();
         DogLog.log("Robot/ScoreLocation", "L1");
     }
 
     public void setL2() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L2;
+//        LED.getInstance().setL2();
         DogLog.log("Robot/ScoreLocation", "L2");
     }
 
     public void setL3() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L3;
+//        globra.setL3();
         DogLog.log("Robot/ScoreLocation", "L3");
     }
 
     public void setL4() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L4;
+//        globra.setL4();
+//        LED.getInstance().setL4();
         DogLog.log("Robot/ScoreLocation", "L4");
     }
 
     public void setProcessor() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.PROCESSOR;
+//        LED.getInstance().setProccessor();
         DogLog.log("Robot/ScoreLocation", "PROCESSOR");
     }
 
     public void setBarge() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.BARGE;
+//        LED.getInstance().setBarge();
         DogLog.log("Robot/ScoreLocation", "BARGE");
 
     }
