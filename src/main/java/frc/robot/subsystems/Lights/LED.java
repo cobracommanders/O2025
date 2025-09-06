@@ -54,11 +54,6 @@ public class LED {
                 LEDPattern.solid(Color.kBlack).applyTo(m_ledBuffer);
                 break;
         }
-//        if (DriverStation.isDisabled()) {
-//            LEDPattern.solid(Color.kPurple).applyTo(m_ledBuffer);
-//        } else {
-//            LEDPattern.solid(Color.kRed).applyTo(m_ledBuffer);
-//        }
 
         glowjack_horseman.setData(m_ledBuffer);
 
