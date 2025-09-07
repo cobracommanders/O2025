@@ -19,7 +19,7 @@ import java.util.OptionalDouble;
 import com.pathplanner.lib.config.RobotConfig;
 
 public class Limelight extends StateMachine<LimelightStates> {
-    private static final int[] VALID_APRILTAGS = new int[] { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
+    private static final int[] VALID_APRILTAGS = new int[] {2, 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 }; //TODO: Remove two
 
     private static final double IS_OFFLINE_TIMEOUT = 3;
     private static final double USE_MT1_DISTANCE_THRESHOLD = Units.inchesToMeters(40.0);
@@ -174,9 +174,6 @@ public class Limelight extends StateMachine<LimelightStates> {
                 updateHealth(tagResult);
             }
         }
-
-        // TODO: Remove once Limelights are upgraded
-        LimelightHelpers.SetIMUMode(limelightTableName, 0);
     }
 
     private void updateHealth(ReusableOptional<?> result) {
@@ -187,13 +184,6 @@ public class Limelight extends StateMachine<LimelightStates> {
         }
         limelightHeartbeat = newHeartbeat;
     }
-
-    // public void setBlinkEnabled(boolean enabled) {
-    //     if (enabled) {
-    //         LimelightHelpers.setLEDMode_ForceBlink(limelightTableName);
-    //     } else {
-    //         LimelightHelpers.setLEDMode_ForceOff(limelightTableName);
-    //     }
 
     public void logCameraPositionCalibrationValues() {
         var cameraPoseTargetSpace = LimelightHelpers.getCameraPose3d_TargetSpace(limelightTableName);

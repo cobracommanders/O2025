@@ -1,9 +1,9 @@
 package frc.robot.vision.limelight;
 
 public enum LimelightStates {
-    OFF(1),
-    TAGS(1),
-    CLOSEST_REEF_TAG(1);
+    OFF(0),
+    TAGS(0),
+    CLOSEST_REEF_TAG(0);
   
     final int pipelineIndex;
   

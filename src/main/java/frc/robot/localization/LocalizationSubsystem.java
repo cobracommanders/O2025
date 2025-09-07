@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
@@ -42,11 +43,11 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
   private final CommandSwerveDrivetrain drivetrain;
   private Pose2d robotPose = Pose2d.kZero;
 
-  public LocalizationSubsystem(Pigeon2 imu, VisionSubsystem vision, DriveSubsystem swerve) {
+  public LocalizationSubsystem() {
     super(LocalizationStates.DEFAULT_STATE);
-    this.swerve = swerve;
-    this.drivetrain = swerve.drivetrain;
-    this.vision = vision;
+    this.swerve = DriveSubsystem.getInstance();
+    this.drivetrain = CommandSwerveDrivetrain.getInstance();
+    this.vision = VisionSubsystem.getInstance();
 
     if (FeatureFlags.FIELD_CALIBRATION.getAsBoolean()) {
       SmartDashboard.putData(
@@ -101,8 +102,10 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
     if (!vision.seenTagRecentlyForReset() && FeatureFlags.MT_VISION_METHOD.getAsBoolean()) {
       resetPose(visionPose);
     }
+
     swerve.drivetrain.addVisionMeasurement(
         visionPose, Utils.fpgaToCurrentTime(result.timestamp()), result.standardDevs());
+    DogLog.log("Localization/VisionPose", visionPose);
   }
 
   private void resetGyro(Rotation2d gyroAngle) {
@@ -128,4 +131,12 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
     return Commands.runOnce(
         () -> resetGyro(Rotation2d.fromDegrees((FmsSubsystem.getInstance().isRedAlliance() ? 180 : 0))));
   }
+
+  private static LocalizationSubsystem instance;
+
+      public static LocalizationSubsystem getInstance() {
+        if (instance == null)
+            instance = new LocalizationSubsystem(); // Make sure there is an instance (this will only run once)
+        return instance;
+    }
 }

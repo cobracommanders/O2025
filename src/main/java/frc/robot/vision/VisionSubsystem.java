@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.config.FeatureFlags;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.LED.LED;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.vision.limelight.Limelight;
 import frc.robot.vision.limelight.LimelightStates;
@@ -22,7 +23,6 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
   private final Limelight leftBackLimelight;
   private final Limelight leftFrontLimelight;
   private final Limelight rightLimelight;
-  private final Limelight gamePieceDetectionLimelight;
 
   private OptionalTagResult leftBackTagResult = new OptionalTagResult();
   private OptionalTagResult leftFrontTagResult = new OptionalTagResult();
@@ -42,15 +42,13 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
   private boolean seenTagRecentlyForReset = true;
 
   public VisionSubsystem(
-      Limelight leftBackLimelight,
-      Limelight leftFrontLimelight,
-      Limelight rightLimelight,
-      Limelight gamePieceDetectionLimelight) {
+      Limelight bl,
+      Limelight fl,
+      Limelight right) {
     super(VisionStates.TAGS);
-    this.leftBackLimelight = leftBackLimelight;
-    this.leftFrontLimelight = leftFrontLimelight;
-    this.rightLimelight = rightLimelight;
-    this.gamePieceDetectionLimelight = gamePieceDetectionLimelight;
+    this.leftBackLimelight = bl;
+    this.leftFrontLimelight = fl;
+    this.rightLimelight = right;
   }
 
   @Override
@@ -60,7 +58,6 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
     leftBackTagResult = leftBackLimelight.getTagResult();
     leftFrontTagResult = leftFrontLimelight.getTagResult();
     rightTagResult = rightLimelight.getTagResult();
-    gamePieceTagResult = gamePieceDetectionLimelight.getTagResult();
 
     if (leftBackTagResult.isPresent()
         || leftFrontTagResult.isPresent()
@@ -131,7 +128,6 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
         leftBackLimelight.setState(LimelightStates.TAGS);
         leftFrontLimelight.setState(LimelightStates.TAGS);
         rightLimelight.setState(LimelightStates.TAGS);
-        gamePieceDetectionLimelight.setState(LimelightStates.TAGS);
       }
       case CLOSEST_REEF_TAG -> {
         if (FeatureFlags.USE_ANY_REEF_TAG.getAsBoolean()) {
@@ -154,14 +150,12 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
     leftBackLimelight.sendImuData(robotHeading, angularVelocity, 0.0, 0.0, 0.0, 0.0);
     leftFrontLimelight.sendImuData(robotHeading, angularVelocity, 0.0, 0.0, 0.0, 0.0);
     rightLimelight.sendImuData(robotHeading, angularVelocity, 0.0, 0.0, 0.0, 0.0);
-    gamePieceDetectionLimelight.sendImuData(robotHeading, angularVelocity, 0.0, 0.0, 0.0, 0.0);
 
     if (FeatureFlags.CAMERA_POSITION_CALIBRATION.getAsBoolean()) {
       setStateFromRequest(VisionStates.TAGS);
       leftBackLimelight.logCameraPositionCalibrationValues();
       leftFrontLimelight.logCameraPositionCalibrationValues();
       rightLimelight.logCameraPositionCalibrationValues();
-      gamePieceDetectionLimelight.logCameraPositionCalibrationValues();
     }
 
     DogLog.log("Vision/SeeingTag", seeingTag);
@@ -172,6 +166,16 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
     leftFrontLimelight.setClosestScoringReefTag(tagID);
     rightLimelight.setClosestScoringReefTag(tagID);
     leftBackLimelight.setClosestScoringReefTag(tagID);
-    gamePieceDetectionLimelight.setClosestScoringReefTag(tagID);
+  }
+
+  private static VisionSubsystem instance;
+
+      public static VisionSubsystem getInstance() {
+    if (instance == null)
+      instance = new VisionSubsystem(
+        new Limelight("bl", LimelightStates.CLOSEST_REEF_TAG, true)
+      , new Limelight("fl", LimelightStates.CLOSEST_REEF_TAG, true)
+      , new Limelight("right", LimelightStates.CLOSEST_REEF_TAG, true)); // Make sure there is an instance (this will only run once)
+    return instance;
   }
 }
