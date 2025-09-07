@@ -14,4 +14,10 @@ public class FeatureFlags {
     public static final BooleanSupplier USE_ANY_REEF_TAG = FeatureFlag.of("Vision/UseAnyReefTag", true);
 
     public static final BooleanSupplier FIELD_CALIBRATION = FeatureFlag.of("FieldCalibration", false);
+
+    public static final BooleanSupplier AUTO_ALIGN_DEADBAND =
+      FeatureFlag.of("AutoAlign/Deadband", false);
+
+    public static final BooleanSupplier AUTO_ALIGN_DISTANCE_COST =
+      FeatureFlag.of("AutoAlign/Costs/Distance", true);
 }

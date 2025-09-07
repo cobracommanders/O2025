@@ -6,6 +6,7 @@ import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.Idle;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
 import dev.doglog.DogLog;
+import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
@@ -25,8 +26,9 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
     public final GroundManager groundManager;
     public final Climber climber;
     public final CoralDetector coralDetector;
-    public OperatorOptions operatorOptions = OperatorOptions.getInstance();
+    public final OperatorOptions operatorOptions = OperatorOptions.getInstance();
     public final DriveSubsystem driveSubsystem;
+    public final LocalizationSubsystem localizationSubsystem;
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
@@ -41,6 +43,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
         this.climber = Climber.getInstance();
         this.coralDetector = CoralDetector.getInstance();
         this.driveSubsystem = DriveSubsystem.getInstance();
+        this.localizationSubsystem = LocalizationSubsystem.getInstance();
         // this.desiredArmState = armManager.getState();
         // this.desiredGroundState = groundManager.getState();
     }

@@ -18,6 +18,7 @@ public class LED extends SubsystemBase {
   private final AddressableLEDBuffer m_ledBuffer;
   private final Timer blinkTimer = new Timer();
   private LEDState state = new LEDState(Color.kBlue);
+  private final OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
   public LED() {
     blinkTimer.start();
@@ -30,7 +31,7 @@ public class LED extends SubsystemBase {
   @Override
   public void periodic() {
 
-    switch (OperatorOptions.getInstance().scoreLocation) {
+    switch (operatorOptions.scoreLocation) {
       case L1 -> {
         setLED(Color.kBlue);
       }
