@@ -49,6 +49,7 @@ public class Controls {
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
         driver.back().onTrue(Robot.robotCommands.groundIdleCommand());
+        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
        
     }
 

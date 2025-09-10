@@ -139,19 +139,19 @@ public class AlignmentCostUtil {
               var allPipes =
                   TagAlign.ALL_REEF_PIPES; // Assuming reefState has a method to get all pipes
               return allPipes.stream()
-                  .filter(p -> p.getPose(level, side, localization.getPose()) != null)
+                  .filter(p -> p.getPose(level, side, localization.getPose2d()) != null)
                   .min(
                       Comparator.comparingDouble(
                           p ->
-                              p.getPose(level, side, localization.getPose())
+                              p.getPose(level, side, localization.getPose2d())
                                       .getTranslation()
-                                      .getDistance(localization.getPose().getTranslation())
+                                      .getDistance(localization.getPose2d().getTranslation())
                                   + reefState.getL1Count(p)))
                   .map(
                       p ->
                           getAlignCost(
-                              p.getPose(level, side, localization.getPose()),
-                              localization.getPose(),
+                              p.getPose(level, side, localization.getPose2d()),
+                              localization.getPose2d(),
                               swerve.getTeleopSpeeds()))
                   .orElse(Double.MAX_VALUE);
             });
@@ -160,8 +160,8 @@ public class AlignmentCostUtil {
         yield Comparator.comparingDouble(
             pipe ->
                 getAlignCost(
-                        pipe.getPose(level, side, localization.getPose()),
-                        localization.getPose(),
+                        pipe.getPose(level, side, localization.getPose2d()),
+                        localization.getPose2d(),
                         swerve.getTeleopSpeeds())
                     + (reefState.isCoralScored(pipe, level)
                             && FeatureFlags.AUTO_ALIGN_REEF_STATE_COST.getAsBoolean()
@@ -175,8 +175,8 @@ public class AlignmentCostUtil {
     return Comparator.comparingDouble(
         side ->
             getAlignCost(
-                    side.getPose(localization.getPose()),
-                    localization.getPose(),
+                    side.getPose(localization.getPose2d()),
+                    localization.getPose2d(),
                     swerve.getTeleopSpeeds())
                 + (reefState.isAlgaeRemoved(side)
                         && FeatureFlags.AUTO_ALIGN_REEF_STATE_COST.getAsBoolean()

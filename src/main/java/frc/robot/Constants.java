@@ -16,6 +16,7 @@ public final class Constants {
         public static final double MotionMagicAcceleration = 50;
         public static final double MotionMagicJerk = 150;
         public static final double encoderOffset = -0.64111328125 + 0.005371;
+        public static final double inchesFromCenter = 6.615;
     }
 
     public static final class ElevatorConstants {

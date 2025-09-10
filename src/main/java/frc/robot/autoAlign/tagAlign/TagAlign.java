@@ -14,6 +14,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.AutoConstaints.AutoConstraintOptions;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.ReefSide;
@@ -27,6 +28,8 @@ import frc.robot.util.MathHelpers;
 import frc.robot.util.MathHelpersDog;
 import frc.robot.util.PolarChassisSpeeds;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +38,9 @@ import java.util.OptionalDouble;
 
 public class TagAlign {
   public static final List<ReefPipe> ALL_REEF_PIPES =
-      List.copyOf(ReefPipe.values());
+      List.copyOf(Arrays.asList(ReefPipe.values()));
   public static final List<ReefSide> ALL_REEF_SIDES =
-      List.copyOf(ReefSide.values());
+      List.copyOf(Arrays.asList(ReefSide.values()));
   public static final double L1_TRACKING_TIMEOUT = 15.0;
 
   private static final ProfiledPIDController REEF_PIPE_ROTATION_CONTROLLER =

@@ -296,10 +296,6 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
   }
 
   public ReefAlignStates getReefAlignState() {
-    if (!vision.isAnyLeftScoringTagLimelightOnline()
-        && !vision.isAnyRightScoringTagLimelightOnline()) {
-      return ReefAlignStates.ALL_CAMERAS_DEAD;
-    }
 
     if (vision.getLeftBackTagResult().isPresent()
         || vision.getLeftFrontTagResult().isPresent()
