@@ -63,12 +63,10 @@ public class Controls {
         operator.A().onTrue(Robot.robotCommands.setL1Command());
         operator.POV0().onTrue(Robot.robotCommands.setHighReefAlgaeCommand());
         operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
-        operator.POVMinus90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
+        operator.POVMinus90().onTrue(Robot.robotCommands.toggleCoralMode());
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
         operator.back().onTrue(Robot.robotCommands.invertedHandoffToIdleCommand());
         operator.start().onTrue(Robot.robotCommands.resetToIdleCommand());
-        operator.leftTrigger().onTrue(Robot.robotCommands.coralMode());
-        operator.rightTrigger().onTrue(Robot.robotCommands.normalMode());
     }
 
     private static Controls instance;

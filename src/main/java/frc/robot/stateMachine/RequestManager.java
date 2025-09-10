@@ -116,8 +116,8 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                 groundManager.getState() == GroundManagerStates.IDLE)) {
             nextState = RequestManagerStates.INDEPENDENT;
                 }else{ 
-                    //we are in corla mode
-                    if(armManager.getState() == ArmManagerStates. PREPARE_HANDOFF_MIDDLE && groundManager.getState() == GroundManagerStates.IDLE){
+                    //we are in coral mode
+                    if(armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE && groundManager.getState() == GroundManagerStates.IDLE){
                         nextState = RequestManagerStates.INDEPENDENT;
                     }
             }
@@ -411,12 +411,14 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
     }
 
-    public void coralMode() {
-        operatorOptions.coralMode = operatorOptions.coralMode.CORAL_MODE;
-    }
-
-    public void normalMode() {
-        operatorOptions.coralMode = operatorOptions.coralMode.NORMAL_MODE;
+    public void toggleCoralMode() {
+        if(operatorOptions.coralMode == CoralMode.CORAL_MODE){
+            operatorOptions.coralMode = CoralMode.NORMAL_MODE;
+            DogLog.log("Robot/CoralMode", "NORMAL");
+        }else{
+            operatorOptions.coralMode = CoralMode.CORAL_MODE;
+            DogLog.log("Robot/CoralMode", "CORAL");
+        }
     }
 
     public void setHighReefAlgae() {

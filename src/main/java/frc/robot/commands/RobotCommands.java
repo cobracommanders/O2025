@@ -142,6 +142,10 @@ public class RobotCommands {
         return Commands.runOnce(() -> robotManager.groundIdleRequest()).withName("groundIdle");
     }
 
+    public Command toggleCoralMode(){
+        return Commands.runOnce(() -> robotManager.toggleCoralMode()).withName("coralMode");
+    }
+
     public Command invertedHandoffToIdleCommand() {
         return invertedHandoffCommand()
                 .andThen(robotManager.waitForState(RequestManagerStates.INDEPENDENT).andThen(resetToIdleCommand()));
