@@ -97,7 +97,6 @@ public class Arm extends StateMachine<ArmStates> {
                 MathUtil.isNear(ArmPositions.HANDOFF_RIGHT, armPosition, tolerance);
             case CLIMB ->
                 MathUtil.isNear(ArmPositions.CLIMB, armPosition, tolerance);
-
         };
 
     }

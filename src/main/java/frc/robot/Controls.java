@@ -67,6 +67,8 @@ public class Controls {
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
         operator.back().onTrue(Robot.robotCommands.invertedHandoffToIdleCommand());
         operator.start().onTrue(Robot.robotCommands.resetToIdleCommand());
+        operator.leftTrigger().onTrue(Robot.robotCommands.coralMode());
+        operator.rightTrigger().onTrue(Robot.robotCommands.normalMode());
     }
 
     private static Controls instance;
