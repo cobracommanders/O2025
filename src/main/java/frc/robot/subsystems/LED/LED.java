@@ -17,7 +17,6 @@ public class LED extends SubsystemBase {
   private final AddressableLED glowbra_commander;
   private final AddressableLEDBuffer m_ledBuffer;
   private final Timer blinkTimer = new Timer();
-  private LEDState state = new LEDState(Color.kBlue);
   private final OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
   public LED() {

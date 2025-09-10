@@ -1,6 +1,8 @@
 package frc.robot.subsystems.armManager;
 
 import dev.doglog.DogLog;
+import frc.robot.stateMachine.OperatorOptions;
+import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmStates;
@@ -48,17 +50,29 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
 
             case SCORE_L4 -> {
                 if(timeout(scoringTime)){
-                    nextState = ArmManagerStates.PREPARE_IDLE;
+                    if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                        nextState = ArmManagerStates.PREPARE_IDLE;
+                    }else{
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                    }
                 }
             }
             case SCORE_L3 -> {
                 if(timeout(scoringTime)){
-                    nextState = ArmManagerStates.PREPARE_IDLE;
+                    if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                        nextState = ArmManagerStates.PREPARE_IDLE;
+                    }else{
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                    }
                 }
             }
             case SCORE_L2 -> {
                 if(timeout(scoringTime)){
-                    nextState = ArmManagerStates.PREPARE_IDLE;
+                    if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                        nextState = ArmManagerStates.PREPARE_IDLE;
+                    }else{
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                    }
                 }
             }
 
