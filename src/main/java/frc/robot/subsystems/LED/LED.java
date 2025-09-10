@@ -39,10 +39,10 @@ public class LED extends SubsystemBase {
         setLED(Color.kPurple);
       }
       case L3 -> {
-        setLED(Color.kGreen);
+        setLED(Color.kYellow);
       }
       case L4 -> {
-        setLED(Color.kYellow);
+        setLED(Color.kGreen);
       }
       case BARGE -> {
         setLED(Color.kRed);

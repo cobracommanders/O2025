@@ -8,9 +8,9 @@ public class OperatorOptions {
     public AlgaeIntakeLevel algaeIntakeLevel;
 
     public OperatorOptions() {
-        this.scoreLocation = ScoreLocation.L3;
+        this.scoreLocation = ScoreLocation.L4;
         this.algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE;
-        DogLog.log("Robot/ScoreLocation", "L3");
+        DogLog.log("Robot/ScoreLocation", "L4");
         DogLog.log("Robot/AlgaeLocation", "GROUND");
 
     }
