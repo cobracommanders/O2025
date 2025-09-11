@@ -31,7 +31,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ElevatorConstants.ElevatorGearRatio));
 
     private double elevatorPosition;
-    private final double tolerance;
+    public final double tolerance;
     private Follower right_motor_request = new Follower(Ports.ElevatorPorts.LMOTOR, true);
     private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 

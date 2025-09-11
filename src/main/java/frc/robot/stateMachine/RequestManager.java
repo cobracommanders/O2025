@@ -94,7 +94,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                 }
                 break;
             case HANDOFF:
-                if (timeout(0.1)) {
+                if ((operatorOptions.coralMode == CoralMode.NORMAL_MODE &&timeout(0.1) ) || timeout(0.2)) {
                     nextState = RequestManagerStates.INDEPENDENT;
 
                 }

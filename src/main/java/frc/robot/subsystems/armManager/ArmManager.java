@@ -259,16 +259,19 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 arm.setState(ArmStates.SCORE_L2);
             }
             case PREPARE_HANDOFF_RIGHT -> {
-                armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
+                    armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
             }
             case WAIT_HANDOFF_RIGHT -> {
             }
             case PREPARE_HANDOFF_MIDDLE -> {
+                //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
                 armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
             }
             case WAIT_HANDOFF_MIDDLE -> {
             }
             case PREPARE_HANDOFF_LEFT -> {
+                //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
                 armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
             }
             case WAIT_HANDOFF_LEFT -> {
