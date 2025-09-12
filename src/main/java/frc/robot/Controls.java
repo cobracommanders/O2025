@@ -52,6 +52,7 @@ public class Controls {
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
         driver.back().onTrue(Robot.robotCommands.groundIdleCommand());
         driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
+        driver.X().onTrue(Robot.robotCommands.driveTeleopCommand());
        
     }
 

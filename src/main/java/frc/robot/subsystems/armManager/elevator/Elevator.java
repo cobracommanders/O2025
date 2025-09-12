@@ -15,6 +15,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.ArmStates;
@@ -98,6 +99,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
         double rightElevatorPosition = rMotor.getPosition().getValueAsDouble();
         DogLog.log(name + "/Left Elevator Position", leftElevatorPosition);
         DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
+        MechanismVisualizer.setElevatorPosition(elevatorPosition);
     }
 
     public double getHeight(){

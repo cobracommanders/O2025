@@ -23,6 +23,8 @@ import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.stateMachine.OperatorOptions;
+import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.util.MathHelpers;
 import frc.robot.util.MathHelpersDog;
@@ -347,7 +349,7 @@ public class TagAlign {
   }
 
   public Pose2d getUsedScoringPose(ReefPipe pipe, RobotScoringSide side) {
-    if (preferedScoringLevel.equals(ReefPipeLevel.L1)) {
+    if (OperatorOptions.getInstance().scoreLocation == ScoreLocation.L1) {
       var reefPose = ReefSide.fromPipe(pipe).getPose(localization.getPose2d());
       var pipePose = pipe.getPose(pipeLevel, side, localization.getPose2d());
       var rotatedPipePose =

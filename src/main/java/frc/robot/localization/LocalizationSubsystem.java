@@ -74,6 +74,7 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
     vision.getRightTagResult().ifPresent(this::ingestTagResult);
     vision.getGamePieceTagResult().ifPresent(this::ingestTagResult);
     robotPose = swerve.drivetrain.getState().Pose;
+    vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());
   }
 
   public Pose2d getPose2d() {

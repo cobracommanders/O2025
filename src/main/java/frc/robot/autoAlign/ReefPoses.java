@@ -2,6 +2,7 @@ package frc.robot.autoAlign;
 
 import java.util.List;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.fms.FmsSubsystem;
@@ -47,6 +48,8 @@ public final class ReefPoses {
   }
   public Pose2d getNearestBranch() {
       closestBranch = DriveSubsystem.getInstance().drivetrain.getState().Pose.nearest(List.of(getReefPoses()));
+
+      DogLog.log("nearest branch", closestBranch);
       return closestBranch;
   }
 

@@ -14,6 +14,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Robot;
+import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefAlignStates;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPoses;
@@ -45,6 +47,9 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   private double teleopSlowModePercent = 1.0;
   private double rawControllerXValue = 0.0;
   private double rawControllerYValue = 0.0;
+
+  public PIDController reefAutoAlignX = new PIDController(0, 0, 0);
+  public PIDController reefAutoAlignY = new PIDController(0, 0, 0);
 
   private double goalSnapAngle = 0;
 
@@ -78,6 +83,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
       // Handle exception as needed
       e.printStackTrace();
     }
+
+    reefAutoAlignX.setPID(0.1, 0, 0);
+    reefAutoAlignY.setPID(0.03, 0, 0);
+
+    autoAlignSpeeds = new ChassisSpeeds(0, 0, 0);
 
     AutoBuilder.configure(
         () -> drivetrain.getState().Pose, // Robot pose supplier
@@ -114,19 +124,22 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
         new Rotation2d(rawControllerXValue, rawControllerYValue));
   }
 
-  public void setAutoAlignSpeeds(ChassisSpeeds speeds) {
-    autoAlignSpeeds = speeds;
+  public void setAutoAlignSpeeds() {
+    double reefSpeedX = reefAutoAlignX.calculate(teleopSpeeds.vxMetersPerSecond, ReefPoses.getInstance().getNearestBranch().getX());
+    double reefSpeedY = reefAutoAlignY.calculate(teleopSpeeds.vyMetersPerSecond, ReefPoses.getInstance().getNearestBranch().getY());
+    autoAlignSpeeds = new ChassisSpeeds(reefSpeedX, reefSpeedY, 0);
     sendSwerveRequest(DriveStates.REEF_ALIGN_TELEOP);
   }
 
-  public void scoringAlignmentRequest() {
-    if (DriverStation.isAutonomous()) {
-      normalDriveRequest();
-    } else {
-      setSnapToAngle(ReefPoses.getInstance().getNearestBranch().getRotation().getDegrees());
-      setStateFromRequest(DriveStates.REEF_ALIGN_TELEOP);
-    }
-  }
+  // public void scoringAlignmentRequest() {
+  //   if (DriverStation.isAutonomous()) {
+  //     normalDriveRequest();
+  //   } else {
+  //     setSnapToAngle(ReefPoses.getInstance().getNearestBranch().getRotation().getDegrees());
+  //     setAutoAlignSpeeds();
+  //     setStateFromRequest(DriveStates.REEF_ALIGN_TELEOP);
+  //   }
+  // }
 
   public void normalDriveRequest() {
     if (DriverStation.isAutonomous()) {
@@ -154,7 +167,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
       case AUTO, TELEOP ->
         FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
       case REEF_ALIGN_TELEOP ->
-        DriverStation.isAutonomous() ? DriveStates.AUTO : DriveStates.REEF_ALIGN_TELEOP;
+        AutoAlign.getInstance().isAligned() ? DriveStates.TELEOP : DriveStates.REEF_ALIGN_TELEOP;
+
     };
   }
 
@@ -203,9 +217,15 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   @Override
   protected void collectInputs() {
     fieldRelativeSpeeds = calculateFieldRelativeSpeeds();
+    autoAlignSpeeds =  FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getTagAlignSpeeds()) : AutoAlign.getInstance().getTagAlignSpeeds();
     teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
     DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);
     DogLog.log("Swerve/Pose", drivetrain.getState().Pose);
+  }
+
+  public ChassisSpeeds flipSpeeds(ChassisSpeeds speeds){
+    // speeds = AutoAlign.getInstance().getAlgaeAlignSpeeds();
+    return new ChassisSpeeds(-speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
   }
 
   @Override

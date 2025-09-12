@@ -9,11 +9,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.autoAlign.AutoAlign;
-import frc.robot.autoAlign.ReefPoses;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.armManager.ArmManagerStates;
+import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 
@@ -165,6 +165,10 @@ public class RobotCommands {
     }
 
     public Command reefAlignCommand() {
-        return Commands.runOnce(() -> DriveSubsystem.getInstance().scoringAlignmentRequest());
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP));
+    }
+
+    public Command driveTeleopCommand() {
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP));
     }
 }

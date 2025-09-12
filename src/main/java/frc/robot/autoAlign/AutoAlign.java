@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.AutoConstaints.AutoConstraintOptions;
 import frc.robot.autoAlign.tagAlign.TagAlign;
 import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.util.MathHelpers;
 import frc.robot.util.PolarChassisSpeeds;
@@ -89,6 +91,8 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         Math.abs(
             MathUtil.angleModulus(
                 angleToAim - (robotPose.getRotation().getRadians() + (Math.PI / 2.0))));
+    DogLog.log("AutoAlign/errorRight", errorRight);
+    DogLog.log("AutoAlign/errorLeft", errorLeft);
 
     if (errorRight < errorLeft) {
       return RobotScoringSide.RIGHT;
@@ -124,14 +128,12 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
   private ReefSide bestAlgaeSide = ReefSide.SIDE_AB;
   private ReefSide closestSide = ReefSide.SIDE_AB;
 
-  public AutoAlign(
-      VisionSubsystem vision, LocalizationSubsystem localization, DriveSubsystem swerve) {
+  public AutoAlign() {
     super(AutoAlignState.DEFAULT_STATE);
-
+    this.vision = VisionSubsystem.getInstance();
+    this.localization = LocalizationSubsystem.getInstance();
+    this.swerve = DriveSubsystem.getInstance();
     this.tagAlign = new TagAlign(swerve, localization);
-    this.vision = vision;
-    this.localization = localization;
-    this.swerve = swerve;
   }
 
   public void setAutoReefPipeOverride(ReefPipe override) {
@@ -173,6 +175,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
             new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
     var controllerValues = swerve.getControllerValues();
     tagAlign.setControllerValues(controllerValues.getX(), controllerValues.getY());
+    tagAlign.setLevel(ReefPipeLevel.L3, ReefPipeLevel.L3, getScoringSideFromRobotPose(robotPose, true, true));
   }
 
   public void reset() {
@@ -224,7 +227,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
   public ChassisSpeeds getTagAlignSpeeds() {
     DogLog.log("AutoAlign/TagAlignSpeeds", tagAlignSpeeds);
-    if (preferredLevel.equals(ReefPipeLevel.L1)) {
+    if (OperatorOptions.getInstance().scoreLocation == ScoreLocation.L1) {
       return l1AlignSpeeds;
     }
     return tagAlignSpeeds;
@@ -312,5 +315,13 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
       return ReefAlignStates.NO_TAGS_IN_POSITION;
     }
     return ReefAlignStates.NO_TAGS_WRONG_POSITION;
+  }
+
+  private static AutoAlign instance;
+
+  public static AutoAlign getInstance() {
+    if (instance == null)
+      instance = new AutoAlign(); // Make sure there is an instance (this will only run once)
+    return instance;
   }
 }
