@@ -102,6 +102,11 @@ public class Elevator extends StateMachine<ElevatorStates> {
         MechanismVisualizer.setElevatorPosition(elevatorPosition);
     }
 
+    @Override
+    public void simulationPeriodic() {
+        SimElevator.updateSimPosition(lMotor, rMotor);
+    }
+
     public double getHeight(){
         return elevatorPosition;
     }

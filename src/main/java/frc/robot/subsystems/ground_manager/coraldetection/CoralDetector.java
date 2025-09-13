@@ -8,6 +8,7 @@ import dev.doglog.DogLog;
 import frc.robot.Constants;
 
 import frc.robot.Ports;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
@@ -19,6 +20,8 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     public double lDistance;
     public double rDistance;
     public final String name;
+    
+    public boolean hasSimCoral = false;
 
     public CoralDetector() {
         super(CoralDetectorStates.NONE);
@@ -42,6 +45,13 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
 
     @Override
     protected CoralDetectorStates getNextState(CoralDetectorStates currentState) {
+        if (FmsSubsystem.getInstance().isSimulation()){
+            if (hasSimCoral){
+                return CoralDetectorStates.MIDDLE;
+            } else {
+                return CoralDetectorStates.NONE;
+            }
+        }
         if (lDetected && rDetected) {
             return CoralDetectorStates.MIDDLE;
         } else if (!lDetected && !rDetected) {
@@ -56,6 +66,10 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
 
     public boolean hasCoral(){
         return getState() != CoralDetectorStates.NONE;
+    }
+
+    public void setSimCoral(boolean hasCoral){
+        this.hasSimCoral = hasCoral;
     }
 
     private static CoralDetector instance;

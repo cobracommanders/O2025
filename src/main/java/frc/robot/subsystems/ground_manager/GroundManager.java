@@ -2,6 +2,7 @@ package frc.robot.subsystems.ground_manager;
 
 import dev.doglog.DogLog;
 import frc.robot.Ports.coralDetectorPorts;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
@@ -43,6 +44,10 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 if (coralDetector.hasCoral()) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 }
+                else if(FmsSubsystem.getInstance().isSimulation() && intakePivot.atGoal()){
+                    nextState = GroundManagerStates.PREPARE_IDLE;
+                    coralDetector.setSimCoral(true);
+                }
             }
             case PREPARE_HANDOFF -> {
                 if (intakePivot.atGoal()) {
@@ -62,7 +67,10 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 if (timeout(1)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 }
-                // add timeout
+                else if(FmsSubsystem.getInstance().isSimulation() && intakePivot.atGoal()){
+                    nextState = GroundManagerStates.PREPARE_IDLE;
+                    coralDetector.setSimCoral(false);
+                }
             }
             case WAIT_SCORE_L1 -> {
             }
@@ -108,6 +116,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
             case HANDOFF -> {
                 rollers.setState(IntakeRollersStates.HANDOFF);
+                coralDetector.setSimCoral(false);
             }
             case PREPARE_INVERTED_HANDOFF -> {
                 intakePivot.setState(IntakePivotStates.HANDOFF);

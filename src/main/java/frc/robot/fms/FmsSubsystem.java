@@ -1,5 +1,7 @@
 package frc.robot.fms;
 
+import com.ctre.phoenix6.Utils;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -10,6 +12,7 @@ public class FmsSubsystem extends SubsystemBase {
     private boolean disabled= true;
     private boolean teleopEnabled = false;
     private boolean autoEnabled = false;
+    private boolean isSimulation = false;
     private Alliance alliance = Alliance.Red;
 
     public FmsSubsystem() {
@@ -17,6 +20,10 @@ public class FmsSubsystem extends SubsystemBase {
 
     public boolean isDisabled() {
         return disabled;
+    }
+
+    public boolean isSimulation(){
+        return isSimulation;
     }
 
     public boolean isTeleop() {
@@ -29,6 +36,10 @@ public class FmsSubsystem extends SubsystemBase {
 
     public boolean isRedAlliance() {
         return alliance == Alliance.Red;
+    }
+
+    public void updateSimulation(){
+        isSimulation = Utils.isSimulation();
     }
 
     @Override

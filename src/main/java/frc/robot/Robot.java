@@ -72,6 +72,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     lights.periodic();
     MechanismVisualizer.publishData();
+    FmsSubsystem.getInstance().updateSimulation();
   }
 
   @Override
