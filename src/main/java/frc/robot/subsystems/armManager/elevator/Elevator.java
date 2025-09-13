@@ -15,6 +15,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.ArmStates;
@@ -31,13 +32,13 @@ public class Elevator extends StateMachine<ElevatorStates> {
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ElevatorConstants.ElevatorGearRatio));
 
     private double elevatorPosition;
-    private final double tolerance;
+    public final double tolerance;
     private Follower right_motor_request = new Follower(Ports.ElevatorPorts.LMOTOR, true);
     private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
     public Elevator() {
         super(ElevatorStates.IDLE);
-        motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
         motor_config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MotionMagicAcceleration;
@@ -98,6 +99,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
         double rightElevatorPosition = rMotor.getPosition().getValueAsDouble();
         DogLog.log(name + "/Left Elevator Position", leftElevatorPosition);
         DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
+        MechanismVisualizer.setElevatorPosition(elevatorPosition);
     }
 
     public double getHeight(){

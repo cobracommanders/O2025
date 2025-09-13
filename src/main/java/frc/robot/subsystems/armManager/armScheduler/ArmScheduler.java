@@ -1,9 +1,14 @@
 package frc.robot.subsystems.armManager.armScheduler;
 
+import frc.robot.stateMachine.OperatorOptions;
+import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.armManager.ArmManager;
+import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmStates;
 import frc.robot.subsystems.armManager.elevator.Elevator;
+import frc.robot.subsystems.armManager.elevator.ElevatorPositions;
 import frc.robot.subsystems.armManager.elevator.ElevatorStates;
 import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.armManager.hand.HandStates;
@@ -69,7 +74,22 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
         this.armState = armState;
         this.handState = handState;
         this.elevatorState = elevatorState;
-        this.setStateFromRequest(ArmSchedulerStates.ARM_UP);
+        if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.CORAL_MODE
+        && isArmManagerPrepareHandoff(ArmManager.getInstance().getState())
+        && isHandoffArmState(armState)
+        && Elevator.getInstance().getHeight() > ElevatorPositions.HANDOFF - Elevator.getInstance().tolerance){
+            this.setStateFromRequest(ArmSchedulerStates.ARM_TO_POSITION);
+        }else{
+            this.setStateFromRequest(ArmSchedulerStates.ARM_UP);
+        }
+    }
+
+    public boolean isHandoffArmState(ArmStates armState){
+        return armState == ArmStates.HANDOFF_LEFT || armState == ArmStates.HANDOFF_RIGHT || armState == ArmStates.HANDOFF_MIDDLE;
+    }
+
+    public boolean isArmManagerPrepareHandoff(ArmManagerStates armManagerState){
+        return armManagerState == ArmManagerStates.PREPARE_HANDOFF_LEFT || armManagerState == ArmManagerStates.PREPARE_HANDOFF_MIDDLE || armManagerState == ArmManagerStates.PREPARE_HANDOFF_RIGHT || armManagerState == ArmManagerStates.WAIT_HANDOFF_MIDDLE;
     }
 
     @Override
@@ -83,6 +103,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
                 elevator.setState(elevatorState);
             }
             case ARM_TO_POSITION -> {
+                hand.setState(handState); //needs to happen for coral mode skipping ARM_UP and ELE_TO_POS
                 arm.setState(armState);
             }
             case READY -> {

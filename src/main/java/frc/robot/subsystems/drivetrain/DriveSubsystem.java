@@ -1,5 +1,6 @@
 package frc.robot.subsystems.drivetrain;
 
+import java.util.List;
 import java.util.Map;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -13,12 +14,21 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.DrivetrainConstants;
+import frc.robot.Robot;
+import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.ReefAlignStates;
+import frc.robot.autoAlign.ReefPipe;
+import frc.robot.autoAlign.ReefPoses;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.util.ControllerHelpers;
@@ -27,12 +37,21 @@ import frc.robot.util.MathHelpers;
 public class DriveSubsystem extends StateMachine<DriveStates> {
   private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
   private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
+  private ChassisSpeeds fieldRelativeSpeeds = new ChassisSpeeds();
+  private ChassisSpeeds robotRelativeSpeeds = new ChassisSpeeds();
+  private ChassisSpeeds autoAlignSpeeds = new ChassisSpeeds();
   public final CommandSwerveDrivetrain drivetrain;
+  public Pose2d closestBranch = new Pose2d();
   private SwerveDriveState drivetrainState = new SwerveDriveState();
   public final Pigeon2 drivetrainPigeon = CommandSwerveDrivetrain.getInstance().getPigeon2();
   private double teleopSlowModePercent = 1.0;
   private double rawControllerXValue = 0.0;
   private double rawControllerYValue = 0.0;
+
+  public PIDController reefAutoAlignX = new PIDController(0, 0, 0);
+  public PIDController reefAutoAlignY = new PIDController(0, 0, 0);
+
+  private double goalSnapAngle = 0;
 
   private double elevatorHeight;
 
@@ -65,6 +84,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
       e.printStackTrace();
     }
 
+    reefAutoAlignX.setPID(0.1, 0, 0);
+    reefAutoAlignY.setPID(0.03, 0, 0);
+
+    autoAlignSpeeds = new ChassisSpeeds(0, 0, 0);
+
     AutoBuilder.configure(
         () -> drivetrain.getState().Pose, // Robot pose supplier
         drivetrain::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
@@ -89,11 +113,62 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
     );
   }
 
+  public Translation2d getControllerValues() {
+    if (getState() != DriveStates.REEF_ALIGN_TELEOP) {
+      return Translation2d.kZero;
+    }
+
+    return new Translation2d(
+        ControllerHelpers.getJoystickMagnitude(
+            rawControllerXValue, rawControllerYValue, 2),
+        new Rotation2d(rawControllerXValue, rawControllerYValue));
+  }
+
+  public void setAutoAlignSpeeds() {
+    double reefSpeedX = reefAutoAlignX.calculate(teleopSpeeds.vxMetersPerSecond, ReefPoses.getInstance().getNearestBranch().getX());
+    double reefSpeedY = reefAutoAlignY.calculate(teleopSpeeds.vyMetersPerSecond, ReefPoses.getInstance().getNearestBranch().getY());
+    autoAlignSpeeds = new ChassisSpeeds(reefSpeedX, reefSpeedY, 0);
+    sendSwerveRequest(DriveStates.REEF_ALIGN_TELEOP);
+  }
+
+  // public void scoringAlignmentRequest() {
+  //   if (DriverStation.isAutonomous()) {
+  //     normalDriveRequest();
+  //   } else {
+  //     setSnapToAngle(ReefPoses.getInstance().getNearestBranch().getRotation().getDegrees());
+  //     setAutoAlignSpeeds();
+  //     setStateFromRequest(DriveStates.REEF_ALIGN_TELEOP);
+  //   }
+  // }
+
+  public void normalDriveRequest() {
+    if (DriverStation.isAutonomous()) {
+      setStateFromRequest(DriveStates.AUTO);
+    } else {
+      setStateFromRequest(DriveStates.TELEOP);
+    }
+  }
+
+
+  public void setSnapToAngle(double angle) {
+    goalSnapAngle = ReefPoses.getInstance().getNearestBranch().getRotation().getDegrees();
+
+    // We don't necessarily set auto swerve speeds every loop, so this ensures we are always snapped
+    // to the right angle during auto. Teleop doesn't need this since teleop speeds are constantly
+    // fed into swerve.
+    if (DriverStation.isAutonomous()) {
+      sendSwerveRequest(DriveStates.REEF_ALIGN_TELEOP);
+    }
+  }
+
   @Override
   protected DriveStates getNextState(DriveStates currentState) {
     return switch (currentState) {
       case AUTO, TELEOP ->
         FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
+      case REEF_ALIGN_TELEOP ->
+        AutoAlign.getInstance().isAligned() ? DriveStates.TELEOP : DriveStates.REEF_ALIGN_TELEOP;
+
     };
   }
 
@@ -121,15 +196,36 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
         rightX * DrivetrainConstants.maxAngularRate * teleopSlowModePercent);
   }
 
+  public ChassisSpeeds getTeleopSpeeds() {
+    return teleopSpeeds;
+  }
+
+  public ChassisSpeeds getFieldRelativeSpeeds() {
+    return fieldRelativeSpeeds;
+  }
+
+  private ChassisSpeeds calculateFieldRelativeSpeeds() {
+    return ChassisSpeeds.fromRobotRelativeSpeeds(
+        robotRelativeSpeeds, drivetrainState.Pose.getRotation());
+  }
+
   @Override
   public void simulationPeriodic() {
     drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
   }
+
   @Override
   protected void collectInputs() {
+    fieldRelativeSpeeds = calculateFieldRelativeSpeeds();
+    autoAlignSpeeds =  FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getTagAlignSpeeds()) : AutoAlign.getInstance().getTagAlignSpeeds();
     teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
     DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);
     DogLog.log("Swerve/Pose", drivetrain.getState().Pose);
+  }
+
+  public ChassisSpeeds flipSpeeds(ChassisSpeeds speeds){
+    // speeds = AutoAlign.getInstance().getAlgaeAlignSpeeds();
+    return new ChassisSpeeds(-speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
   }
 
   @Override
@@ -172,6 +268,15 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
                 .withVelocityX(autoSpeeds.vxMetersPerSecond)
                 .withVelocityY(autoSpeeds.vyMetersPerSecond)
                 .withRotationalRate(autoSpeeds.omegaRadiansPerSecond)
+                .withDriveRequestType(DriveRequestType.Velocity));
+      }
+
+      case REEF_ALIGN_TELEOP -> {
+        drivetrain.setControl(
+            drive
+                .withVelocityX(autoAlignSpeeds.vxMetersPerSecond)
+                .withVelocityY(autoAlignSpeeds.vyMetersPerSecond)
+                .withRotationalRate(autoAlignSpeeds.omegaRadiansPerSecond)
                 .withDriveRequestType(DriveRequestType.Velocity));
       }
     }

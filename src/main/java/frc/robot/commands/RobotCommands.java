@@ -8,16 +8,21 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.autoAlign.AutoAlign;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.armManager.ArmManagerStates;
+import frc.robot.subsystems.drivetrain.DriveStates;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 
 public class RobotCommands {
 
     private final RequestManager robotManager;
     private final Subsystem[] requirements;
+
+    private double reefSnapAngle = 0.0;
 
     public RobotCommands() {
         this.robotManager = RequestManager.getInstance();
@@ -42,7 +47,8 @@ public class RobotCommands {
                 setGroundAlgaeCommand(),
                 waitForState(RequestManagerStates.INDEPENDENT),
                 waitForGroundReady(),
-                waitForWaitL4()
+                waitForWaitL4(),
+                reefAlignCommand()
         };
     }
 
@@ -136,6 +142,10 @@ public class RobotCommands {
         return Commands.runOnce(() -> robotManager.groundIdleRequest()).withName("groundIdle");
     }
 
+    public void toggleCoralMode(){
+        robotManager.toggleCoralMode();
+    }
+
     public Command invertedHandoffToIdleCommand() {
         return invertedHandoffCommand()
                 .andThen(robotManager.waitForState(RequestManagerStates.INDEPENDENT).andThen(resetToIdleCommand()));
@@ -152,5 +162,13 @@ public class RobotCommands {
                                 robotManager.operatorOptions.scoreLocation != ScoreLocation.L1))
                 .withName("prepareScoreWithHandoffCheck");
 
+    }
+
+    public Command reefAlignCommand() {
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP));
+    }
+
+    public Command driveTeleopCommand() {
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP));
     }
 }

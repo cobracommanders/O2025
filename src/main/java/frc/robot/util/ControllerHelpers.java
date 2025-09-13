@@ -46,5 +46,16 @@ public final class ControllerHelpers {
     }
   }
 
+  public static double getJoystickMagnitude(double joystickX, double joystickY, double exponent) {
+    var rawMagnitude = Math.hypot(joystickX, joystickY);
+
+    var deadbandedLower = MathUtil.applyDeadband(rawMagnitude, 0.05, 1);
+    var deadbandedUpper =
+        MathUtil.interpolate(
+            0, Math.signum(deadbandedLower), Math.abs(deadbandedLower) / 0.95);
+
+    return Math.pow(deadbandedUpper, exponent);
+  }
+
   private ControllerHelpers() {}
 }

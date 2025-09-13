@@ -2,5 +2,6 @@ package frc.robot.subsystems.drivetrain;
 
 public enum DriveStates {
     TELEOP,
-    AUTO
+    AUTO,
+    REEF_ALIGN_TELEOP
 }
