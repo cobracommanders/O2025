@@ -2,6 +2,7 @@ package frc.robot.subsystems.armManager.arm;
 
 import java.util.jar.Attributes.Name;
 
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -20,11 +21,13 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
+import frc.robot.subsystems.armManager.elevator.SimElevator;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.vision.VisionSubsystem;
 
@@ -108,6 +111,9 @@ public class Arm extends StateMachine<ArmStates> {
     }
 
     public void syncEncoder() {
+        if(FmsSubsystem.getInstance().isSimulation()){
+            return;
+        }
         motor.setPosition(absolutePosition);
     }
 
@@ -133,8 +139,16 @@ public class Arm extends StateMachine<ArmStates> {
         DogLog.log(getName() + "/Encoder position", absolutePosition);
         DogLog.log(getName() + "/Motor position", armPosition);
         DogLog.log(getName() + "/at goal", atGoal());
+        if (Utils.isSimulation())
+            SimArm.updateSimPosition(motor, encoder);
+        // updateSimPosition(setpoint);
         MechanismVisualizer.setArmPosition(armPosition);
     }
+
+    //   @Override
+    // public void simulationPeriodic() {
+    //     SimArm.updateSimPosition(motor, encoder);
+    // }
 
     public void setArmSpeed() {
         motor.set(armSpeed.get());
