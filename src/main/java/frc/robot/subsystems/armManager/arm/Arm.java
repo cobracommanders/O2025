@@ -19,14 +19,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.autoAlign.AutoAlign;
-import frc.robot.localization.LocalizationSubsystem;
-import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
-import frc.robot.subsystems.drivetrain.DriveSubsystem;
-import frc.robot.vision.VisionSubsystem;
 
 public class Arm extends StateMachine<ArmStates> {
     public String name = getName();
@@ -54,7 +48,7 @@ public class Arm extends StateMachine<ArmStates> {
         motor_config.MotionMagic.MotionMagicAcceleration = ArmConstants.MotionMagicAcceleration;
         motor_config.MotionMagic.MotionMagicJerk = ArmConstants.MotionMagicJerk;
         canCoderConfig.MagnetSensor.MagnetOffset = Constants.ArmConstants.encoderOffset;
-        canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.7;
+        canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5;
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
 
         encoder = new CANcoder(Ports.ArmPorts.ENCODER);
@@ -84,17 +78,17 @@ public class Arm extends StateMachine<ArmStates> {
             case ALGAE_PROCESSOR ->
                 MathUtil.isNear(ArmPositions.ALGAE_PROCESSOR, armPosition, tolerance);
             case L4 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L4) : ArmPositions.L4, armPosition, tolerance);
+                MathUtil.isNear(ArmPositions.L4, armPosition, tolerance);
             case SCORE_L4 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L4) : ArmPositions.SCORE_L4, armPosition, tolerance);
+                MathUtil.isNear(ArmPositions.SCORE_L4, armPosition, tolerance);
             case L3 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L3) : ArmPositions.L3, armPosition, tolerance);
+                MathUtil.isNear(ArmPositions.L3, armPosition, tolerance);
             case SCORE_L3 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L3) : ArmPositions.SCORE_L3, armPosition, tolerance);
+                MathUtil.isNear(ArmPositions.SCORE_L3, armPosition, tolerance);
             case L2 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L2) : ArmPositions.L2, armPosition, tolerance);
+                MathUtil.isNear(ArmPositions.L2, armPosition, tolerance);
             case SCORE_L2 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L2) : ArmPositions.SCORE_L2, armPosition, tolerance);
+                MathUtil.isNear(ArmPositions.SCORE_L2, armPosition, tolerance);
             case HANDOFF_LEFT ->
                 MathUtil.isNear(ArmPositions.HANDOFF_LEFT, armPosition, tolerance);
             case HANDOFF_MIDDLE ->
@@ -103,6 +97,7 @@ public class Arm extends StateMachine<ArmStates> {
                 MathUtil.isNear(ArmPositions.HANDOFF_RIGHT, armPosition, tolerance);
             case CLIMB ->
                 MathUtil.isNear(ArmPositions.CLIMB, armPosition, tolerance);
+
         };
 
     }
@@ -111,29 +106,13 @@ public class Arm extends StateMachine<ArmStates> {
         motor.setPosition(absolutePosition);
     }
 
-    public boolean invertArm(){
-        switch (AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d(), true, true)) {
-            case LEFT:
-                return true;
-            case RIGHT:
-                return false;
-            default:
-                return false;
-        }
-    }
-
-    public double invertPosition(double position){
-        return -position + 0.5;
-    } 
-
-    @Override 
+    @Override
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
         armPosition = motor.getPosition().getValueAsDouble();
         DogLog.log(getName() + "/Encoder position", absolutePosition);
         DogLog.log(getName() + "/Motor position", armPosition);
         DogLog.log(getName() + "/at goal", atGoal());
-        MechanismVisualizer.setArmPosition(armPosition);
     }
 
     public void setArmSpeed() {
@@ -171,10 +150,10 @@ public class Arm extends StateMachine<ArmStates> {
                 setArmPosition(ArmPositions.ALGAE_NET);
             }
             case L4 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L4) : ArmPositions.L4);
+                setArmPosition(ArmPositions.L4);
             }
             case SCORE_L4 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L4) : ArmPositions.SCORE_L4);
+                setArmPosition(ArmPositions.SCORE_L4);
             }
             case HANDOFF_LEFT -> {
                 setArmPosition(ArmPositions.HANDOFF_LEFT);
@@ -186,16 +165,16 @@ public class Arm extends StateMachine<ArmStates> {
                 setArmPosition(ArmPositions.HANDOFF_RIGHT);
             }
             case L3 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L3) : ArmPositions.L3);
+                setArmPosition(ArmPositions.L3);
             }
             case SCORE_L3 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L3) : ArmPositions.SCORE_L3);
+                setArmPosition(ArmPositions.SCORE_L3);
             }
             case L2 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L2) : ArmPositions.L2);
+                setArmPosition(ArmPositions.L2);
             }
             case SCORE_L2 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L2) : ArmPositions.SCORE_L2);
+                setArmPosition(ArmPositions.SCORE_L2);
             }
             case CLIMB -> {
                 setArmPosition(ArmPositions.CLIMB);

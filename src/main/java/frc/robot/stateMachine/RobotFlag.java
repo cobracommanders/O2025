@@ -11,6 +11,5 @@ public enum RobotFlag {
     RESET_TO_IDLE,
     INVERTED_HANDOFF,
     HANDOFF,
-    GROUND_IDLE,
-    PREPARE_CORAL_IDLE,
+    GROUND_IDLE;
 }

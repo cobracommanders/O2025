@@ -1,8 +1,6 @@
 package frc.robot.stateMachine;
 
 import dev.doglog.DogLog;
-import frc.robot.localization.LocalizationSubsystem;
-import frc.robot.stateMachine.OperatorOptions.CoralMode;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
@@ -22,9 +20,9 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
     public final GroundManager groundManager;
     public final Climber climber;
     public final CoralDetector coralDetector;
-    public final OperatorOptions operatorOptions = OperatorOptions.getInstance();
+    public OperatorOptions operatorOptions = OperatorOptions.getInstance();
     public final DriveSubsystem driveSubsystem;
-    public final LocalizationSubsystem localizationSubsystem;
+//    public final LED globra = LED.getInstance();
 
     public final FlagManager<RobotFlag> flags = new FlagManager<>("RobotManager", RobotFlag.class);
 
@@ -39,7 +37,6 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
         this.climber = Climber.getInstance();
         this.coralDetector = CoralDetector.getInstance();
         this.driveSubsystem = DriveSubsystem.getInstance();
-        this.localizationSubsystem = LocalizationSubsystem.getInstance();
         // this.desiredArmState = armManager.getState();
         // this.desiredGroundState = groundManager.getState();
     }
@@ -94,7 +91,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                 }
                 break;
             case HANDOFF:
-                if ((operatorOptions.coralMode == CoralMode.NORMAL_MODE &&timeout(0.1) ) || timeout(0.2)) {
+                if (timeout(0.1)) {
                     nextState = RequestManagerStates.INDEPENDENT;
 
                 }
@@ -111,18 +108,10 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                 }
                 break;
             case PREPARE_IDLE:
-                if ((operatorOptions.coralMode == CoralMode.NORMAL_MODE) &&
-                ((armManager.getState() == ArmManagerStates.IDLE) &&
-                groundManager.getState() == GroundManagerStates.IDLE)) {
-            nextState = RequestManagerStates.INDEPENDENT;
-                }else{ 
-                    //we are in coral mode
-                    if(armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE && groundManager.getState() == GroundManagerStates.IDLE){
-                        nextState = RequestManagerStates.INDEPENDENT;
-                    }
-            }
-
-                
+                if ((armManager.getState() == ArmManagerStates.IDLE) &&
+                        groundManager.getState() == GroundManagerStates.IDLE) {
+                    nextState = RequestManagerStates.INDEPENDENT;
+                }
                 break;
             case CLIMB:
             case INDEPENDENT:
@@ -135,14 +124,8 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
     protected void afterTransition(RequestManagerStates newState) {
         switch (newState) {
             case PREPARE_IDLE -> {
-                if (operatorOptions.coralMode == CoralMode.CORAL_MODE) {
-                    groundManager.setState(GroundManagerStates.PREPARE_IDLE);
-                    armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
-            }else if (operatorOptions.coralMode == CoralMode.NORMAL_MODE) {
-                    groundManager.setState(GroundManagerStates.PREPARE_IDLE);
-                    armManager.setState(ArmManagerStates.PREPARE_IDLE);
-                }
-                
+                groundManager.setState(GroundManagerStates.PREPARE_IDLE);
+                armManager.setState(ArmManagerStates.PREPARE_IDLE);
             }
             case HANDOFF -> {
                 groundManager.setState(GroundManagerStates.HANDOFF);
@@ -176,7 +159,6 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                 groundManager.setState(GroundManagerStates.CLIMB);
             }
         }
-
     }
 
     @Override
@@ -375,50 +357,40 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
     public void setL1() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L1;
-        // LED.getInstance().setL1();
+//        LED.getInstance().setL1();
         DogLog.log("Robot/ScoreLocation", "L1");
     }
 
     public void setL2() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L2;
-        // LED.getInstance().setL2();
+//        LED.getInstance().setL2();
         DogLog.log("Robot/ScoreLocation", "L2");
     }
 
     public void setL3() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L3;
-        // globra.setL3();
+//        globra.setL3();
         DogLog.log("Robot/ScoreLocation", "L3");
     }
 
     public void setL4() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.L4;
-        // globra.setL4();
-        // LED.getInstance().setL4();
+//        globra.setL4();
+//        LED.getInstance().setL4();
         DogLog.log("Robot/ScoreLocation", "L4");
     }
 
     public void setProcessor() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.PROCESSOR;
-        // LED.getInstance().setProccessor();
+//        LED.getInstance().setProccessor();
         DogLog.log("Robot/ScoreLocation", "PROCESSOR");
     }
 
     public void setBarge() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.BARGE;
-        // LED.getInstance().setBarge();
+//        LED.getInstance().setBarge();
         DogLog.log("Robot/ScoreLocation", "BARGE");
 
-    }
-
-    public void toggleCoralMode() {
-        if(operatorOptions.coralMode == CoralMode.CORAL_MODE){
-            operatorOptions.coralMode = CoralMode.NORMAL_MODE;
-            DogLog.log("Robot/CoralMode", "NORMAL");
-        }else{
-            operatorOptions.coralMode = CoralMode.CORAL_MODE;
-            DogLog.log("Robot/CoralMode", "CORAL");
-        }
     }
 
     public void setHighReefAlgae() {

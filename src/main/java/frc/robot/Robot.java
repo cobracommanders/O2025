@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import java.util.Map;
+import java.util.ResourceBundle.Control;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -15,18 +19,16 @@ import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.autoAlign.AutoAlign;
 import frc.robot.commands.RobotCommands;
-import frc.robot.fms.FmsSubsystem;
-import frc.robot.mechanism_visualizer.MechanismVisualizer;
+import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.Lights.LED;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
@@ -42,9 +44,8 @@ public class Robot extends TimedRobot {
   // Uncomment as needed
   public static RequestManager robotManager = RequestManager.getInstance();
   public static RobotCommands robotCommands = new RobotCommands();
-  // public static final Controls controls = new Controls();
+  public static final Controls controls = new Controls();
   private SendableChooser<Command> autoChooser;
-  private final Timer seedImuTimer = new Timer();
   public static LED lights;
   // public static OperatorOptions operatorOptions =
   // OperatorOptions.getInstance();
@@ -71,7 +72,6 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     lights.periodic();
-    MechanismVisualizer.publishData();
   }
 
   @Override
@@ -84,10 +84,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    FmsSubsystem.getInstance();
     SmartDashboard.putData(autoChooser);
     lights = new LED();
-    AutoAlign.getInstance();
 
   }
 
@@ -98,9 +96,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-
-    seedImuTimer.reset();
-    seedImuTimer.start();
 
     if (autoChooser.getSelected() != null)
       autoChooser.getSelected().schedule();

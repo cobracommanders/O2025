@@ -5,18 +5,27 @@
 package frc.robot.subsystems.Lights;
 
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.stateMachine.OperatorOptions;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberStates;
+
+import static edu.wpi.first.units.Units.*;
 
 public class LED {
     private final AddressableLED glowjack_horseman;
     private final AddressableLEDBuffer m_ledBuffer;
 
+    //For Climb
+    private final LEDPattern rainbow = LEDPattern.rainbow(255, 128);
+    private final Distance ledSpacing = Meters.of(1.0 / 120.0);
+    private final LEDPattern scrollingRainbow =
+            rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(.5), ledSpacing);
+    LEDPattern blinkingRainbow = scrollingRainbow.blink(Seconds.of(.1));
     public LED() {
         // PWM port 9
         // Must be a PWM header, not MXP or DIO
@@ -31,29 +40,38 @@ public class LED {
         glowjack_horseman.start();
     }
     public void periodic() {
-        switch(OperatorOptions.getInstance().scoreLocation){
-            case L1:
-                LEDPattern.solid(Color.kRed).applyTo(m_ledBuffer);
-                break;
-            case L2:
-                LEDPattern.solid(Color.kYellow).applyTo(m_ledBuffer);
-                break;
-            case L3:
-                LEDPattern.solid(Color.kDodgerBlue).applyTo(m_ledBuffer);
-                break;
-            case L4:
-                LEDPattern.solid(Color.kGreen).applyTo(m_ledBuffer);
-                break;
-            case PROCESSOR:
-                LEDPattern.solid(Color.kDarkOliveGreen).applyTo(m_ledBuffer);
-                break;
-            case BARGE:
-                LEDPattern.solid(Color.kPurple).applyTo(m_ledBuffer);
-                break;
-            default:
-                LEDPattern.solid(Color.kBlack).applyTo(m_ledBuffer);
-                break;
+        if(Climber.getInstance().getState() != ClimberStates.IDLE){
+            if(Climber.getInstance().getState() == ClimberStates.CLIMBING || Climber.getInstance().getState() == ClimberStates.CLIMBED){
+                blinkingRainbow.applyTo(m_ledBuffer);
+            }else{
+                scrollingRainbow.applyTo(m_ledBuffer);
+            }
+        }else{
+            switch(OperatorOptions.getInstance().scoreLocation){
+                case L1:
+                    LEDPattern.solid(Color.kRed).applyTo(m_ledBuffer);
+                    break;
+                case L2:
+                    LEDPattern.solid(Color.kYellow).applyTo(m_ledBuffer);
+                    break;
+                case L3:
+                    LEDPattern.solid(Color.kDodgerBlue).applyTo(m_ledBuffer);
+                    break;
+                case L4:
+                    LEDPattern.solid(Color.kGreen).applyTo(m_ledBuffer);
+                    break;
+                case PROCESSOR:
+                    LEDPattern.solid(Color.kDarkOliveGreen).applyTo(m_ledBuffer);
+                    break;
+                case BARGE:
+                    LEDPattern.solid(Color.kPurple).applyTo(m_ledBuffer);
+                    break;
+                default:
+                    LEDPattern.solid(Color.kBlack).applyTo(m_ledBuffer);
+                    break;
+            }
         }
+
 
         glowjack_horseman.setData(m_ledBuffer);
 
