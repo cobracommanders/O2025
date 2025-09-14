@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.ReefSideOffset;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
@@ -165,7 +168,11 @@ public class RobotCommands {
     }
 
     public Command reefAlignCommand() {
-        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP));
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.TELEOP).andThen(scoreCommand()));
+    }
+
+    public Command algaeAlignCommand() {
+        return Commands.runOnce(() -> AutoAlign.getInstance().setAlgaeIntakingOffset(ReefSideOffset.ALGAE_INTAKING)).andThen(runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.ALGAE_ALIGN_TELEOP)));
     }
 
     public Command driveTeleopCommand() {

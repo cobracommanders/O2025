@@ -47,6 +47,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
     @Override
     protected void collectInputs() {
         driveSubsystem.setElevatorHeight(armManager.elevator.getHeight());
+        DogLog.log("coral mode", operatorOptions.coralMode);
     }
 
     @Override
@@ -88,7 +89,8 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
             case PREPARE_HANDOFF:
                 if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
-                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
+                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT ||
+                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_CORAL_MODE) &&
                         groundManager.getState() == GroundManagerStates.WAIT_HANDOFF) {
                     nextState = RequestManagerStates.HANDOFF;
                 }
@@ -151,7 +153,9 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
             }
             case PREPARE_HANDOFF -> {
                 // need to figure out which handoff we are doing...
-                if (coralDetector.getState() == CoralDetectorStates.LEFT) {
+                if (OperatorOptions.CoralMode.CORAL_MODE == operatorOptions.coralMode && armManager.getState() != ArmManagerStates.WAIT_HANDOFF_CORAL_MODE){
+                    armManager.setState(ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE);
+                } else if (coralDetector.getState() == CoralDetectorStates.LEFT) {
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_LEFT);
                 } else if (coralDetector.getState() == CoralDetectorStates.RIGHT) {
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_RIGHT);

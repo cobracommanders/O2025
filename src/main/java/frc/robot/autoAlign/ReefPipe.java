@@ -1,7 +1,11 @@
 package frc.robot.autoAlign;
+import java.util.List;
+
+import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
 
 public enum ReefPipe {
   PIPE_A(new Pose2d(3.71, 4.19, Rotation2d.kZero), new Pose2d(13.84, 3.86, Rotation2d.k180deg)),
@@ -40,6 +44,8 @@ public enum ReefPipe {
     this.redPoses = new ReefPipePoses(redBase);
     this.bluePoses = new ReefPipePoses(blueBase);
   }
+
+
 
   public Pose2d getPose(ReefPipeLevel level, RobotScoringSide side) {
     if (side == RobotScoringSide.LEFT) {

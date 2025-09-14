@@ -79,11 +79,11 @@ public class Arm extends StateMachine<ArmStates> {
             case INTAKE_GROUND_ALGAE ->
                 MathUtil.isNear(ArmPositions.INTAKE_GROUND_ALGAE, armPosition, tolerance);
             case INTAKE_HIGH_REEF_ALGAE ->
-                MathUtil.isNear(ArmPositions.INTAKE_HIGH_REEF_ALGAE, armPosition, tolerance);
+                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE, armPosition, tolerance);
             case INTAKE_LOW_REEF_ALGAE ->
-                MathUtil.isNear(ArmPositions.INTAKE_LOW_REEF_ALGAE, armPosition, tolerance);
+                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE, armPosition, tolerance);
             case ALGAE_NET ->
-                MathUtil.isNear(ArmPositions.ALGAE_NET, armPosition, tolerance);
+                MathUtil.isNear(invertNet() ? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET, armPosition, tolerance);
             case ALGAE_PROCESSOR ->
                 MathUtil.isNear(ArmPositions.ALGAE_PROCESSOR, armPosition, tolerance);
             case L4 ->
@@ -111,7 +111,7 @@ public class Arm extends StateMachine<ArmStates> {
     }
 
     public void syncEncoder() {
-        if(FmsSubsystem.getInstance().isSimulation()){
+        if(Utils.isSimulation()){
             return;
         }
         motor.setPosition(absolutePosition);
@@ -132,6 +132,18 @@ public class Arm extends StateMachine<ArmStates> {
         return -position + 0.5;
     } 
 
+    public boolean invertNet(){
+        switch (AutoAlign.getNetScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d())) {
+            case LEFT:
+                return true;
+            case RIGHT:
+                return false;
+            default:
+                return false;
+        }
+    }
+
+
     @Override 
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
@@ -149,6 +161,34 @@ public class Arm extends StateMachine<ArmStates> {
     // public void simulationPeriodic() {
     //     SimArm.updateSimPosition(motor, encoder);
     // }
+
+    @Override
+    public void periodic(){
+        super.periodic();
+        switch (getState()) {
+            case L2:
+                setArmPosition(invertArm()? invertPosition(ArmPositions.L2) : ArmPositions.L2);
+                break;
+            case L3:
+                setArmPosition(invertArm()? invertPosition(ArmPositions.L3) : ArmPositions.L3);
+                break;
+            case L4:
+                setArmPosition(invertArm()? invertPosition(ArmPositions.L4) : ArmPositions.L4);
+                break;
+            case INTAKE_HIGH_REEF_ALGAE:
+                setArmPosition(invertArm()? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE);
+                break;
+            case INTAKE_LOW_REEF_ALGAE:
+                setArmPosition(invertArm()? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE);
+                break;
+            case ALGAE_NET:
+                setArmPosition(invertNet()? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET);
+                break;
+        
+            default:
+                break;
+        }
+    }
 
     public void setArmSpeed() {
         motor.set(armSpeed.get());
@@ -173,16 +213,16 @@ public class Arm extends StateMachine<ArmStates> {
                 setArmPosition(ArmPositions.INTAKE_GROUND_ALGAE);
             }
             case INTAKE_HIGH_REEF_ALGAE -> {
-                setArmPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE);
+                setArmPosition(invertArm() ? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE);
             }
             case INTAKE_LOW_REEF_ALGAE -> {
-                setArmPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE);
+                setArmPosition(invertArm() ? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE);
             }
             case ALGAE_PROCESSOR -> {
                 setArmPosition(ArmPositions.ALGAE_PROCESSOR);
             }
             case ALGAE_NET -> {
-                setArmPosition(ArmPositions.ALGAE_NET);
+                setArmPosition(invertNet() ? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET);
             }
             case L4 -> {
                 setArmPosition(invertArm() ? invertPosition(ArmPositions.L4) : ArmPositions.L4);

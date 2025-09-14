@@ -1,5 +1,7 @@
 package frc.robot.subsystems.ground_manager;
 
+import com.ctre.phoenix6.Utils;
+
 import dev.doglog.DogLog;
 import frc.robot.Ports.coralDetectorPorts;
 import frc.robot.fms.FmsSubsystem;
@@ -44,7 +46,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 if (coralDetector.hasCoral()) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 }
-                else if(FmsSubsystem.getInstance().isSimulation() && intakePivot.atGoal()){
+                else if(Utils.isSimulation() && intakePivot.atGoal()){
                     nextState = GroundManagerStates.PREPARE_IDLE;
                     coralDetector.setSimCoral(true);
                 }
@@ -67,7 +69,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 if (timeout(1)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 }
-                else if(FmsSubsystem.getInstance().isSimulation() && intakePivot.atGoal()){
+                else if(Utils.isSimulation() && intakePivot.atGoal()){
                     nextState = GroundManagerStates.PREPARE_IDLE;
                     coralDetector.setSimCoral(false);
                 }

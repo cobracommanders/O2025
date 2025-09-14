@@ -43,7 +43,7 @@ public class Controls {
         driver.leftBumper().onTrue(Robot.robotCommands.algaeIntakeCommand());
         driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand());
         driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
-        driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand());
+        driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand().andThen(Robot.robotCommands.driveTeleopCommand()));
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
         driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
         driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
@@ -53,6 +53,7 @@ public class Controls {
         driver.back().onTrue(Robot.robotCommands.groundIdleCommand());
         driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
         driver.X().onTrue(Robot.robotCommands.driveTeleopCommand());
+        driver.Y().onTrue(Robot.robotCommands.algaeAlignCommand());
        
     }
 

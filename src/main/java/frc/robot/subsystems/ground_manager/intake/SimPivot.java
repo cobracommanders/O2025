@@ -26,13 +26,13 @@ public class SimPivot {
             Units.rotationsToRadians(IntakePivotPositions.INTAKING),
             Units.rotationsToRadians(IntakePivotPositions.HANDOFF),
             true,
-            Units.rotationsToRadians(IntakePivotPositions.HANDOFF),
+            Units.rotationsToRadians(IntakePivotPositions.IDLE),
             0.001,
             0);
 
     public static void updateSimPosition(TalonFX motor) {
         var motorSim = motor.getSimState();
-        motorSim.Orientation = ChassisReference.Clockwise_Positive;
+        motorSim.Orientation = ChassisReference.CounterClockwise_Positive;
         motorSim.setSupplyVoltage(RobotController.getBatteryVoltage());
         var motorVoltage = motorSim.getMotorVoltageMeasure();
         armSim.setInputVoltage(motorVoltage.in(Volts));
