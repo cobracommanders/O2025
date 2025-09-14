@@ -15,6 +15,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.AutoConstaints.AutoConstraintOptions;
+import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.ReefSide;
@@ -86,7 +87,7 @@ public class TagAlign {
           Map.entry(2.66, 2.943), Map.entry(0.0, 0.0), Map.entry(-11.0, -2.943));
 
   private static final DoubleSubscriber TRANSLATION_GOOD_THRESHOLD =
-      DogLog.tunable("AutoAlign/IsAlignedTranslation", Units.inchesToMeters(1.0));
+      DogLog.tunable("AutoAlign/IsAlignedTranslation", Units.inchesToMeters(2));
   private static final DoubleSubscriber ROTATION_GOOD_THRESHOLD =
       DogLog.tunable("AutoAlign/IsAlignedRotation", 3.0);
 
@@ -575,4 +576,6 @@ public class TagAlign {
 
     return speeds;
   }
+
+
 }

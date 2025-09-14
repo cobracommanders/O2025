@@ -1,17 +1,30 @@
 package frc.robot.subsystems.armManager;
 
 import dev.doglog.DogLog;
+import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.ReefPipeLevel;
+import frc.robot.autoAlign.tagAlign.TagAlign;
+import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.stateMachine.OperatorOptions.CoralMode;
 import frc.robot.subsystems.armManager.arm.Arm;
+import frc.robot.subsystems.armManager.arm.ArmPositions;
 import frc.robot.subsystems.armManager.arm.ArmStates;
 import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
 import frc.robot.subsystems.armManager.armScheduler.ArmSchedulerStates;
 import frc.robot.subsystems.armManager.elevator.Elevator;
+import frc.robot.subsystems.armManager.elevator.ElevatorPositions;
 import frc.robot.subsystems.armManager.elevator.ElevatorStates;
 import frc.robot.subsystems.armManager.hand.Hand;
+import frc.robot.subsystems.armManager.hand.HandSpeeds;
 import frc.robot.subsystems.armManager.hand.HandStates;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.GroundManager;
+import frc.robot.subsystems.ground_manager.GroundManagerStates;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
 public class ArmManager extends StateMachine<ArmManagerStates> {
     public static final double scoringTime = 0.75;
@@ -19,6 +32,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     public final Hand hand;
     public final Elevator elevator;
     public final Arm arm;
+    public final CoralDetector coralDetector;
 
     private boolean synced = false;
 
@@ -31,6 +45,16 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
         this.elevator = Elevator.getInstance();
         this.arm = Arm.getInstance();
         this.armScheduler = ArmScheduler.getInstance();
+        this.coralDetector = CoralDetector.getInstance();
+    }
+
+    public boolean isReadyToMove(){
+       return AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 0.25;
+    }
+
+    @Override
+    public void periodic(){
+        super.periodic();
     }
 
     protected ArmManagerStates getNextState(ArmManagerStates currentState) {
@@ -38,7 +62,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
 
         switch (currentState) {
             case PREPARE_IDLE -> {
-                if (armScheduler.isReady()) {
+                if (armScheduler.isReady() ) {
                     nextState = ArmManagerStates.IDLE;
                 }
             }
@@ -49,29 +73,29 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             // }
 
             case SCORE_L4 -> {
-                if(timeout(scoringTime)){
+                if(isReadyToMove()) {
                     if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
                         nextState = ArmManagerStates.PREPARE_IDLE;
                     }else{
-                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE;
                     }
                 }
             }
             case SCORE_L3 -> {
-                if(timeout(scoringTime)){
+                if(isReadyToMove()){
                     if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
                         nextState = ArmManagerStates.PREPARE_IDLE;
                     }else{
-                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE;
                     }
                 }
             }
             case SCORE_L2 -> {
-                if(timeout(scoringTime)){
+                if(isReadyToMove()){
                     if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
                         nextState = ArmManagerStates.PREPARE_IDLE;
                     }else{
-                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE;
                     }
                 }
             }
@@ -94,6 +118,27 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
 
+            case PREPARE_HANDOFF_CORAL_MODE -> {
+                if (armScheduler.isReady() && OperatorOptions.getInstance().coralMode == CoralMode.CORAL_MODE) {
+                    nextState = ArmManagerStates.WAIT_HANDOFF_CORAL_MODE;
+                }
+            }
+
+            case WAIT_HANDOFF_CORAL_MODE -> {
+                if(GroundManager.getInstance().getState() == GroundManagerStates.WAIT_HANDOFF && coralDetector.hasCoral()) {
+                    if (coralDetector.getState() == CoralDetectorStates.LEFT) {
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_LEFT;
+                    } else if (coralDetector.getState() == CoralDetectorStates.RIGHT) {
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_RIGHT;
+                    } else if (coralDetector.getState() == CoralDetectorStates.MIDDLE) {
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                    } else {
+                        nextState = ArmManagerStates.PREPARE_HANDOFF_MIDDLE;
+                    // if there is no coral, do nothing
+                    }
+                }
+            }
+
             case PREPARE_INTAKE_GROUND_ALGAE -> {
                 if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_GROUND_ALGAE;
@@ -110,9 +155,12 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case INTAKE_HIGH_REEF_ALGAE -> {
-                if (hand.hasAlgae()){
+                // if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L2){
+                //     nextState = ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE;
+                // }
+                // else {
                     nextState = ArmManagerStates.ALGAE_LEAVE_REEF;
-                }
+                //}
             }
             case PREPARE_INTAKE_LOW_REEF_ALGAE -> {
                 if (armScheduler.isReady()) {
@@ -120,12 +168,15 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case INTAKE_LOW_REEF_ALGAE -> {
-                if (hand.hasAlgae() && (timeout(2))){
+                // if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                //     nextState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
+                // }
+                // else {
                     nextState = ArmManagerStates.ALGAE_LEAVE_REEF;
-                }
+                //}
             }
             case ALGAE_LEAVE_REEF -> {
-                if(timeout(2)) {
+                if(AutoAlign.getInstance().getAlgaeDistance().getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 1.25) {
                     nextState = ArmManagerStates.PREPARE_IDLE;
                 }
             }
@@ -260,21 +311,48 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
             case PREPARE_HANDOFF_RIGHT -> {
                 //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
+                if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
+                    arm.setState(ArmStates.HANDOFF_RIGHT);
+                    elevator.setState(ElevatorStates.HANDOFF);
+                    hand.setState(HandStates.HANDOFF);
+                }
+                else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
                     armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                }
             }
             case WAIT_HANDOFF_RIGHT -> {
             }
             case PREPARE_HANDOFF_MIDDLE -> {
                 //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
-                armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
+                    arm.setState(ArmStates.HANDOFF_MIDDLE);
+                    elevator.setState(ElevatorStates.HANDOFF);
+                    hand.setState(HandStates.HANDOFF);
+                }
+                else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                    armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                }
             }
             case WAIT_HANDOFF_MIDDLE -> {
             }
             case PREPARE_HANDOFF_LEFT -> {
                 //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
-                armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
+                    arm.setState(ArmStates.HANDOFF_LEFT);
+                    elevator.setState(ElevatorStates.HANDOFF);
+                    hand.setState(HandStates.HANDOFF);
+                }
+                else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                    armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                }
             }
             case WAIT_HANDOFF_LEFT -> {
+            }
+            case PREPARE_HANDOFF_CORAL_MODE -> {
+                armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF_CORAL_MODE);
+            }
+            case WAIT_HANDOFF_CORAL_MODE -> {
+                //armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF_CORAL_MODE);
             }
             case CLIMB -> {
                 armScheduler.scheduleStates(ArmStates.CLIMB, HandStates.IDLE, ElevatorStates.IDLE);
