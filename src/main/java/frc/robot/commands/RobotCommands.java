@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefSideOffset;
 import frc.robot.stateMachine.RequestManager;
@@ -177,5 +178,13 @@ public class RobotCommands {
 
     public Command driveTeleopCommand() {
         return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP));
+    }
+
+    private static RobotCommands instance;
+
+    public static RobotCommands getInstance() {
+        if (instance == null)
+            instance = new RobotCommands(); // Make sure there is an instance (this will only run once)
+        return instance;
     }
 }

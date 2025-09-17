@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
@@ -60,6 +61,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   private double goalSnapAngle = 0;
 
   private double elevatorHeight;
+
+  private final Timer timeSinceAutoSpeeds = new Timer();
 
   private static final double LEFT_X_DEADBAND = 0.05;
   private static final double LEFT_Y_DEADBAND = 0.05;
@@ -195,6 +198,12 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
 
   public ChassisSpeeds getFieldRelativeSpeeds() {
     return fieldRelativeSpeeds;
+  }
+
+  public void setFieldRelativeAutoSpeeds(ChassisSpeeds speeds) {
+    autoSpeeds = speeds;
+    timeSinceAutoSpeeds.reset();
+    sendSwerveRequest(DriveStates.AUTO);
   }
 
   private ChassisSpeeds calculateFieldRelativeSpeeds() {
