@@ -6,19 +6,21 @@ package frc.robot.subsystems.LED;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.AddressableLEDBufferView;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.stateMachine.OperatorOptions;
+import frc.robot.stateMachine.OperatorOptions.CoralMode;
 
 public class LED extends SubsystemBase {
   private final AddressableLED glowbra_commander;
   private final AddressableLEDBuffer m_ledBuffer;
   private final Timer blinkTimer = new Timer();
   private final OperatorOptions operatorOptions = OperatorOptions.getInstance();
-
+  AddressableLEDBufferView m_middle;
   public LED() {
     blinkTimer.start();
     glowbra_commander = new AddressableLED(9);
@@ -50,8 +52,13 @@ public class LED extends SubsystemBase {
         setLED(Color.kOrange);
       }
     }
-    
-    
+
+    if (operatorOptions.coralMode == CoralMode.CORAL_MODE) {
+      AddressableLEDBuffer m_buffer = new AddressableLEDBuffer(21);
+      m_middle = m_buffer.createView(8, 12);
+      LEDPattern.solid(Color.kWhite).applyTo(m_middle);
+      System.out.println("coral model");
+    }
     if (DriverStation.isDisabled()) {
       LEDPattern.solid(Color.kPurple).applyTo(m_ledBuffer);
     }
