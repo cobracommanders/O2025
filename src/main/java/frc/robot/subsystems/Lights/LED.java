@@ -5,17 +5,23 @@
 package frc.robot.subsystems.Lights;
 
 
+import java.security.cert.LDAPCertStoreParameters;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.AddressableLEDBufferView;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.stateMachine.OperatorOptions;
+import frc.robot.stateMachine.OperatorOptions.CoralMode;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
 public class LED {
     private final AddressableLED glowjack_horseman;
     private final AddressableLEDBuffer m_ledBuffer;
+    private final AddressableLEDBufferView m_middle;
 
     public LED() {
         // PWM port 9
@@ -26,33 +32,48 @@ public class LED {
         // Length is expensive to set, so only set it once, then just update data
         m_ledBuffer = new AddressableLEDBuffer(150);
         glowjack_horseman.setLength(m_ledBuffer.getLength());
+        m_middle = m_ledBuffer.createView(8, 12);
         // Set the data
         glowjack_horseman.setData(m_ledBuffer);
         glowjack_horseman.start();
     }
+    Color c;
     public void periodic() {
         switch(OperatorOptions.getInstance().scoreLocation){
             case L1:
-                LEDPattern.solid(Color.kRed).applyTo(m_ledBuffer);
+                c = Color.kRed;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 break;
             case L2:
-                LEDPattern.solid(Color.kYellow).applyTo(m_ledBuffer);
+                c = Color.kYellow;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 break;
             case L3:
-                LEDPattern.solid(Color.kDodgerBlue).applyTo(m_ledBuffer);
+                c = Color.kDodgerBlue;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 break;
             case L4:
-                LEDPattern.solid(Color.kGreen).applyTo(m_ledBuffer);
+                c = Color.kGreen;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 break;
             case PROCESSOR:
-                LEDPattern.solid(Color.kDarkOliveGreen).applyTo(m_ledBuffer);
+                c = Color.kDarkOliveGreen;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 break;
             case BARGE:
-                LEDPattern.solid(Color.kPurple).applyTo(m_ledBuffer);
+                c = Color.kPurple;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 break;
             default:
-                LEDPattern.solid(Color.kBlack).applyTo(m_ledBuffer);
+                c = Color.kBlack;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 break;
+        }
+
+        if(OperatorOptions.getInstance().coralMode == CoralMode.CORAL_MODE){
+            LEDPattern.solid(Color.kWhite).applyTo(m_middle);
+        }else{
+            LEDPattern.solid(c).applyTo(m_middle);
         }
 
         glowjack_horseman.setData(m_ledBuffer);
