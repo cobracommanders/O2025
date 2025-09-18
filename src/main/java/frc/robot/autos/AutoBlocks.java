@@ -27,6 +27,8 @@ public class AutoBlocks {
 
     private static final PoseErrorTolerance AFTER_SCORE_POSITION_TOLERANCE =
             new PoseErrorTolerance(0.6, 25);
+            
+    public static final PoseErrorTolerance APPROACH_REEF_TOLERANCE = new PoseErrorTolerance(0.6, 10);
 
     private final Trailblazer trailblazer;
 

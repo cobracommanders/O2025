@@ -1,5 +1,4 @@
 package frc.robot.trailblazer;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -7,7 +6,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.autos.AutoCommands;
 import frc.robot.trailblazer.constraints.AutoConstraintCalculator;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.trailblazer.followers.PathFollower;
@@ -33,7 +31,7 @@ public class Trailblazer {
   private final PathTracker pathTracker = new PurePursuitPathTracker(false, true);
   private final PathFollower pathFollower =
       new PidPathFollower(
-          new PIDController(3.7, 0, 0), new PIDController(3.7, 0, 0), new PIDController(6.5, 0, 0));
+          new PIDController(3.7, 0, 0), new PIDController(3.7, 0, 0), new PIDController(6.5, 0, 0)); //3.7, 3.7, 6.5
   private int previousAutoPointIndex = -1;
   private TimestampedChassisSpeeds previousSpeeds = new TimestampedChassisSpeeds(0);
 
@@ -63,12 +61,12 @@ public class Trailblazer {
                 Commands.run(
                     () -> {
                       pathTracker.updateRobotState(
-                          localization.getPose(), swerve.getFieldRelativeSpeeds());
+                          localization.getPose2d(), swerve.getFieldRelativeSpeeds());
                       var currentAutoPointIndex = pathTracker.getCurrentPointIndex();
                       var currentAutoPoint = segment.points.get(currentAutoPointIndex);
                       double distanceToSegmentEnd =
                           segment.getRemainingDistance(
-                              localization.getPose(), currentAutoPointIndex);
+                              localization.getPose2d(), currentAutoPointIndex);
 
                       var constrainedVelocityGoal =
                           getSwerveSetpoint(
@@ -99,7 +97,7 @@ public class Trailblazer {
     if (shouldEnd) {
       return command
           .until(
-              () -> segment.isFinished(localization.getPose(), pathTracker.getCurrentPointIndex()))
+              () -> segment.isFinished(localization.getPose2d(), pathTracker.getCurrentPointIndex()))
           .andThen(
               Commands.runOnce(
                   () -> {
@@ -117,7 +115,7 @@ public class Trailblazer {
       previousSpeeds = new TimestampedChassisSpeeds(Timer.getFPGATimestamp() - 0.02);
     }
 
-    var robotPose = localization.getPose();
+    var robotPose = localization.getPose2d();
     var originalTargetPose = pathTracker.getTargetPose();
     var originalVelocityGoal =
         new TimestampedChassisSpeeds(pathFollower.calculateSpeeds(robotPose, originalTargetPose));

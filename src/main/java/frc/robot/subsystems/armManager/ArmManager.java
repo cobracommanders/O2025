@@ -155,12 +155,12 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case INTAKE_HIGH_REEF_ALGAE -> {
-                // if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L2){
-                //     nextState = ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE;
-                // }
-                // else {
+                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L2){
+                     nextState = ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE;
+                 }
+                else {
                     nextState = ArmManagerStates.ALGAE_LEAVE_REEF;
-                //}
+                }
             }
             case PREPARE_INTAKE_LOW_REEF_ALGAE -> {
                 if (armScheduler.isReady()) {
@@ -168,12 +168,12 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case INTAKE_LOW_REEF_ALGAE -> {
-                // if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
-                //     nextState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
-                // }
-                // else {
+                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                     nextState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
+                 }
+                 else {
                     nextState = ArmManagerStates.ALGAE_LEAVE_REEF;
-                //}
+                }
             }
             case ALGAE_LEAVE_REEF -> {
                 if(AutoAlign.getInstance().getAlgaeDistance().getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 1.25) {

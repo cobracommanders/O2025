@@ -4,10 +4,11 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
+import com.ctre.phoenix6.Utils;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.SendableRegistry;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autos.AutoSelection;
 import frc.robot.autos.Autos;
 import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
@@ -44,9 +46,9 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
 public class Robot extends TimedRobot {
+  private Command m_autonomousCommand;
 
   private Command autonomousCommand = Commands.none();
-  private Command m_autonomousCommand;
 
   // Uncomment as needed
   public static RequestManager robotManager = RequestManager.getInstance();
@@ -57,18 +59,20 @@ public class Robot extends TimedRobot {
   //private SendableChooser<Command> autoChooser;
   private final Timer seedImuTimer = new Timer();
   public static LED lights;
-  //private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+  private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
   //private final Autos autos = new Autos(trailblazer);
   // public static OperatorOptions operatorOptions =
   // OperatorOptions.getInstance();
 
+  private final Autos autos = new Autos(trailblazer);
+
 
   public Robot() {
-    for (Command command : robotCommands.getPathplannerCommands()) {
-      NamedCommands.registerCommand(command.getName(), command);
-    }
-    Command centerL1 = AutoBuilder.buildAuto("CenterL1");
-    Command centerL4 = AutoBuilder.buildAuto("CenterL4");
+    // for (Command command : robotCommands.getPathplannerCommands()) {
+    //   NamedCommands.registerCommand(command.getName(), command);
+    // }
+    // Command centerL1 = AutoBuilder.buildAuto("CenterL1");
+    // Command centerL4 = AutoBuilder.buildAuto("CenterL4");
 
     // autoChooser = new SendableChooser<Command>();
     // // autoChooser.addOption("CenterL1", centerL1);
@@ -85,7 +89,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     lights.periodic();
     MechanismVisualizer.publishData();
-    FmsSubsystem.getInstance().updateSimulation();
+    // FmsSubsystem.getInstance().updateSimulation();
   }
 
   @Override
@@ -116,9 +120,13 @@ public class Robot extends TimedRobot {
     seedImuTimer.reset();
     seedImuTimer.start();
 
-    //autonomousCommand = autos.getAutoCommand();
-    autonomousCommand.schedule();
+    autonomousCommand = autos.getAutoCommand();
 
+    if(Utils.isSimulation()){
+      localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
+    }
+    DogLog.log("Selected Auto", autonomousCommand.getName());
+    autonomousCommand.schedule();
     AutoAlign.getInstance().clearReefState();
   }
 

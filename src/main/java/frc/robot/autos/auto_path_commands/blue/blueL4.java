@@ -26,13 +26,18 @@ public class blueL4 extends BaseAuto {
     return Points.START_R1_AND_B1.redPose;
   }
 
+  public Pose2d getStartingPosition(){
+    return getStartingPose();
+  }
+
   @Override
   protected Command createAutoCommand() {
     return Commands.sequence(
         trailblazer.followSegment(
             new AutoSegment(
                 CONSTRAINTS,
-                new AutoPoint(Points.START_R1_AND_B1.redPose),
-                new AutoPoint(ReefPipe.PIPE_A.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)))));
+                new AutoPoint(Points.START_R1_AND_B1.bluePose),
+                new AutoPoint(ReefPipe.PIPE_G.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT))
+                )));
   }
 }

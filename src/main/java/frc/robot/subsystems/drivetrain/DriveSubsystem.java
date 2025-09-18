@@ -32,10 +32,11 @@ import frc.robot.autoAlign.ReefAlignStates;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.trailblazer.SwerveBase;
 import frc.robot.util.ControllerHelpers;
 import frc.robot.util.MathHelpers;
 
-public class DriveSubsystem extends StateMachine<DriveStates> {
+public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveBase {
   private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
   private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
   private ChassisSpeeds fieldRelativeSpeeds = new ChassisSpeeds();
@@ -48,7 +49,7 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
   public final Pigeon2 drivetrainPigeon = CommandSwerveDrivetrain.getInstance().getPigeon2();
   private double teleopSlowModePercent = 1.0;
   private double rawControllerXValue = 0.0;
-  private double rawControllerYValue = 0.0;
+  private double rawControllerYValue = 0.0;;
 
   private Debouncer alignmentDebouncer = new Debouncer(0.5);
 
@@ -124,6 +125,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
         },
         this // Reference to this subsystem to set requirements
     );
+
+    timeSinceAutoSpeeds.start();
   }
 
   public Translation2d getControllerValues() {
@@ -200,10 +203,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
     return fieldRelativeSpeeds;
   }
 
+  @Override
   public void setFieldRelativeAutoSpeeds(ChassisSpeeds speeds) {
     autoSpeeds = speeds;
     timeSinceAutoSpeeds.reset();
-    sendSwerveRequest(DriveStates.AUTO);
+    // sendSwerveRequest(DriveStates.AUTO);
   }
 
   private ChassisSpeeds calculateFieldRelativeSpeeds() {
@@ -267,7 +271,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
       }
       case AUTO -> {
         drivetrain.setControl(
-            driveRobotRelative
+            drive
+                .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance)
                 .withVelocityX(autoSpeeds.vxMetersPerSecond)
                 .withVelocityY(autoSpeeds.vyMetersPerSecond)
                 .withRotationalRate(autoSpeeds.omegaRadiansPerSecond)
