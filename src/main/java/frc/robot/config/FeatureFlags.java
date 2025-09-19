@@ -53,5 +53,8 @@ public class FeatureFlags {
   public static final BooleanSupplier USE_ANY_REEF_TAG =
       FeatureFlag.of("Vision/UseAnyReefTag", true);
 
+  public static final BooleanSupplier LED_INTAKE_BLINK =
+          FeatureFlag.of("LED/IntakeBlink", true);
+
   private FeatureFlags() {}
 }
