@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
 
   // Uncomment as needed
   public static RequestManager robotManager = RequestManager.getInstance();
-  public static RobotCommands robotCommands = new RobotCommands();
+  public static RobotCommands robotCommands = RobotCommands.getInstance();
   public static DriveSubsystem swerve = DriveSubsystem.getInstance();
   public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
   // public static final Controls controls = new Controls();

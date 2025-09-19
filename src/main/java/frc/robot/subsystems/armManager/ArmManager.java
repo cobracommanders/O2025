@@ -66,11 +66,11 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                     nextState = ArmManagerStates.IDLE;
                 }
             }
-            // case PREPARE_SCORE_L4 -> {
-            //     if (armScheduler.isReady()) {
-            //         nextState = ArmManagerStates.WAIT_L4;
-            //     }
-            // }
+            case PREPARE_SCORE_L4 -> {
+                if (armScheduler.isReady()) {
+                    nextState = ArmManagerStates.WAIT_L4;
+                }
+            }
 
             case SCORE_L4 -> {
                 if(isReadyToMove()) {
@@ -283,7 +283,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case WAIT_L4 -> {
-                armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
+                // armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case SCORE_L4 -> {
                 hand.setState(HandStates.SCORE_CORAL);

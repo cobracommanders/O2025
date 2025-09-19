@@ -42,19 +42,22 @@ public class redL4 extends BaseAuto {
 
   @Override
   protected Command createAutoCommand() {
-    return Commands.sequence(
-      Commands.parallel(
-        trailblazer.followSegment(
-          new AutoSegment(
-              CONSTRAINTS,
-              AutoBlocks.APPROACH_REEF_TOLERANCE,
-              new AutoPoint(Points.START_R1_AND_B1.redPose),
-              // new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)),
-              new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT),
-                  Robot.robotCommands.waitForAllIdle().andThen(Robot.robotCommands.prepareScoreWithHandoffCheckCommand()).andThen(Robot.robotCommands.waitForL4())
-              )
-          ), false)
-      )//.withDeadline(Robot.robotCommands.waitForL4()), Robot.robotCommands.autoReefAlignCommand()
-        );
+    return blocks.scorePreloadL3(getStartingPose(), ReefPipe.PIPE_I, RobotScoringSide.LEFT);
+    // return Commands.sequence(
+    //   Commands.parallel(
+    //     trailblazer.followSegment(
+    //       new AutoSegment(
+    //           CONSTRAINTS,
+    //           AutoBlocks.APPROACH_REEF_TOLERANCE,
+    //           new AutoPoint(Points.START_R1_AND_B1.redPose),
+    //           // new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)),
+    //           new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT),
+    //               Robot.robotCommands.waitForAllIdle().andThen(Robot.robotCommands.prepareScoreWithHandoffCheckCommand()).andThen(Robot.robotCommands.waitForL4())
+    //           )
+    //       ), false)
+          
+    //   )//.withDeadline(Robot.robotCommands.waitForL4()), Robot.robotCommands.autoReefAlignCommand(),
+      
+    //     );
   }
 }

@@ -82,6 +82,10 @@ public class RobotCommands {
         return Commands.runOnce(robotManager::scoreRequest, requirements).withName("score");
     }
 
+    // public Command waitForScoreCommand() {
+    //     return ArmManager.getInstance().wait.withName("score");
+    // }
+
     public Command algaeIntakeCommand() {
         return Commands.runOnce(robotManager::intakeAlgaeRequest, requirements).withName("algaeIntake");
     }

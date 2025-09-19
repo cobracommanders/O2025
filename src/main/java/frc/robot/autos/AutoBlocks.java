@@ -5,11 +5,13 @@ import java.util.List;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.commands.RobotCommands;
+import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.trailblazer.AutoPoint;
 import frc.robot.trailblazer.AutoSegment;
 import frc.robot.trailblazer.Trailblazer;
@@ -79,6 +81,46 @@ public class AutoBlocks {
                     new AutoPoint(
                         () -> AutoAlign.getInstance().getUsedScoringPose(
                                 pipe, ReefPipeLevel.L4, RobotScoringSide.LEFT))
+                )
+            )
+        );
+    }
+
+    public Command scorePreloadL3(Pose2d startingPose, ReefPipe pipe, RobotScoringSide scoringSide) {
+        return Commands.sequence(
+            trailblazer.followSegment(
+                new AutoSegment(
+                    BASE_CONSTRAINTS,
+                    AutoBlocks.APPROACH_REEF_TOLERANCE,
+                    // new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)),
+                    new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4, scoringSide),
+                        Robot.robotCommands.waitForAllIdle().andThen(Robot.robotCommands.prepareScoreWithHandoffCheckCommand())
+                    )
+                )
+            ),
+            trailblazer.followSegment(
+                new AutoSegment(
+                    SCORING_CONSTRAINTS,
+                    // new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)),
+                    new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4, scoringSide),
+                        Robot.robotCommands.autoReefAlignCommand().andThen(Robot.robotCommands.scoreCommand()))
+                )
+            ),
+            // trailblazer.followSegment(
+            //     new AutoSegment(
+            //         SCORING_CONSTRAINTS,
+            //         AutoBlocks.APPROACH_REEF_TOLERANCE,
+            //         // new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)),
+            //         new AutoPoint(()-> pipe.getPose(ReefPipeLevel.L4, scoringSide),
+            //             Robot.robotCommands.scoreCommand())
+            //     )
+            // ),
+            Commands.waitSeconds(2),
+            trailblazer.followSegment(
+                new AutoSegment(
+                    BASE_CONSTRAINTS,
+                    // new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)),
+                    new AutoPoint(()-> Points.START_R1_AND_B1.getPose())
                 )
             )
         );
