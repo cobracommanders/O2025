@@ -1,6 +1,9 @@
 package frc.robot.subsystems.armManager;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.tagAlign.TagAlign;
@@ -376,6 +379,26 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
 
         }
+    }
+
+    public Command waitForGoal() {
+        return Commands.waitUntil(()-> arm.atGoal() && elevator.atGoal());
+    }
+
+    public Command finishScoring() {
+        return Commands.waitUntil(()-> finishedScoring());
+    }
+
+    private boolean finishedScoring() {
+        return isScoring() && atGoal();
+    }
+
+    private boolean isScoring() {
+        return getState() == ArmManagerStates.SCORE_L2 || getState() == ArmManagerStates.SCORE_L3 || getState() == ArmManagerStates.SCORE_L4;
+    }
+
+    private boolean atGoal() {
+        return arm.atGoal() && elevator.atGoal();
     }
 
     private static ArmManager instance;

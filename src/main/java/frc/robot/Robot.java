@@ -104,6 +104,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    // CommandScheduler.getInstance().onCommandInitialize((command)-> DogLog.log("CommandScheduler/Scheduled Commands", command.getName()));
     FmsSubsystem.getInstance();
     //SmartDashboard.putData(autoChooser);
     lights = new LED();

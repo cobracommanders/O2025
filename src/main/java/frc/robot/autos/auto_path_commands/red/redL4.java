@@ -2,6 +2,7 @@ package frc.robot.autos.auto_path_commands.red;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Robot;
@@ -42,7 +43,21 @@ public class redL4 extends BaseAuto {
 
   @Override
   protected Command createAutoCommand() {
-    return blocks.scorePreloadL3(getStartingPose(), ReefPipe.PIPE_I, RobotScoringSide.LEFT);
+    return Commands.sequence(
+      blocks.scorePreloadL4(getStartingPose(), ReefPipe.PIPE_I, RobotScoringSide.LEFT),
+      // Commands.waitSeconds(3),
+      // RobotCommands.getInstance().waitForAllIdle(),
+      trailblazer.followSegment(
+        new AutoSegment(
+          AutoBlocks.BASE_CONSTRAINTS,
+          new AutoPoint(
+            Points.START_R1_AND_B1.redPose.plus(new Transform2d(0, 3, Rotation2d.kZero))
+          )
+        )
+      ),
+      blocks.pickUpMidLolli().andThen(Robot.robotCommands.resetToIdleCommand())
+      // blocks.scoreL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT)
+    );
     // return Commands.sequence(
     //   Commands.parallel(
     //     trailblazer.followSegment(
