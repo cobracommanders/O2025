@@ -5,6 +5,8 @@
 package frc.robot;
 
 import com.ctre.phoenix6.Utils;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -48,7 +50,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private Command autonomousCommand = Commands.none();
+  //private Command autonomousCommand = Commands.none();
 
   // Uncomment as needed
   public static RequestManager robotManager = RequestManager.getInstance();
@@ -56,34 +58,37 @@ public class Robot extends TimedRobot {
   public static DriveSubsystem swerve = DriveSubsystem.getInstance();
   public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
   // public static final Controls controls = new Controls();
-  //private SendableChooser<Command> autoChooser;
+  private SendableChooser<Command> autoChooser;
   private final Timer seedImuTimer = new Timer();
   public static LED lights;
-  private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+  //private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
   //private final Autos autos = new Autos(trailblazer);
   // public static OperatorOptions operatorOptions =
   // OperatorOptions.getInstance();
 
-  private final Autos autos = new Autos(trailblazer);
+  //private final Autos autos = new Autos(trailblazer);
 
 
   public Robot() {
-    // for (Command command : robotCommands.getPathplannerCommands()) {
-    //   NamedCommands.registerCommand(command.getName(), command);
-    // }
-    // Command centerL1 = AutoBuilder.buildAuto("CenterL1");
-    // Command centerL4 = AutoBuilder.buildAuto("CenterL4");
+    for (Command command : robotCommands.getPathplannerCommands()) {
+      NamedCommands.registerCommand(command.getName(), command);
+    }
+    Command centerL1 = AutoBuilder.buildAuto("CenterL1");
+    Command centerL4 = AutoBuilder.buildAuto("CenterL4");
+    Command center1 = AutoBuilder.buildAuto("Center1");
+    Command centerL3 = AutoBuilder.buildAuto("CenterL3");
 
-    // autoChooser = new SendableChooser<Command>();
+    autoChooser = new SendableChooser<Command>();
     // // autoChooser.addOption("CenterL1", centerL1);
-    // autoChooser.setDefaultOption("CenterL1", centerL1);
-    // autoChooser.addOption("CenterL4", centerL4);
+    autoChooser.setDefaultOption("CenterL1", centerL1);
+    autoChooser.addOption("CenterL4", centerL4);
+    autoChooser.addOption("Center1", center1);
+    autoChooser.addOption("CenterL3", centerL3);
 
   }
   public final LEDPattern m_pattern = LEDPattern.rainbow(255, 128);
-  private static final Distance kLedSpacing = Meters.of(1 / 120.0);
-  private final LEDPattern m_scrollingRainbow =
-          m_pattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(1), kLedSpacing);
+  // private final LEDPattern m_scrollingRainbow =
+  //         m_pattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(1), kLedSpacing);
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
@@ -120,20 +125,20 @@ public class Robot extends TimedRobot {
     seedImuTimer.reset();
     seedImuTimer.start();
 
-    autonomousCommand = autos.getAutoCommand();
+   // autonomousCommand = autos.getAutoCommand();
 
-    if(Utils.isSimulation()){
-      localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
-    }
-    DogLog.log("Selected Auto", autonomousCommand.getName());
-    autonomousCommand.schedule();
+    // if(Utils.isSimulation()){
+    //   localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
+    // }
+    // DogLog.log("Selected Auto", autonomousCommand.getName());
+    // autonomousCommand.schedule();
     AutoAlign.getInstance().clearReefState();
-  }
+  
 
-    // if (autoChooser.getSelected() != null)
-    //   autoChooser.getSelected().schedule();
-    // DogLog.log("Selected Auto", autoChooser.getSelected().getName());
-//}
+    if (autoChooser.getSelected() != null)
+      autoChooser.getSelected().schedule();
+    DogLog.log("Selected Auto", autoChooser.getSelected().getName());
+  }
 
   @Override
   public void autonomousPeriodic() {

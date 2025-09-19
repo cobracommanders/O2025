@@ -376,9 +376,9 @@ public class TagAlign {
 
   /** Returns the best reef pipe for scoring, based on the robot's current state. */
   public ReefPipe getBestPipe() {
-    if ((DriverStation.isAutonomous() || pipeSwitchActive) && reefPipeOverride.isPresent()) {
-      return reefPipeOverride.orElseThrow();
-    }
+    // if ((DriverStation.isAutonomous() || pipeSwitchActive) && reefPipeOverride.isPresent()) {
+    //   return reefPipeOverride.orElseThrow();
+    // }
     var level = pipeLevel;
     var robotPose = localization.getPose2d();
     if (pipeLevel.equals(ReefPipeLevel.L1)) {
