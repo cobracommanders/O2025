@@ -76,9 +76,15 @@ public class Climber extends StateMachine<ClimberStates>{
         break;
         case WAIT_FOR_CAGE:
           if (atGoal()) {
-            nextState = ClimberStates.CLIMBING;
+            nextState = ClimberStates.CONTINUE_SUCKING;
           }
           break;
+          case CONTINUE_SUCKING:
+                  if(timeout(0.5)){
+                      nextState = ClimberStates.CLIMBING;
+                  }
+
+
         case CLIMBING:
            if (atGoal()){
             nextState = ClimberStates.CLIMBED;
@@ -130,6 +136,9 @@ public class Climber extends StateMachine<ClimberStates>{
       case CLIMBED:
         setWinchSpeed(ClimberPositions.IDLE);
         //do nothing
+        break;
+    case CONTINUE_SUCKING:
+        //do nothing!
         break;
       default:
         break;

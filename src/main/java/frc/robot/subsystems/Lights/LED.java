@@ -7,6 +7,7 @@ package frc.robot.subsystems.Lights;
 
 import java.security.cert.LDAPCertStoreParameters;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.AddressableLEDBufferView;
@@ -16,12 +17,23 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.OperatorOptions.CoralMode;
+import frc.robot.stateMachine.RequestManager;
+import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 
 public class LED {
     private final AddressableLED glowjack_horseman;
     private final AddressableLEDBuffer m_ledBuffer;
     private final AddressableLEDBufferView m_middle;
+
+    // Rainbow LED pattern
+    public final LEDPattern m_pattern = LEDPattern.rainbow(255, 128);
+    private static final Distance kLedSpacing = Meters.of(1 / 120.0);
+    private final LEDPattern m_scrollingRainbow =
+            m_pattern.scrollAtAbsoluteSpeed(MetersPerSecond.of(1), kLedSpacing);
 
     public LED() {
         // PWM port 9
@@ -74,6 +86,10 @@ public class LED {
             LEDPattern.solid(Color.kWhite).applyTo(m_middle);
         }else{
             LEDPattern.solid(c).applyTo(m_middle);
+        }
+
+        if(RequestManager.getInstance().climber.getState() != ClimberStates.IDLE){
+
         }
 
         glowjack_horseman.setData(m_ledBuffer);
