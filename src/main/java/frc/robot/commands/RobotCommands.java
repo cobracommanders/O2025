@@ -67,6 +67,12 @@ public class RobotCommands {
                 .withName("waitForGroundState/WAIT_SCORE_L1");
     }
 
+    public Command waitForAllIdle() {
+        return robotManager.groundManager.waitForState(GroundManagerStates.IDLE)
+                .alongWith(robotManager.armManager.waitForState(ArmManagerStates.IDLE))
+                .withName("waitForState/ALL_IDLE");
+    }
+
     public Command waitForWaitL4() {
         return robotManager.armManager.waitForState(ArmManagerStates.WAIT_L4)
                 .withName("waitForArmState/WAIT_L4");

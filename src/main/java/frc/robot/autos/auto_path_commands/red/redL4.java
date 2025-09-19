@@ -16,6 +16,7 @@ import frc.robot.autos.Points;
 import frc.robot.commands.RobotCommands;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.RequestManager;
+import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.trailblazer.AutoPoint;
@@ -50,9 +51,10 @@ public class redL4 extends BaseAuto {
               new AutoPoint(Points.START_R1_AND_B1.redPose),
               // new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT)),
               new AutoPoint(ReefPipe.PIPE_I.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT),
-                  Robot.robotCommands.prepareScoreWithHandoffCheckCommand()
-          )))
-      ).withDeadline(Robot.robotCommands.waitForL4()), Robot.robotCommands.autoReefAlignCommand()
+                  Robot.robotCommands.waitForAllIdle().andThen(Robot.robotCommands.prepareScoreWithHandoffCheckCommand()).andThen(Robot.robotCommands.waitForL4())
+              )
+          ), false)
+      )//.withDeadline(Robot.robotCommands.waitForL4()), Robot.robotCommands.autoReefAlignCommand()
         );
   }
 }

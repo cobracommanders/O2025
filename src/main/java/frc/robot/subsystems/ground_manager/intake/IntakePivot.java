@@ -33,7 +33,6 @@ import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.TunablePid;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.armManager.arm.SimArm;
 
 public class IntakePivot extends StateMachine<IntakePivotStates> {
   public final String name = getName();

@@ -27,7 +27,6 @@ import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
-import frc.robot.subsystems.armManager.elevator.SimElevator;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.vision.VisionSubsystem;
 

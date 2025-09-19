@@ -33,6 +33,7 @@ import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.Lights.LED;
+import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
@@ -68,6 +69,7 @@ public class Robot extends TimedRobot {
 
 
   public Robot() {
+    ArmManager.getInstance();
     // for (Command command : robotCommands.getPathplannerCommands()) {
     //   NamedCommands.registerCommand(command.getName(), command);
     // }
