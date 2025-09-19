@@ -109,7 +109,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
   private final Debouncer isAlignedDebouncer = new Debouncer(0.5, DebounceType.kRising);
   private final VisionSubsystem vision;
   private final LocalizationSubsystem localization;
-  private final TagAlign tagAlign;
+  public final TagAlign tagAlign;
   private final DriveSubsystem swerve;
 
   private Pose2d robotPose = Pose2d.kZero;
@@ -123,7 +123,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
   private RobotScoringSide robotScoringSide = RobotScoringSide.RIGHT;
   private ReefPipe bestReefPipe = ReefPipe.PIPE_A;
   private ReefPipeLevel preferredLevel = ReefPipeLevel.BASE;
-  private Pose2d usedScoringPose = Pose2d.kZero;
+  public Pose2d usedScoringPose = Pose2d.kZero;
   private ReefSideOffset reefSideOffset = ReefSideOffset.BASE;
   private ReefSide bestAlgaeSide = ReefSide.SIDE_AB;
   private ReefSide closestSide = ReefSide.SIDE_AB;
@@ -143,6 +143,10 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
   public ReefSide getClosestReefSide() {
     return ReefSide.fromPipe(bestReefPipe);
+  }
+
+  public Pose2d getAlgaeDistance() {
+    return bestAlgaeSide.getPose(reefSideOffset, robotScoringSide, robotPose);
   }
 
   @Override

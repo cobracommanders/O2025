@@ -88,6 +88,8 @@ public class Elevator extends StateMachine<ElevatorStates> {
                 MathUtil.isNear(ElevatorPositions.L2, elevatorPosition, tolerance);
             case SCORE_L2 -> 
                 MathUtil.isNear(ElevatorPositions.SCORE_L2, elevatorPosition, tolerance);
+            case HANDOFF_CORAL_MODE -> 
+                MathUtil.isNear(ElevatorPositions.HANDOFF_CORAL_MODE, elevatorPosition, tolerance);
         };
 
     }
@@ -100,6 +102,11 @@ public class Elevator extends StateMachine<ElevatorStates> {
         DogLog.log(name + "/Left Elevator Position", leftElevatorPosition);
         DogLog.log(name + "/Right Elevator Position", rightElevatorPosition);
         MechanismVisualizer.setElevatorPosition(elevatorPosition);
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        SimElevator.updateSimPosition(lMotor, rMotor);
     }
 
     public double getHeight(){
@@ -126,6 +133,9 @@ public class Elevator extends StateMachine<ElevatorStates> {
         switch (newState) {
             case IDLE -> {
                 setElevatorPosition(ElevatorPositions.IDLE);
+            }
+            case HANDOFF_CORAL_MODE -> {
+                setElevatorPosition(ElevatorPositions.HANDOFF_CORAL_MODE);
             }
             case L4 -> {
                 setElevatorPosition(ElevatorPositions.L4);

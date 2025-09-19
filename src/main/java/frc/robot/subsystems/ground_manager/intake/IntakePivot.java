@@ -14,6 +14,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import dev.doglog.DogLog;
 import dev.doglog.internal.tunable.Tunable;
+import edu.wpi.first.hal.SimInt;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -32,6 +33,7 @@ import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.TunablePid;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.armManager.arm.SimArm;
 
 public class IntakePivot extends StateMachine<IntakePivotStates> {
   public final String name = getName();
@@ -97,8 +99,14 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
     absolutePosition = 1 - encoder.getOutput() - 0.163;
     DogLog.log(name + "/motor Position", intakePosition);
     DogLog.log(name + "/absolute Position", absolutePosition);
+    if (Utils.isSimulation()) SimPivot.updateSimPosition(intakeMotor);
     MechanismVisualizer.setGroundPivotPosition(intakePosition);
   }
+
+  // @Override
+  //   public void simulationPeriodic() {
+        
+  //   }
 
   public void setIntakePosition(double position) {
     DogLog.log(name + "/Setpoint", position);
@@ -110,6 +118,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   }
 
   public void syncEncoder() {
+    if (Utils.isSimulation()) return;
     intakeMotor.setPosition(absolutePosition);
   }
 

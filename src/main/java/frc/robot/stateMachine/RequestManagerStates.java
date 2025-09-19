@@ -6,7 +6,7 @@ package frc.robot.stateMachine;
 
 public enum RequestManagerStates {
    INDEPENDENT,
-   PREPARE_HANDOFF, 
+   PREPARE_HANDOFF,
    HANDOFF, 
    PREPARE_INVERTED_HANDOFF, 
    INVERTED_HANDOFF, 

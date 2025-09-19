@@ -4,10 +4,11 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
+import com.ctre.phoenix6.Utils;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.SendableRegistry;
@@ -20,9 +21,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autos.AutoSelection;
+import frc.robot.autos.Autos;
 import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.climber.Climber;
@@ -31,7 +36,11 @@ import frc.robot.subsystems.Lights.LED;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.trailblazer.LocalizationBase;
+import frc.robot.trailblazer.SwerveBase;
 //import frc.robot.subsystems.led.LED;
+import frc.robot.trailblazer.Trailblazer;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -39,28 +48,36 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
+  private Command autonomousCommand = Commands.none();
+
   // Uncomment as needed
   public static RequestManager robotManager = RequestManager.getInstance();
   public static RobotCommands robotCommands = new RobotCommands();
+  public static DriveSubsystem swerve = DriveSubsystem.getInstance();
+  public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
   // public static final Controls controls = new Controls();
-  private SendableChooser<Command> autoChooser;
+  //private SendableChooser<Command> autoChooser;
   private final Timer seedImuTimer = new Timer();
   public static LED lights;
+  private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+  //private final Autos autos = new Autos(trailblazer);
   // public static OperatorOptions operatorOptions =
   // OperatorOptions.getInstance();
 
+  private final Autos autos = new Autos(trailblazer);
+
 
   public Robot() {
-    for (Command command : robotCommands.getPathplannerCommands()) {
-      NamedCommands.registerCommand(command.getName(), command);
-    }
-    Command centerL1 = AutoBuilder.buildAuto("CenterL1");
-    Command centerL4 = AutoBuilder.buildAuto("CenterL4");
+    // for (Command command : robotCommands.getPathplannerCommands()) {
+    //   NamedCommands.registerCommand(command.getName(), command);
+    // }
+    // Command centerL1 = AutoBuilder.buildAuto("CenterL1");
+    // Command centerL4 = AutoBuilder.buildAuto("CenterL4");
 
-    autoChooser = new SendableChooser<Command>();
-    // autoChooser.addOption("CenterL1", centerL1);
-    autoChooser.setDefaultOption("CenterL1", centerL1);
-    autoChooser.addOption("CenterL4", centerL4);
+    // autoChooser = new SendableChooser<Command>();
+    // // autoChooser.addOption("CenterL1", centerL1);
+    // autoChooser.setDefaultOption("CenterL1", centerL1);
+    // autoChooser.addOption("CenterL4", centerL4);
 
   }
   public final LEDPattern m_pattern = LEDPattern.rainbow(255, 128);
@@ -72,6 +89,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     lights.periodic();
     MechanismVisualizer.publishData();
+    // FmsSubsystem.getInstance().updateSimulation();
   }
 
   @Override
@@ -85,7 +103,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     FmsSubsystem.getInstance();
-    SmartDashboard.putData(autoChooser);
+    //SmartDashboard.putData(autoChooser);
     lights = new LED();
     AutoAlign.getInstance();
 
@@ -102,10 +120,20 @@ public class Robot extends TimedRobot {
     seedImuTimer.reset();
     seedImuTimer.start();
 
-    if (autoChooser.getSelected() != null)
-      autoChooser.getSelected().schedule();
-    DogLog.log("Selected Auto", autoChooser.getSelected().getName());
+    autonomousCommand = autos.getAutoCommand();
+
+    if(Utils.isSimulation()){
+      localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
+    }
+    DogLog.log("Selected Auto", autonomousCommand.getName());
+    autonomousCommand.schedule();
+    AutoAlign.getInstance().clearReefState();
   }
+
+    // if (autoChooser.getSelected() != null)
+    //   autoChooser.getSelected().schedule();
+    // DogLog.log("Selected Auto", autoChooser.getSelected().getName());
+//}
 
   @Override
   public void autonomousPeriodic() {

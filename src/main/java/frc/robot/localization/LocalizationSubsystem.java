@@ -20,15 +20,15 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
-import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.trailblazer.LocalizationBase;
 import frc.robot.util.MathHelpers;
 import frc.robot.vision.VisionSubsystem;
 import frc.robot.vision.results.TagResult;
 
-public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
+public class LocalizationSubsystem extends StateMachine<LocalizationStates> implements LocalizationBase{
   private static final Vector<N3> MT1_VISION_STD_DEVS = VecBuilder.fill(
       VisionConstants.xyStandardDeviation, // xy standard deviation
       VisionConstants.xyStandardDeviation, // xy standard deviation
@@ -77,6 +77,7 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> {
     vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());
   }
 
+  @Override
   public Pose2d getPose2d() {
     return robotPose;
   }

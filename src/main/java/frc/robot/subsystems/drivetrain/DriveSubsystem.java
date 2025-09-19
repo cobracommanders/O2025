@@ -15,6 +15,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -23,37 +24,46 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefAlignStates;
 import frc.robot.autoAlign.ReefPipe;
-import frc.robot.autoAlign.ReefPoses;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.trailblazer.SwerveBase;
 import frc.robot.util.ControllerHelpers;
 import frc.robot.util.MathHelpers;
 
-public class DriveSubsystem extends StateMachine<DriveStates> {
+public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveBase {
   private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
   private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
   private ChassisSpeeds fieldRelativeSpeeds = new ChassisSpeeds();
   private ChassisSpeeds robotRelativeSpeeds = new ChassisSpeeds();
   private ChassisSpeeds autoAlignSpeeds = new ChassisSpeeds();
+  private ChassisSpeeds algaeAutoAlignSpeeds = new ChassisSpeeds();
   public final CommandSwerveDrivetrain drivetrain;
   public Pose2d closestBranch = new Pose2d();
   private SwerveDriveState drivetrainState = new SwerveDriveState();
   public final Pigeon2 drivetrainPigeon = CommandSwerveDrivetrain.getInstance().getPigeon2();
   private double teleopSlowModePercent = 1.0;
   private double rawControllerXValue = 0.0;
-  private double rawControllerYValue = 0.0;
+  private double rawControllerYValue = 0.0;;
+
+  private Debouncer alignmentDebouncer = new Debouncer(0.5);
 
   public PIDController reefAutoAlignX = new PIDController(0, 0, 0);
   public PIDController reefAutoAlignY = new PIDController(0, 0, 0);
 
+  public PIDController algaeAutoAlignX = new PIDController(0, 0, 0);
+  public PIDController algaeAutoAlignY = new PIDController(0, 0, 0);
+
   private double goalSnapAngle = 0;
 
   private double elevatorHeight;
+
+  private final Timer timeSinceAutoSpeeds = new Timer();
 
   private static final double LEFT_X_DEADBAND = 0.05;
   private static final double LEFT_Y_DEADBAND = 0.05;
@@ -87,7 +97,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
     reefAutoAlignX.setPID(0.1, 0, 0);
     reefAutoAlignY.setPID(0.03, 0, 0);
 
+    algaeAutoAlignX.setPID(0.1, 0, 0);
+    algaeAutoAlignY.setPID(0.03, 0, 0);
+
     autoAlignSpeeds = new ChassisSpeeds(0, 0, 0);
+    algaeAutoAlignSpeeds = new ChassisSpeeds(0,0,0);
 
     AutoBuilder.configure(
         () -> drivetrain.getState().Pose, // Robot pose supplier
@@ -111,10 +125,12 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
         },
         this // Reference to this subsystem to set requirements
     );
+
+    timeSinceAutoSpeeds.start();
   }
 
   public Translation2d getControllerValues() {
-    if (getState() != DriveStates.REEF_ALIGN_TELEOP) {
+    if (getState() != DriveStates.REEF_ALIGN_TELEOP || getState() != DriveStates.ALGAE_ALIGN_TELEOP) {
       return Translation2d.kZero;
     }
 
@@ -122,13 +138,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
         ControllerHelpers.getJoystickMagnitude(
             rawControllerXValue, rawControllerYValue, 2),
         new Rotation2d(rawControllerXValue, rawControllerYValue));
-  }
-
-  public void setAutoAlignSpeeds() {
-    double reefSpeedX = reefAutoAlignX.calculate(teleopSpeeds.vxMetersPerSecond, ReefPoses.getInstance().getNearestBranch().getX());
-    double reefSpeedY = reefAutoAlignY.calculate(teleopSpeeds.vyMetersPerSecond, ReefPoses.getInstance().getNearestBranch().getY());
-    autoAlignSpeeds = new ChassisSpeeds(reefSpeedX, reefSpeedY, 0);
-    sendSwerveRequest(DriveStates.REEF_ALIGN_TELEOP);
   }
 
   // public void scoringAlignmentRequest() {
@@ -149,25 +158,15 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
     }
   }
 
-
-  public void setSnapToAngle(double angle) {
-    goalSnapAngle = ReefPoses.getInstance().getNearestBranch().getRotation().getDegrees();
-
-    // We don't necessarily set auto swerve speeds every loop, so this ensures we are always snapped
-    // to the right angle during auto. Teleop doesn't need this since teleop speeds are constantly
-    // fed into swerve.
-    if (DriverStation.isAutonomous()) {
-      sendSwerveRequest(DriveStates.REEF_ALIGN_TELEOP);
-    }
-  }
-
   @Override
   protected DriveStates getNextState(DriveStates currentState) {
     return switch (currentState) {
       case AUTO, TELEOP ->
         FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
       case REEF_ALIGN_TELEOP ->
-        AutoAlign.getInstance().isAligned() ? DriveStates.TELEOP : DriveStates.REEF_ALIGN_TELEOP;
+        AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.REEF_ALIGN_TELEOP;
+      case ALGAE_ALIGN_TELEOP ->
+        AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
 
     };
   }
@@ -204,6 +203,13 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
     return fieldRelativeSpeeds;
   }
 
+  @Override
+  public void setFieldRelativeAutoSpeeds(ChassisSpeeds speeds) {
+    autoSpeeds = speeds;
+    timeSinceAutoSpeeds.reset();
+    // sendSwerveRequest(DriveStates.AUTO);
+  }
+
   private ChassisSpeeds calculateFieldRelativeSpeeds() {
     return ChassisSpeeds.fromRobotRelativeSpeeds(
         robotRelativeSpeeds, drivetrainState.Pose.getRotation());
@@ -214,10 +220,23 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
     drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
   }
 
+  public ChassisSpeeds getTagAlignSpeedsForAlign(){
+    if(FmsSubsystem.getInstance().isAutonomous()){
+      return AutoAlign.getInstance().getTagAlignSpeeds();
+    }
+    else if(FmsSubsystem.getInstance().isRedAlliance()){
+      return flipSpeeds(AutoAlign.getInstance().getTagAlignSpeeds());
+    }
+    else{
+      return AutoAlign.getInstance().getTagAlignSpeeds();
+    }
+  }
+
   @Override
   protected void collectInputs() {
     fieldRelativeSpeeds = calculateFieldRelativeSpeeds();
-    autoAlignSpeeds =  FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getTagAlignSpeeds()) : AutoAlign.getInstance().getTagAlignSpeeds();
+    autoAlignSpeeds =  getTagAlignSpeedsForAlign();
+    algaeAutoAlignSpeeds = FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getAlgaeAlignSpeeds()) : AutoAlign.getInstance().getAlgaeAlignSpeeds();
     teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
     DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);
     DogLog.log("Swerve/Pose", drivetrain.getState().Pose);
@@ -264,7 +283,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
       }
       case AUTO -> {
         drivetrain.setControl(
-            driveRobotRelative
+            drive
+                .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance)
                 .withVelocityX(autoSpeeds.vxMetersPerSecond)
                 .withVelocityY(autoSpeeds.vyMetersPerSecond)
                 .withRotationalRate(autoSpeeds.omegaRadiansPerSecond)
@@ -277,6 +297,14 @@ public class DriveSubsystem extends StateMachine<DriveStates> {
                 .withVelocityX(autoAlignSpeeds.vxMetersPerSecond)
                 .withVelocityY(autoAlignSpeeds.vyMetersPerSecond)
                 .withRotationalRate(autoAlignSpeeds.omegaRadiansPerSecond)
+                .withDriveRequestType(DriveRequestType.Velocity));
+      }
+      case ALGAE_ALIGN_TELEOP -> {
+        drivetrain.setControl(
+            drive
+                .withVelocityX(algaeAutoAlignSpeeds.vxMetersPerSecond)
+                .withVelocityY(algaeAutoAlignSpeeds.vyMetersPerSecond)
+                .withRotationalRate(algaeAutoAlignSpeeds.omegaRadiansPerSecond)
                 .withDriveRequestType(DriveRequestType.Velocity));
       }
     }

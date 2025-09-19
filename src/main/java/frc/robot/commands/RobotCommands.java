@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
 import java.util.List;
 import java.util.Map;
 
@@ -8,10 +10,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.ReefSideOffset;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
+import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
@@ -48,7 +53,8 @@ public class RobotCommands {
                 waitForState(RequestManagerStates.INDEPENDENT),
                 waitForGroundReady(),
                 waitForWaitL4(),
-                reefAlignCommand()
+                reefAlignCommand(),
+                autoReefAlignCommand()
         };
     }
 
@@ -165,10 +171,34 @@ public class RobotCommands {
     }
 
     public Command reefAlignCommand() {
-        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP));
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.TELEOP).andThen(scoreCommand())).withName("teleop align");
+    }
+
+    public Command autoReefAlignCommand() {
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).andThen(scoreCommand()).withName("auto align");
+    }
+
+    public Command algaeAlignCommand() {
+        return Commands.runOnce(() -> AutoAlign.getInstance().setAlgaeIntakingOffset(ReefSideOffset.ALGAE_INTAKING)).andThen(runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.ALGAE_ALIGN_TELEOP)));
     }
 
     public Command driveTeleopCommand() {
         return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP));
+    }
+
+    public Command waitForSaikiranCommand() {
+        return Commands.waitUntil(() -> AutoAlign.getInstance().isAlignedDebounced());
+    }
+
+    public Command waitForL4() {
+        return Commands.waitUntil(() -> ArmManager.getInstance().getState() == ArmManagerStates.WAIT_L4);
+    }
+
+    private static RobotCommands instance;
+
+    public static RobotCommands getInstance() {
+        if (instance == null)
+            instance = new RobotCommands(); // Make sure there is an instance (this will only run once)
+        return instance;
     }
 }
