@@ -37,7 +37,8 @@ public class blueL4 extends BaseAuto {
             new AutoSegment(
                 CONSTRAINTS,
                 new AutoPoint(Points.START_R1_AND_B1.bluePose),
-                new AutoPoint(ReefPipe.PIPE_G.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT))
+                new AutoPoint(ReefPipe.PIPE_G.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT), 
+                autoCommands.l4ApproachCommand(ReefPipe.PIPE_G, RobotScoringSide.LEFT))
                 )));
   }
 }

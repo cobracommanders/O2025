@@ -220,10 +220,22 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
   }
 
+  public ChassisSpeeds getTagAlignSpeedsForAlign(){
+    if(FmsSubsystem.getInstance().isAutonomous()){
+      return AutoAlign.getInstance().getTagAlignSpeeds();
+    }
+    else if(FmsSubsystem.getInstance().isRedAlliance()){
+      return flipSpeeds(AutoAlign.getInstance().getTagAlignSpeeds());
+    }
+    else{
+      return AutoAlign.getInstance().getTagAlignSpeeds();
+    }
+  }
+
   @Override
   protected void collectInputs() {
     fieldRelativeSpeeds = calculateFieldRelativeSpeeds();
-    autoAlignSpeeds =  FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getTagAlignSpeeds()) : AutoAlign.getInstance().getTagAlignSpeeds();
+    autoAlignSpeeds =  getTagAlignSpeedsForAlign();
     algaeAutoAlignSpeeds = FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getAlgaeAlignSpeeds()) : AutoAlign.getInstance().getAlgaeAlignSpeeds();
     teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
     DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);

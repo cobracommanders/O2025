@@ -1,6 +1,7 @@
 package frc.robot.stateMachine;
 
 import dev.doglog.DogLog;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions.CoralMode;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
@@ -40,6 +41,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
         this.coralDetector = CoralDetector.getInstance();
         this.driveSubsystem = DriveSubsystem.getInstance();
         this.localizationSubsystem = LocalizationSubsystem.getInstance();
+        this.operatorOptions.scoreLocation = ScoreLocation.L4;
         // this.desiredArmState = armManager.getState();
         // this.desiredGroundState = groundManager.getState();
     }
@@ -79,7 +81,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                         nextState = RequestManagerStates.PREPARE_IDLE;
                         flags.remove(flag);
                     }
-                    break;
+                    break;                       
                 default:
                     break;
             }
@@ -89,8 +91,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
             case PREPARE_HANDOFF:
                 if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
-                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT ||
-                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_CORAL_MODE) &&
+                        armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
                         groundManager.getState() == GroundManagerStates.WAIT_HANDOFF) {
                     nextState = RequestManagerStates.HANDOFF;
                 }
@@ -153,18 +154,18 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
             }
             case PREPARE_HANDOFF -> {
                 // need to figure out which handoff we are doing...
-                if (OperatorOptions.CoralMode.CORAL_MODE == operatorOptions.coralMode && armManager.getState() != ArmManagerStates.WAIT_HANDOFF_CORAL_MODE){
+                if (armManager.getState() != ArmManagerStates.WAIT_HANDOFF_CORAL_MODE){
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE);
-                } else if (coralDetector.getState() == CoralDetectorStates.LEFT) {
-                    armManager.setState(ArmManagerStates.PREPARE_HANDOFF_LEFT);
-                } else if (coralDetector.getState() == CoralDetectorStates.RIGHT) {
-                    armManager.setState(ArmManagerStates.PREPARE_HANDOFF_RIGHT);
-                } else if (coralDetector.getState() == CoralDetectorStates.MIDDLE) {
-                    armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
-                } else {
-                    armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
+                }//else if (coralDetector.getState() == CoralDetectorStates.LEFT) {
+                //     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_LEFT);
+                // } else if (coralDetector.getState() == CoralDetectorStates.RIGHT) {
+                //     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_RIGHT);
+                // } else if (coralDetector.getState() == CoralDetectorStates.MIDDLE) {
+                //     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
+                // } else {
+                //     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_MIDDLE);
                     // if there is no coral, do nothing
-                }
+                //}
                 groundManager.setState(GroundManagerStates.PREPARE_HANDOFF);
             }
             case PREPARE_INVERTED_HANDOFF -> {

@@ -30,10 +30,26 @@ public class AutoCommands {
 //   }
 
   public Command l4ApproachCommand(ReefPipe pipe, RobotScoringSide scoringSide) {
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
+    System.out.println("RUNNING L4 APPROACH COMMAND");
     return Commands.runOnce(
             () -> {
               autoAlign.setAutoReefPipeOverride(pipe);
-                robotCommands.setL4Command().andThen(robotCommands.prepareScoreCommand());
+                robotCommands.setL4Command().andThen(robotCommands.prepareScoreWithHandoffCheckCommand(), robotCommands.autoReefAlignCommand());
             })
         .withName("L4ApproachCommand");
   }
@@ -64,6 +80,8 @@ public class AutoCommands {
             })
         .withName("GroundIntakeL4Command");
   }
+
+  
 
   private static AutoCommands instance;
 

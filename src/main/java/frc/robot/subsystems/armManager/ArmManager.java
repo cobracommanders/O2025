@@ -101,25 +101,28 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
 
             case PREPARE_HANDOFF_LEFT -> {
-                if (armScheduler.isReady()) {
+                if (arm.atGoal() && elevator.atGoal()) {
+                // if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.WAIT_HANDOFF_LEFT;
                 }
             }
 
             case PREPARE_HANDOFF_RIGHT -> {
-                if (armScheduler.isReady()) {
+                if (arm.atGoal() && elevator.atGoal()) {
+                // if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.WAIT_HANDOFF_RIGHT;
                 }
             }
 
             case PREPARE_HANDOFF_MIDDLE -> {
-                if (armScheduler.isReady()) {
+                if (arm.atGoal() && elevator.atGoal()) {
+                // if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.WAIT_HANDOFF_MIDDLE;
                 }
             }
 
             case PREPARE_HANDOFF_CORAL_MODE -> {
-                if (armScheduler.isReady() && OperatorOptions.getInstance().coralMode == CoralMode.CORAL_MODE) {
+                if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.WAIT_HANDOFF_CORAL_MODE;
                 }
             }
@@ -310,41 +313,50 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 arm.setState(ArmStates.SCORE_L2);
             }
             case PREPARE_HANDOFF_RIGHT -> {
+                arm.setState(ArmStates.HANDOFF_RIGHT);
+                elevator.setState(ElevatorStates.HANDOFF);
+                hand.setState(HandStates.HANDOFF);
                 //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
-                if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
-                    arm.setState(ArmStates.HANDOFF_RIGHT);
-                    elevator.setState(ElevatorStates.HANDOFF);
-                    hand.setState(HandStates.HANDOFF);
-                }
-                else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
-                    armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
-                }
+                // if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
+                //     arm.setState(ArmStates.HANDOFF_RIGHT);
+                //     elevator.setState(ElevatorStates.HANDOFF);
+                //     hand.setState(HandStates.HANDOFF);
+                // }
+                // else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                //     armScheduler.scheduleStates(ArmStates.HANDOFF_RIGHT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                // }
             }
             case WAIT_HANDOFF_RIGHT -> {
             }
             case PREPARE_HANDOFF_MIDDLE -> {
+                arm.setState(ArmStates.HANDOFF_MIDDLE);
+                elevator.setState(ElevatorStates.HANDOFF);
+                hand.setState(HandStates.HANDOFF);
                 //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
-                if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
-                    arm.setState(ArmStates.HANDOFF_MIDDLE);
-                    elevator.setState(ElevatorStates.HANDOFF);
-                    hand.setState(HandStates.HANDOFF);
-                }
-                else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
-                    armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
-                }
+                // if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
+                //     arm.setState(ArmStates.HANDOFF_MIDDLE);
+                //     elevator.setState(ElevatorStates.HANDOFF);
+                //     hand.setState(HandStates.HANDOFF);
+                // }
+                // else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                //     armScheduler.scheduleStates(ArmStates.HANDOFF_MIDDLE, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                // }
             }
             case WAIT_HANDOFF_MIDDLE -> {
             }
             case PREPARE_HANDOFF_LEFT -> {
+                arm.setState(ArmStates.HANDOFF_LEFT);
+                elevator.setState(ElevatorStates.HANDOFF);
+                hand.setState(HandStates.HANDOFF);
                 //if normal mode, we need to use arm scheduler, if not, we can ignore arm scheduler
-                if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
-                    arm.setState(ArmStates.HANDOFF_LEFT);
-                    elevator.setState(ElevatorStates.HANDOFF);
-                    hand.setState(HandStates.HANDOFF);
-                }
-                else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
-                    armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
-                }
+                // if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE){
+                //     arm.setState(ArmStates.HANDOFF_LEFT);
+                //     elevator.setState(ElevatorStates.HANDOFF);
+                //     hand.setState(HandStates.HANDOFF);
+                // }
+                // else if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                //     armScheduler.scheduleStates(ArmStates.HANDOFF_LEFT, HandStates.HANDOFF, ElevatorStates.HANDOFF);
+                // }
             }
             case WAIT_HANDOFF_LEFT -> {
             }
