@@ -131,9 +131,9 @@ public class Climber extends StateMachine<ClimberStates> {
         setWinchSpeed(ClimberPositions.IDLE);
         // do nothing
         break;
-      case KEEP_SUCKING:
-        // do nothing
-        break;
+      // case KEEP_SUCKING:
+      //   // do nothing
+      //   break;
     case CONTINUE_SUCKING:
         //do nothing!
         break;
