@@ -1,12 +1,14 @@
 package frc.robot.subsystems.armManager;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.tagAlign.TagAlign;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
@@ -64,6 +66,14 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
         ArmManagerStates nextState = currentState;
 
         switch (currentState) {
+            case PREPARE_INTAKE_LOLLIPOP -> {
+                if (atGoal()) {
+                    nextState = ArmManagerStates.INTAKE_LOLLIPOP;
+                }
+            }
+            case INTAKE_LOLLIPOP -> {
+                
+            }
             case PREPARE_IDLE -> {
                 if (armScheduler.isReady() ) {
                     nextState = ArmManagerStates.IDLE;
@@ -156,6 +166,9 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case PREPARE_INTAKE_HIGH_REEF_ALGAE -> {
+                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                    nextState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
+                }
                 if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_HIGH_REEF_ALGAE;
                 }
@@ -169,7 +182,10 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case PREPARE_INTAKE_LOW_REEF_ALGAE -> {
-                if (armScheduler.isReady()) {
+                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                    nextState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
+                }
+                else if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_LOW_REEF_ALGAE;
                 }
             }
@@ -224,7 +240,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     }
 
     public void setState(ArmManagerStates state) {
-        if (armScheduler.isReady()) {
+        if (armScheduler.isReady() || DriverStation.isAutonomous()) {
             setStateFromRequest(state);
         }else{
             //do nothing
@@ -239,6 +255,17 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     protected void afterTransition(ArmManagerStates newState) {
         synced = false;
         switch (newState) {
+            case PREPARE_INTAKE_LOLLIPOP -> {
+                if (DriverStation.isAutonomous()) {
+                    arm.setState(ArmStates.LOLLIPOP);
+                    hand.setState(HandStates.LOLLIPOP);
+                    elevator.setState(ElevatorStates.LOLLIPOP);
+                }
+                // armScheduler.scheduleStates(ArmStates.LOLLIPOP, HandStates.LOLLIPOP, ElevatorStates.LOLLIPOP);
+            }
+            case INTAKE_LOLLIPOP -> {
+
+            }
             case PREPARE_IDLE -> {
                 armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
             }

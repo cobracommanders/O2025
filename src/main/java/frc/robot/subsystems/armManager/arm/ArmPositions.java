@@ -17,4 +17,5 @@ public class ArmPositions {
     public static final double L2 = 0.08;
     public static final double SCORE_L2 = 0.0;
     public static final double CLIMB = 0.0;
+    public static final double LOLLIPOP = -0.035;
 }

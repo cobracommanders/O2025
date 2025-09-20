@@ -31,7 +31,7 @@ public class RobotCommands {
 
     public RobotCommands() {
         this.robotManager = RequestManager.getInstance();
-        var requirementsList = List.of(robotManager.armManager, robotManager.groundManager, robotManager.climber);
+        var requirementsList = List.of();//List.of(robotManager.armManager, robotManager.groundManager, robotManager.climber);
         requirements = requirementsList.toArray(Subsystem[]::new);
     }
 
@@ -79,7 +79,7 @@ public class RobotCommands {
     }
 
     public Command scoreCommand() {
-        return Commands.runOnce(robotManager::scoreRequest, requirements).withName("score");
+        return Commands.runOnce(robotManager::scoreRequest).withName("score");
     }
 
     // public Command waitForScoreCommand() {
@@ -92,6 +92,10 @@ public class RobotCommands {
 
     public Command coralIntakeCommand() {
         return Commands.runOnce(robotManager::coralIntakeRequest, requirements).withName("coralIntake");
+    }
+
+    public Command lollipopIntakeCommand() {
+        return Commands.runOnce(robotManager::lollipopIntakeRequest).withName("lollipopIntake");
     }
 
     public Command prepareScoreCommand() {
@@ -186,6 +190,10 @@ public class RobotCommands {
 
     public Command autoReefAlignCommand() {
         return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).andThen(scoreCommand()).withName("auto align");
+    }
+
+    public Command autoReefAlignCommandNoScore() {
+        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).withName("auto align");
     }
 
     public Command algaeAlignCommand() {

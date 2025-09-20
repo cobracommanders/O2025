@@ -5,6 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
@@ -68,6 +69,11 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
   public static Translation2d getAllianceCenterOfReef(Pose2d robotPose) {
     return robotPose.getX() > 17.55 / 2 ? CENTER_OF_REEF_RED : CENTER_OF_REEF_BLUE;
+  }
+
+  public static Rotation2d angleToReef(Pose2d robotPose) {
+    var centerOfReef = getAllianceCenterOfReef(robotPose.getX() > (17.5 / 2));
+    return Rotation2d.fromRadians(MathUtil.angleModulus(Math.atan2(centerOfReef.getY() - robotPose.getY(), centerOfReef.getX() - robotPose.getX())));
   }
 
   public static RobotScoringSide getScoringSideFromRobotPose(

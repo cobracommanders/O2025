@@ -73,6 +73,8 @@ public class Arm extends StateMachine<ArmStates> {
 
     public boolean atGoal() {
         return switch (getState()) {
+            case LOLLIPOP ->
+                MathUtil.isNear(ArmPositions.LOLLIPOP, armPosition, tolerance);
             case IDLE ->
                 MathUtil.isNear(ArmPositions.IDLE, armPosition, tolerance);
             case INTAKE_GROUND_ALGAE ->
@@ -205,6 +207,9 @@ public class Arm extends StateMachine<ArmStates> {
     @Override
     protected void afterTransition(ArmStates newState) {
         switch (newState) {
+            case LOLLIPOP -> {
+                setArmPosition(ArmPositions.LOLLIPOP);
+            }
             case IDLE -> {
                 setArmPosition(ArmPositions.IDLE);
             }

@@ -11,4 +11,5 @@ public class HandSpeeds {
     public static final double SCORE_ALGAE_PROCESSOR = 0.5;
     public static final double CORAL_IDLE = 0.0;
     public static final double INVERTED_HANDOFF = 1.0;
+    public static final double LOLLIPOP = -1.0;
 }

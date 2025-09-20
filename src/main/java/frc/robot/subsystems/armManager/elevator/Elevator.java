@@ -62,6 +62,8 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
     public boolean atGoal() {
         return switch (getState()) {
+            case LOLLIPOP ->
+                MathUtil.isNear(ElevatorPositions.LOLLIPOP, elevatorPosition, tolerance);
             case IDLE ->
                 MathUtil.isNear(ElevatorPositions.IDLE, elevatorPosition, tolerance);
             case L4 ->
@@ -131,6 +133,9 @@ public class Elevator extends StateMachine<ElevatorStates> {
     @Override
     protected void afterTransition(ElevatorStates newState) {
         switch (newState) {
+            case LOLLIPOP -> {
+                setElevatorPosition(ElevatorPositions.LOLLIPOP);
+            }
             case IDLE -> {
                 setElevatorPosition(ElevatorPositions.IDLE);
             }
