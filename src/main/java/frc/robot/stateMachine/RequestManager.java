@@ -1,6 +1,7 @@
 package frc.robot.stateMachine;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.fms.FmsSubsystem;
@@ -226,9 +227,7 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                     break;
                 case INTAKE_CORAL_LOLLIPOP:
                     flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
+                    if (DriverStation.isAutonomous()) {
                         armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOLLIPOP);
                     }
                     break;

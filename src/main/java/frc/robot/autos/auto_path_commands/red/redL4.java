@@ -14,6 +14,7 @@ import frc.robot.autos.AutoBlocks;
 import frc.robot.autos.AutoCommands;
 import frc.robot.autos.BaseAuto;
 import frc.robot.autos.Points;
+import frc.robot.autos.AutoBlocks.Lollipop;
 import frc.robot.commands.RobotCommands;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.RequestManager;
@@ -46,26 +47,28 @@ public class redL4 extends BaseAuto {
   @Override
   protected Command createAutoCommand() {
     return Commands.sequence(
-      Robot.robotCommands.waitForAllIdle(),
-      blocks.scoreL4(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
-      Commands.runOnce(()-> ArmManager.getInstance().setState(ArmManagerStates.PREPARE_INTAKE_LOLLIPOP)),
+      blocks.scorePreloadL4(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+      blocks.backUpFromReef(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
       // Commands.parallel(
         
-      blocks.pickUpRightLolli(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+      blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_J, RobotScoringSide.LEFT),
       // ),
       blocks.scoreL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-      Commands.runOnce(()-> ArmManager.getInstance().setState(ArmManagerStates.PREPARE_INTAKE_LOLLIPOP)),
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
 
       // RobotCommands.getInstance().waitForAllIdle(),
       // RobotCommands.getInstance().lollipopIntakeCommand(),
-      blocks.pickUpMidLolli(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
+      blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
       blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-      Commands.runOnce(()-> ArmManager.getInstance().setState(ArmManagerStates.PREPARE_INTAKE_LOLLIPOP)),
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
 
       // RobotCommands.getInstance().waitForAllIdle(),
       // RobotCommands.getInstance().lollipopIntakeCommand(),
-      blocks.pickUpLeftLolli(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-      blocks.scoreL4(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
+      blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+      blocks.scoreL4(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
+      blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
+
     );
   }
 }

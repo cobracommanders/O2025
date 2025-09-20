@@ -71,8 +71,8 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
     return robotPose.getX() > 17.55 / 2 ? CENTER_OF_REEF_RED : CENTER_OF_REEF_BLUE;
   }
 
-  public static Rotation2d angleToReef(Pose2d robotPose) {
-    var centerOfReef = getAllianceCenterOfReef(robotPose.getX() > (17.5 / 2));
+  public static Rotation2d angleToReef(Translation2d robotPose, boolean isRed) {
+    var centerOfReef = getAllianceCenterOfReef(isRed);
     return Rotation2d.fromRadians(MathUtil.angleModulus(Math.atan2(centerOfReef.getY() - robotPose.getY(), centerOfReef.getX() - robotPose.getX())));
   }
 

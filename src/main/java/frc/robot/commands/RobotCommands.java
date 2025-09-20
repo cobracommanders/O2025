@@ -94,7 +94,7 @@ public class RobotCommands {
         return Commands.runOnce(robotManager::coralIntakeRequest, requirements).withName("coralIntake");
     }
 
-    public Command lollipopIntakeCommand() {
+    public Command autoLollipopIntakeCommand() {
         return Commands.runOnce(robotManager::lollipopIntakeRequest).withName("lollipopIntake");
     }
 

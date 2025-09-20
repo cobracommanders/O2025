@@ -7,6 +7,7 @@ import frc.robot.Robot;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.autos.AutoBlocks.Lollipop;
 import frc.robot.autos.BaseAuto;
 import frc.robot.autos.Points;
 import frc.robot.commands.RobotCommands;
@@ -35,23 +36,28 @@ public class blueL4 extends BaseAuto {
   @Override
   protected Command createAutoCommand() {
     return Commands.sequence(
-      Robot.robotCommands.waitForAllIdle(),
-      blocks.scoreL4(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
-      RobotCommands.getInstance().waitForAllIdle().andThen(RobotCommands.getInstance().lollipopIntakeCommand()),
+      blocks.scorePreloadL4(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+      blocks.backUpFromReef(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
       // Commands.parallel(
         
-      blocks.pickUpRightLolli(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+      blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_J, RobotScoringSide.LEFT),
       // ),
       blocks.scoreL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
 
-      RobotCommands.getInstance().waitForAllIdle(),
-      RobotCommands.getInstance().lollipopIntakeCommand(),
-      blocks.pickUpMidLolli(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
+      // RobotCommands.getInstance().waitForAllIdle(),
+      // RobotCommands.getInstance().lollipopIntakeCommand(),
+      blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
       blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-      RobotCommands.getInstance().waitForAllIdle(),
-      RobotCommands.getInstance().lollipopIntakeCommand(),
-      blocks.pickUpLeftLolli(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-      blocks.scoreL4(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
+
+      // RobotCommands.getInstance().waitForAllIdle(),
+      // RobotCommands.getInstance().lollipopIntakeCommand(),
+      blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+      blocks.scoreL4(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
+      blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
+
     );
   }
 }
