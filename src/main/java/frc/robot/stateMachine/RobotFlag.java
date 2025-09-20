@@ -13,4 +13,5 @@ public enum RobotFlag {
     HANDOFF,
     GROUND_IDLE,
     PREPARE_CORAL_IDLE,
+    INTAKE_CORAL_LOLLIPOP
 }

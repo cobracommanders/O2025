@@ -14,5 +14,6 @@ public enum ElevatorStates {
     L3,
     SCORE_L3,
     L2,
-    SCORE_L2
+    SCORE_L2,
+    LOLLIPOP
 }

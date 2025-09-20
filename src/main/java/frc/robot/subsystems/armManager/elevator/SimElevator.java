@@ -15,7 +15,7 @@ import frc.robot.Constants.ElevatorConstants;
 public class SimElevator {
     private static ElevatorSim elevatorSim = new ElevatorSim(
         DCMotor.getKrakenX60Foc(2), 
-        3.5, Units.lbsToKilograms(13), Units.inchesToMeters(1), 0, 1.4, true, 0, 0.0001, 0);
+        3.5, Units.lbsToKilograms(13), Units.inchesToMeters(1), 0, 1.4, true, 0, 0.000001, 0);
     
     public static void updateSimPosition(TalonFX left, TalonFX right) {
         var leftSim = left.getSimState();

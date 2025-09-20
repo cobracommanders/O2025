@@ -27,7 +27,6 @@ import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
-import frc.robot.subsystems.armManager.elevator.SimElevator;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.vision.VisionSubsystem;
 
@@ -74,6 +73,8 @@ public class Arm extends StateMachine<ArmStates> {
 
     public boolean atGoal() {
         return switch (getState()) {
+            case LOLLIPOP ->
+                MathUtil.isNear(ArmPositions.LOLLIPOP, armPosition, tolerance);
             case IDLE ->
                 MathUtil.isNear(ArmPositions.IDLE, armPosition, tolerance);
             case INTAKE_GROUND_ALGAE ->
@@ -206,6 +207,9 @@ public class Arm extends StateMachine<ArmStates> {
     @Override
     protected void afterTransition(ArmStates newState) {
         switch (newState) {
+            case LOLLIPOP -> {
+                setArmPosition(ArmPositions.LOLLIPOP);
+            }
             case IDLE -> {
                 setArmPosition(ArmPositions.IDLE);
             }

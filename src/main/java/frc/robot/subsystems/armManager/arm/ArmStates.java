@@ -17,4 +17,5 @@ public enum ArmStates {
     L2,
     SCORE_L2,
     CLIMB,
+    LOLLIPOP
 }

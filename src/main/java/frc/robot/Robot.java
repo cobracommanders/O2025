@@ -35,6 +35,7 @@ import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.Lights.LED;
+import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
@@ -54,7 +55,7 @@ public class Robot extends TimedRobot {
 
   // Uncomment as needed
   public static RequestManager robotManager = RequestManager.getInstance();
-  public static RobotCommands robotCommands = new RobotCommands();
+  public static RobotCommands robotCommands = RobotCommands.getInstance();
   public static DriveSubsystem swerve = DriveSubsystem.getInstance();
   public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
   // public static final Controls controls = new Controls();
@@ -70,20 +71,19 @@ public class Robot extends TimedRobot {
 
 
   public Robot() {
-    for (Command command : robotCommands.getPathplannerCommands()) {
-      NamedCommands.registerCommand(command.getName(), command);
-    }
-    Command centerL1 = AutoBuilder.buildAuto("CenterL1");
-    Command centerL4 = AutoBuilder.buildAuto("CenterL4");
-    Command center1 = AutoBuilder.buildAuto("Center1");
-    Command centerL3 = AutoBuilder.buildAuto("CenterL3");
+    ArmManager.getInstance();
+    // for (Command command : robotCommands.getPathplannerCommands()) {
+    //   NamedCommands.registerCommand(command.getName(), command);
+    // }
+    // Command centerL1 = AutoBuilder.buildAuto("CenterL1");
+    // Command centerL4 = AutoBuilder.buildAuto("CenterL4");
 
-    autoChooser = new SendableChooser<Command>();
+    // autoChooser = new SendableChooser<Command>();
     // // autoChooser.addOption("CenterL1", centerL1);
-    autoChooser.setDefaultOption("CenterL1", centerL1);
-    autoChooser.addOption("CenterL4", centerL4);
-    autoChooser.addOption("Center1", center1);
-    autoChooser.addOption("CenterL3", centerL3);
+    // autoChooser.setDefaultOption("CenterL1", centerL1);
+    // autoChooser.addOption("CenterL4", centerL4);
+    // autoChooser.addOption("Center1", center1);
+    // autoChooser.addOption("CenterL3", centerL3);
 
   }
   public final LEDPattern m_pattern = LEDPattern.rainbow(255, 128);
@@ -107,6 +107,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+    // CommandScheduler.getInstance().onCommandInitialize((command)-> DogLog.log("CommandScheduler/Scheduled Commands", command.getName()));
     FmsSubsystem.getInstance();
     //SmartDashboard.putData(autoChooser);
     lights = new LED();

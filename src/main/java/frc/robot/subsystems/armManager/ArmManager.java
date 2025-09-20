@@ -1,9 +1,14 @@
 package frc.robot.subsystems.armManager;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.tagAlign.TagAlign;
+import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
@@ -49,6 +54,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     }
 
     public boolean isReadyToMove(){
+        if (DriverStation.isAutonomous()) return false;
        return AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 0.25;
     }
 
@@ -61,16 +67,24 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
         ArmManagerStates nextState = currentState;
 
         switch (currentState) {
+            case PREPARE_INTAKE_LOLLIPOP -> {
+                if (atGoal()) {
+                    nextState = ArmManagerStates.INTAKE_LOLLIPOP;
+                }
+            }
+            case INTAKE_LOLLIPOP -> {
+                
+            }
             case PREPARE_IDLE -> {
                 if (armScheduler.isReady() ) {
                     nextState = ArmManagerStates.IDLE;
                 }
             }
-            // case PREPARE_SCORE_L4 -> {
-            //     if (armScheduler.isReady()) {
-            //         nextState = ArmManagerStates.WAIT_L4;
-            //     }
-            // }
+            case PREPARE_SCORE_L4 -> {
+                if (atGoal()) {
+                    nextState = ArmManagerStates.WAIT_L4;
+                }
+            }
 
             case SCORE_L4 -> {
                 if(isReadyToMove()) {
@@ -153,6 +167,9 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case PREPARE_INTAKE_HIGH_REEF_ALGAE -> {
+                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                    nextState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
+                }
                 if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_HIGH_REEF_ALGAE;
                 }
@@ -166,7 +183,10 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case PREPARE_INTAKE_LOW_REEF_ALGAE -> {
-                if (armScheduler.isReady()) {
+                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                    nextState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
+                }
+                else if (armScheduler.isReady()) {
                     nextState = ArmManagerStates.INTAKE_LOW_REEF_ALGAE;
                 }
             }
@@ -236,6 +256,18 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
     protected void afterTransition(ArmManagerStates newState) {
         synced = false;
         switch (newState) {
+            case PREPARE_INTAKE_LOLLIPOP -> {
+                if (DriverStation.isAutonomous()) {
+                    arm.setState(ArmStates.LOLLIPOP);
+                    hand.setState(HandStates.LOLLIPOP);
+                    elevator.setState(ElevatorStates.LOLLIPOP);
+                } else {
+                    armScheduler.scheduleStates(ArmStates.LOLLIPOP, HandStates.LOLLIPOP, ElevatorStates.LOLLIPOP);
+                }
+            }
+            case INTAKE_LOLLIPOP -> {
+
+            }
             case PREPARE_IDLE -> {
                 armScheduler.scheduleStates(ArmStates.IDLE, HandStates.IDLE, ElevatorStates.IDLE);
             }
@@ -280,10 +312,19 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 hand.setState(HandStates.SCORE_ALGAE_PROCESSOR);
             }
             case PREPARE_SCORE_L4 -> {
-                armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
+                arm.setState(ArmStates.L4);
+                hand.setState(HandStates.CORAL_IDLE);
+                elevator.setState(ElevatorStates.L4);
+                // if (DriverStation.isAutonomous()) {
+                //     arm.setState(ArmStates.L4);
+                //     hand.setState(HandStates.CORAL_IDLE);
+                //     elevator.setState(ElevatorStates.L4);
+                // } else {
+                //     armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
+                // }
             }
             case WAIT_L4 -> {
-                armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
+                // armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case SCORE_L4 -> {
                 hand.setState(HandStates.SCORE_CORAL);
@@ -376,6 +417,26 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
 
         }
+    }
+
+    public Command waitForGoal() {
+        return Commands.waitUntil(()-> arm.atGoal() && elevator.atGoal());
+    }
+
+    public Command finishScoring() {
+        return Commands.waitUntil(()-> finishedScoring());
+    }
+
+    private boolean finishedScoring() {
+        return isScoring() && atGoal();
+    }
+
+    private boolean isScoring() {
+        return getState() == ArmManagerStates.SCORE_L2 || getState() == ArmManagerStates.SCORE_L3 || getState() == ArmManagerStates.SCORE_L4;
+    }
+
+    private boolean atGoal() {
+        return arm.atGoal() && elevator.atGoal();
     }
 
     private static ArmManager instance;

@@ -1,6 +1,9 @@
 package frc.robot.stateMachine;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions.CoralMode;
@@ -206,14 +209,26 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                                 armManager.setState(ArmManagerStates.PREPARE_INTAKE_GROUND_ALGAE);
                                 break;
                             case HIGH_REEF:
+                                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L2){
+                                    armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE);
+                                }
                                 // desiredArmState = ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE;
                                 armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
                                 break;
                             case LOW_REEF:
+                                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                                    armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
+                            }
                                 // desiredArmState = ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE;
                                 armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE);
                                 break;
                         }
+                    }
+                    break;
+                case INTAKE_CORAL_LOLLIPOP:
+                    flags.remove(flag);
+                    if (DriverStation.isAutonomous()) {
+                        armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOLLIPOP);
                     }
                     break;
                 case INTAKE_CORAL:
@@ -332,6 +347,10 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
     public void coralIntakeRequest() {
         flags.check(RobotFlag.INTAKE_CORAL);
+    }
+
+    public void lollipopIntakeRequest() {
+        flags.check(RobotFlag.INTAKE_CORAL_LOLLIPOP);
     }
 
     public void scoreRequest() {

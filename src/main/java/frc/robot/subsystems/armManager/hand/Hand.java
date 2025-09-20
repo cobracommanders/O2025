@@ -57,6 +57,9 @@ public class Hand extends StateMachine<HandStates> {
     @Override
     protected void afterTransition(HandStates newState) {
         switch (newState) {
+            case LOLLIPOP -> {
+                setHandSpeed(HandSpeeds.LOLLIPOP);
+            }
             case IDLE -> {
                 setHandSpeed(HandSpeeds.IDLE);
             }
