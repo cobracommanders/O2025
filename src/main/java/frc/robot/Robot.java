@@ -37,6 +37,7 @@ import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.trailblazer.LocalizationBase;
 import frc.robot.trailblazer.SwerveBase;
@@ -155,6 +156,8 @@ public class Robot extends TimedRobot {
     Controls.getInstance().configureDriverCommands();
     Controls.getInstance().configureOperatorCommands();
     Controls.getInstance().configureDefaultCommands();
+
+    DriveSubsystem.getInstance().setState(DriveStates.TELEOP);
   }
 
   @Override

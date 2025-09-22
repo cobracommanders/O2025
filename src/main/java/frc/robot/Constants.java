@@ -16,9 +16,9 @@ public final class Constants {
         public static final double I = 0;
         public static final double D = 0;
         public static final double G = 0.24;
-        public static final double MotionMagicCruiseVelocity = 2.5;
-        public static final double MotionMagicAcceleration = 50;
-        public static final double MotionMagicJerk = 150;
+        public static final double MotionMagicCruiseVelocity = 1.75;
+        public static final double MotionMagicAcceleration = 40;
+        public static final double MotionMagicJerk = 100;
         public static final double encoderOffset = -0.64111328125 + 0.005371;
         public static final double inchesFromCenter = 6.615;
     }
@@ -66,7 +66,7 @@ public final class Constants {
         public static final double DEPLOY_MOTION_MAGIC_CRUISE_VELOCITY = 0;
         public static final double DEPLOY_MOTION_MAGIC_ACCELERATION = 0;
         public static final double DEPLOY_MOTION_MAGIC_JERK = 0;
-        public static final double CAGE_DETECECTION_CURRENT = 45;
+        public static final double CAGE_DETECECTION_CURRENT = 55;
         public static final double ClimberGearRatio = 0.0;
         public static final double EncoderOffset = 0.314;
     }
