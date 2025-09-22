@@ -77,12 +77,12 @@ public class Controls {
     }
 
     public void setCoralMode() {
-        RequestManager.getInstance().operatorOptions.coralMode = OperatorOptions.CoralMode.CORAL_MODE;
+        OperatorOptions.getInstance().coralMode = OperatorOptions.CoralMode.CORAL_MODE;
         DogLog.log("Control/Coral Mode Enabled", "CORAL");
     }
 
     public void setNormalMode() {
-        RequestManager.getInstance().operatorOptions.coralMode = OperatorOptions.CoralMode.NORMAL_MODE;
+        OperatorOptions.getInstance().coralMode = OperatorOptions.CoralMode.NORMAL_MODE;
         DogLog.log("Control/Coral Mode Enabled", "NORMAL");
     }
 

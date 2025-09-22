@@ -48,7 +48,7 @@ public class Arm extends StateMachine<ArmStates> {
     private double absolutePosition;
     private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
-    public Arm() {
+    private Arm() {
         super(ArmStates.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;

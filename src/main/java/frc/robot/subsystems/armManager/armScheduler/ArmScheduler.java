@@ -14,10 +14,9 @@ import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.armManager.hand.HandStates;
 
 public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
-
-    public final Hand hand;
-    public final Elevator elevator;
-    public final Arm arm;
+    private final Hand hand = Hand.getInstance();
+    private final Elevator elevator = Elevator.getInstance();
+    private final Arm arm = Arm.getInstance();
 
     private ArmStates armState;
     private HandStates handState;
@@ -25,12 +24,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
 
     private boolean begin = false;
 
-    public ArmScheduler() {
+    private ArmScheduler() {
         super(ArmSchedulerStates.START);
-
-        this.arm = Arm.getInstance();
-        this.elevator = Elevator.getInstance();
-        this.hand = Hand.getInstance();
     }
 
     @Override
@@ -74,7 +69,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
         this.armState = armState;
         this.handState = handState;
         this.elevatorState = elevatorState;
-        if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.CORAL_MODE
+        if(OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE
         && isArmManagerPrepareHandoff(ArmManager.getInstance().getState())
         && isHandoffArmState(armState)
         && Elevator.getInstance().getHeight() > ElevatorPositions.HANDOFF - Elevator.getInstance().tolerance){

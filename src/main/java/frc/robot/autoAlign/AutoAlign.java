@@ -134,7 +134,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
   private ReefSide bestAlgaeSide = ReefSide.SIDE_AB;
   private ReefSide closestSide = ReefSide.SIDE_AB;
 
-  public AutoAlign() {
+  private AutoAlign() {
     super(AutoAlignState.DEFAULT_STATE);
     this.vision = VisionSubsystem.getInstance();
     this.localization = LocalizationSubsystem.getInstance();

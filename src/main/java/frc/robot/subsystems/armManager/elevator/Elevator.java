@@ -36,7 +36,7 @@ public class Elevator extends StateMachine<ElevatorStates> {
     private Follower right_motor_request = new Follower(Ports.ElevatorPorts.LMOTOR, true);
     private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
-    public Elevator() {
+    private Elevator() {
         super(ElevatorStates.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;

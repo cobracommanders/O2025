@@ -43,7 +43,7 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
   private final CommandSwerveDrivetrain drivetrain;
   private Pose2d robotPose = Pose2d.kZero;
 
-  public LocalizationSubsystem() {
+  private LocalizationSubsystem() {
     super(LocalizationStates.DEFAULT_STATE);
     this.swerve = DriveSubsystem.getInstance();
     this.drivetrain = CommandSwerveDrivetrain.getInstance();

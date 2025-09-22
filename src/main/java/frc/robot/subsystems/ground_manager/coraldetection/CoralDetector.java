@@ -13,8 +13,8 @@ import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
 public class CoralDetector extends StateMachine<CoralDetectorStates> {
-    public CANrange lCANRange;
-    public CANrange rCANRange;
+    private final CANrange lCANRange;
+    private final CANrange rCANRange;
     public boolean lDetected = false;
     public boolean rDetected = false;
     public double lDistance;
@@ -23,7 +23,7 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     
     public boolean hasSimCoral = false;
 
-    public CoralDetector() {
+    private CoralDetector() {
         super(CoralDetectorStates.NONE);
         lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
         rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);

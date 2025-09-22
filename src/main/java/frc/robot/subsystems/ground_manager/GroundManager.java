@@ -15,15 +15,12 @@ import frc.robot.subsystems.ground_manager.intakeRollers.IntakeRollersStates;
 public class GroundManager extends StateMachine<GroundManagerStates> {
     public final String name = getName();
 
-    private final IntakePivot intakePivot;
-    private final IntakeRollers rollers;
-    private final CoralDetector coralDetector;
+    private final IntakePivot intakePivot = IntakePivot.getInstance();
+    private final IntakeRollers rollers = IntakeRollers.getInstance();
+    private final CoralDetector coralDetector = CoralDetector.getInstance();
 
-    public GroundManager() {
+    private GroundManager() {
         super(GroundManagerStates.PREPARE_IDLE);
-        intakePivot = IntakePivot.getInstance();
-        rollers = IntakeRollers.getInstance();
-        coralDetector = CoralDetector.getInstance();
     }
 
     @Override

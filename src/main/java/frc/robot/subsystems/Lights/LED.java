@@ -13,6 +13,7 @@ import frc.robot.config.FeatureFlags;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.OperatorOptions.CoralMode;
 import frc.robot.stateMachine.RequestManager;
+import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
@@ -86,7 +87,7 @@ public class LED {
             }
 
             //start blinking the LEDs .5 seconds before the climber starts pulling the robot up
-            if (RequestManager.getInstance().climber.getState() == ClimberStates.CONTINUE_SUCKING) {
+            if (Climber.getInstance().getState() == ClimberStates.CONTINUE_SUCKING) {
                 LEDPattern.solid(c).blink(Seconds.of(.2)).applyTo(m_ledBuffer);
                 isBlinking = true;
             }

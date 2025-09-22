@@ -34,23 +34,17 @@ import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 public class ArmManager extends StateMachine<ArmManagerStates> {
     public static final double scoringTime = 0.75;
     private final String name = getName();
-    public final Hand hand;
-    public final Elevator elevator;
-    public final Arm arm;
-    public final CoralDetector coralDetector;
+    private final Hand hand = Hand.getInstance();
+    private final Elevator elevator = Elevator.getInstance();
+    private final Arm arm = Arm.getInstance();
+    private final CoralDetector coralDetector = CoralDetector.getInstance();
 
     private boolean synced = false;
 
-    public final ArmScheduler armScheduler;
+    public final ArmScheduler armScheduler = ArmScheduler.getInstance();
 
-    public ArmManager() {
+    private ArmManager() {
         super(ArmManagerStates.PREPARE_IDLE);
-
-        this.hand = Hand.getInstance();
-        this.elevator = Elevator.getInstance();
-        this.arm = Arm.getInstance();
-        this.armScheduler = ArmScheduler.getInstance();
-        this.coralDetector = CoralDetector.getInstance();
     }
 
     public boolean isReadyToMove(){
@@ -88,7 +82,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
 
             case SCORE_L4 -> {
                 if(isReadyToMove()) {
-                    if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                    if(OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
                         nextState = ArmManagerStates.PREPARE_IDLE;
                     }else{
                         nextState = ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE;
@@ -97,7 +91,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
             case SCORE_L3 -> {
                 if(isReadyToMove()){
-                    if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                    if(OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
                         nextState = ArmManagerStates.PREPARE_IDLE;
                     }else{
                         nextState = ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE;
@@ -106,7 +100,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
             }
             case SCORE_L2 -> {
                 if(isReadyToMove()){
-                    if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
+                    if(OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
                         nextState = ArmManagerStates.PREPARE_IDLE;
                     }else{
                         nextState = ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE;

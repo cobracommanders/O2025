@@ -31,7 +31,7 @@ public class Climber extends StateMachine<ClimberStates> {
   private double motorCurrent = 0.0;
   private double absolutePosition;
 
-  public Climber() {
+  private Climber() {
     super(ClimberStates.IDLE);
     // TODO: update configs
     encoder = new DutyCycle(new DigitalInput(Ports.ClimberPorts.CLIMER_DUTY_CYCLE_ENCODER));

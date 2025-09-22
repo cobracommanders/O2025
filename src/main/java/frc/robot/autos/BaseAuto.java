@@ -26,7 +26,7 @@ public abstract class BaseAuto implements NamedAuto {
   protected BaseAuto(RequestManager robotManager, Trailblazer trailblazer) {
     this.requestManager = robotManager;
     this.trailblazer = trailblazer;
-    actions = new RobotCommands();
+    actions = RobotCommands.getInstance();
     autoCommands = new AutoCommands();
     blocks = new AutoBlocks(trailblazer);
 

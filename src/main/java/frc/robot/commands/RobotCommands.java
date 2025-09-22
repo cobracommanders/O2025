@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefSideOffset;
+import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
@@ -20,7 +21,9 @@ import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 
 public class RobotCommands {
 
@@ -29,7 +32,7 @@ public class RobotCommands {
 
     private double reefSnapAngle = 0.0;
 
-    public RobotCommands() {
+    private RobotCommands() {
         this.robotManager = RequestManager.getInstance();
         var requirementsList = List.of();//List.of(robotManager.armManager, robotManager.groundManager, robotManager.climber);
         requirements = requirementsList.toArray(Subsystem[]::new);
@@ -63,18 +66,18 @@ public class RobotCommands {
     }
 
     public Command waitForGroundReady() {
-        return robotManager.groundManager.waitForState(GroundManagerStates.WAIT_SCORE_L1)
+        return GroundManager.getInstance().waitForState(GroundManagerStates.WAIT_SCORE_L1)
                 .withName("waitForGroundState/WAIT_SCORE_L1");
     }
 
     public Command waitForAllIdle() {
-        return robotManager.groundManager.waitForState(GroundManagerStates.IDLE)
-                .alongWith(robotManager.armManager.waitForState(ArmManagerStates.IDLE))
+        return GroundManager.getInstance().waitForState(GroundManagerStates.IDLE)
+                .alongWith(ArmManager.getInstance().waitForState(ArmManagerStates.IDLE))
                 .withName("waitForState/ALL_IDLE");
     }
 
     public Command waitForWaitL4() {
-        return robotManager.armManager.waitForState(ArmManagerStates.WAIT_L4)
+        return ArmManager.getInstance().waitForState(ArmManagerStates.WAIT_L4)
                 .withName("waitForArmState/WAIT_L4");
     }
 
@@ -176,10 +179,10 @@ public class RobotCommands {
                 handoffCommand().andThen(robotManager.waitForState(RequestManagerStates.INDEPENDENT))
                         .andThen(prepareScoreCommand()).andThen(groundIdleCommand()),
                 prepareScoreCommand(),
-                () -> robotManager.coralDetector.hasCoral() &&
-                        (robotManager.operatorOptions.scoreLocation != ScoreLocation.BARGE &&
-                                robotManager.operatorOptions.scoreLocation != ScoreLocation.PROCESSOR &&
-                                robotManager.operatorOptions.scoreLocation != ScoreLocation.L1))
+                () -> CoralDetector.getInstance().hasCoral() &&
+                        (OperatorOptions.getInstance().scoreLocation != ScoreLocation.BARGE &&
+                                OperatorOptions.getInstance().scoreLocation != ScoreLocation.PROCESSOR &&
+                                OperatorOptions.getInstance().scoreLocation != ScoreLocation.L1))
                 .withName("prepareScoreWithHandoffCheck");
 
     }
