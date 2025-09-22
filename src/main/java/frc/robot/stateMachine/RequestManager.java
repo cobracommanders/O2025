@@ -36,89 +36,94 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
 
     @Override
     protected void collectInputs() {
+        // Log all flags before they are modified in later methods
+        flags.log();
+
         driveSubsystem.setElevatorHeight(elevator.getHeight()); // TODO Does this have to do with request managing?
         DogLog.log("coral mode", operatorOptions.coralMode);
     }
 
     @Override
     protected RequestManagerStates getNextState(RequestManagerStates currentState) {
-        flags.log();
         RequestManagerStates nextState = currentState;
+
+        // TODO I think this maybe should go in the INDEPENDENT/CLIMB state switch block because it's only not overridden when that is active. Unless it's here to make sure those flags are cleared every loop.
         for (RobotFlag flag : flags.getChecked()) {
             switch (flag) {
-                case CLIMB:
+                case CLIMB -> {
                     if (armManager.isReady()) {
                         nextState = RequestManagerStates.CLIMB;
                         flags.remove(flag);
                     }
-                    break;
-                case HANDOFF:
+                }
+                case HANDOFF -> {
                     if (armManager.isReady()) {
                         nextState = RequestManagerStates.PREPARE_HANDOFF;
                         flags.remove(flag);
                     }
-                    break;
-                case INVERTED_HANDOFF:
+                }
+                case INVERTED_HANDOFF -> {
                     if (armManager.isReady()) {
                         nextState = RequestManagerStates.PREPARE_INVERTED_HANDOFF;
                         flags.remove(flag);
                     }
-                    break;
-                case RESET_TO_IDLE:
+                }
+                case RESET_TO_IDLE -> {
                     if (armManager.isReady()) {
                         nextState = RequestManagerStates.PREPARE_IDLE;
                         flags.remove(flag);
                     }
-                    break;
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
         }
 
+
         switch (currentState) {
-            case PREPARE_HANDOFF:
+            case PREPARE_HANDOFF -> {
+                // TODO why not ArmManagerStates.WAIT_HANDOFF_CORAL_MODE as well?
                 if ((armManager.getState() == ArmManagerStates.WAIT_HANDOFF_LEFT ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE ||
                         armManager.getState() == ArmManagerStates.WAIT_HANDOFF_RIGHT) &&
                         groundManager.getState() == GroundManagerStates.WAIT_HANDOFF) {
                     nextState = RequestManagerStates.HANDOFF;
                 }
-                break;
-            case HANDOFF:
+            }
+            case HANDOFF -> {
+                // Waits 0.1 seconds in normal mode and 0.2 seconds in coral mode
+                // TODO is the handoff the same?
                 if ((operatorOptions.coralMode == CoralMode.NORMAL_MODE && timeout(0.1)) || timeout(0.2)) {
                     nextState = RequestManagerStates.INDEPENDENT;
-
                 }
-                break;
-            case PREPARE_INVERTED_HANDOFF:
+            }
+            case PREPARE_INVERTED_HANDOFF -> {
                 if ((armManager.getState() == ArmManagerStates.WAIT_INVERTED_HANDOFF) &&
                         groundManager.getState() == GroundManagerStates.WAIT_INVERTED_HANDOFF) {
                     nextState = RequestManagerStates.INVERTED_HANDOFF;
                 }
-                break;
-            case INVERTED_HANDOFF:
+            }
+            case INVERTED_HANDOFF -> {
                 if (coralDetector.hasCoral() || timeout(0.5)) {
                     nextState = RequestManagerStates.INDEPENDENT;
                 }
-                break;
-            case PREPARE_IDLE:
-                if ((operatorOptions.coralMode == CoralMode.NORMAL_MODE) &&
-                        ((armManager.getState() == ArmManagerStates.IDLE) &&
-                                groundManager.getState() == GroundManagerStates.IDLE)) {
-                    nextState = RequestManagerStates.INDEPENDENT;
-                } else {
-                    //we are in coral mode
+            }
+            case PREPARE_IDLE -> {
+                // Wait for either idle condition based on the current mode
+                if (operatorOptions.coralMode == CoralMode.NORMAL_MODE) {
+                    if (armManager.getState() == ArmManagerStates.IDLE && groundManager.getState() == GroundManagerStates.IDLE) {
+                        nextState = RequestManagerStates.INDEPENDENT;
+                    }
+                } else if (operatorOptions.coralMode == CoralMode.CORAL_MODE) {
                     if (armManager.getState() == ArmManagerStates.WAIT_HANDOFF_MIDDLE && groundManager.getState() == GroundManagerStates.IDLE) {
                         nextState = RequestManagerStates.INDEPENDENT;
                     }
                 }
-
-
-                break;
-            case CLIMB:
-            case INDEPENDENT:
-                break;
+            }
+            case CLIMB, INDEPENDENT -> {
+            }
         }
+
         return nextState;
     }
 
@@ -133,176 +138,115 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
                     groundManager.setState(GroundManagerStates.PREPARE_IDLE);
                     armManager.setState(ArmManagerStates.PREPARE_IDLE);
                 }
+            }
 
-            }
-            case HANDOFF -> {
-                groundManager.setState(GroundManagerStates.HANDOFF);
-            }
-            case INDEPENDENT -> {
-            }
             case PREPARE_HANDOFF -> {
                 // need to figure out which handoff we are doing...
+                // TODO figure out what this if statement is doing and why it isn't in the inverted case
                 if (armManager.getState() != ArmManagerStates.WAIT_HANDOFF_CORAL_MODE) {
                     armManager.setState(ArmManagerStates.PREPARE_HANDOFF_CORAL_MODE);
                 }
                 groundManager.setState(GroundManagerStates.PREPARE_HANDOFF);
             }
+            case HANDOFF -> groundManager.setState(GroundManagerStates.HANDOFF);
+
             case PREPARE_INVERTED_HANDOFF -> {
                 armManager.setState(ArmManagerStates.PREPARE_INVERTED_HANDOFF);
                 groundManager.setState(GroundManagerStates.PREPARE_INVERTED_HANDOFF);
             }
-            case INVERTED_HANDOFF -> {
-                hand.setState(HandStates.INVERTED_HANDOFF);
-            }
+            case INVERTED_HANDOFF -> hand.setState(HandStates.INVERTED_HANDOFF);
+
             case CLIMB -> {
                 climber.setState(ClimberStates.DEPLOYING);
                 armManager.setState(ArmManagerStates.CLIMB);
                 groundManager.setState(GroundManagerStates.CLIMB);
             }
-        }
-
-    }
-
-    @Override
-    public void periodic() {
-        super.periodic();
-        if (getState() == RequestManagerStates.INDEPENDENT) {
-            sendManagerRequests();
+            case INDEPENDENT -> sendIndependentManagerRequests();
         }
     }
 
-    private void sendManagerRequests() {
+    /**
+     * Reads the set flags and sends any necessary requests to control the arm and ground subsystems in parallel.
+     */
+    private void sendIndependentManagerRequests() {
         for (RobotFlag flag : flags.getChecked()) {
             switch (flag) {
-                case INTAKE_ALGAE:
+                case INTAKE_ALGAE -> {
                     flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        switch (operatorOptions.algaeIntakeLevel) {
-                            case GROUND_ALGAE:
-                                armManager.setState(ArmManagerStates.PREPARE_INTAKE_GROUND_ALGAE);
-                                break;
-                            case HIGH_REEF:
-                                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L2) {
-                                    armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE);
-                                }
-                                armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
-                                break;
-                            case LOW_REEF:
-                                if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3) {
-                                    armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
-                                }
+
+                    switch (operatorOptions.algaeIntakeLevel) {
+                        case GROUND_ALGAE -> armManager.setState(ArmManagerStates.PREPARE_INTAKE_GROUND_ALGAE);
+                        // TODO Could maybe be one REEF state unless it's here for ease of switching back
+                        case HIGH_REEF -> {
+                            if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L2) {
                                 armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE);
-                                break;
+                            }
+                            armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
+                        }
+                        case LOW_REEF -> {
+                            if (AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3) {
+                                armManager.setState(ArmManagerStates.PREPARE_INTAKE_HIGH_REEF_ALGAE);
+                            }
+                            armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOW_REEF_ALGAE);
                         }
                     }
-                    break;
-                case INTAKE_CORAL_LOLLIPOP:
+                }
+                case INTAKE_CORAL_LOLLIPOP -> {
                     flags.remove(flag);
                     if (DriverStation.isAutonomous()) {
                         armManager.setState(ArmManagerStates.PREPARE_INTAKE_LOLLIPOP);
                     }
-                    break;
-                case INTAKE_CORAL:
+                }
+                case INTAKE_CORAL -> {
                     flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        groundManager.setState(GroundManagerStates.PREPARE_INTAKE);
-                    }
-                    break;
-                case PREPARE_SCORE_ARM:
+                    groundManager.setState(GroundManagerStates.PREPARE_INTAKE);
+                }
+                case PREPARE_SCORE_ARM -> {
                     flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        switch (operatorOptions.scoreLocation) {
-                            case L2:
-                                armManager.setState(ArmManagerStates.PREPARE_SCORE_L2);
-                                break;
-                            case L3:
-                                armManager.setState(ArmManagerStates.PREPARE_SCORE_L3);
-                                break;
-                            case L4:
-                                armManager.setState(ArmManagerStates.PREPARE_SCORE_L4);
-                                break;
-                            case BARGE:
-                                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_NET);
-                                break;
-                            case PROCESSOR:
-                                armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_PROCESSOR);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    break;
-                case PREPARE_SCORE_GROUND:
-                    flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        switch (operatorOptions.scoreLocation) {
-                            case L1:
-                                groundManager.setState(GroundManagerStates.PREPARE_SCORE_L1);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    break;
-                case SCORE_ARM:
-                    flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        switch (operatorOptions.scoreLocation) {
-                            case L2:
-                                armManager.setState(ArmManagerStates.SCORE_L2);
-                                break;
-                            case L3:
-                                armManager.setState(ArmManagerStates.SCORE_L3);
-                                break;
-                            case L4:
-                                armManager.setState(ArmManagerStates.SCORE_L4);
-                                break;
-                            case BARGE:
-                                armManager.setState(ArmManagerStates.SCORE_ALGAE_NET);
-                                break;
-                            case PROCESSOR:
-                                armManager.setState(ArmManagerStates.SCORE_ALGAE_PROCESSOR);
-                                break;
 
-                            default:
-                                break;
+                    switch (operatorOptions.scoreLocation) {
+                        case L2 -> armManager.setState(ArmManagerStates.PREPARE_SCORE_L2);
+                        case L3 -> armManager.setState(ArmManagerStates.PREPARE_SCORE_L3);
+                        case L4 -> armManager.setState(ArmManagerStates.PREPARE_SCORE_L4);
+                        case BARGE -> armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_NET);
+                        case PROCESSOR -> armManager.setState(ArmManagerStates.PREPARE_SCORE_ALGAE_PROCESSOR);
+                        default -> {
                         }
                     }
+                }
+                case PREPARE_SCORE_GROUND -> {
+                    flags.remove(flag);
 
-                    break;
-                case SCORE_GROUND:
+                    if (operatorOptions.scoreLocation == ScoreLocation.L1) {
+                        groundManager.setState(GroundManagerStates.PREPARE_SCORE_L1);
+                    }
+                }
+                case SCORE_ARM -> {
                     flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        switch (operatorOptions.scoreLocation) {
-                            case L1:
-                                    groundManager.setState(GroundManagerStates.SCORE_L1);
-                                break;
-                            default:
-                                break;
+
+                    switch (operatorOptions.scoreLocation) {
+                        case L2 -> armManager.setState(ArmManagerStates.SCORE_L2);
+                        case L3 -> armManager.setState(ArmManagerStates.SCORE_L3);
+                        case L4 -> armManager.setState(ArmManagerStates.SCORE_L4);
+                        case BARGE -> armManager.setState(ArmManagerStates.SCORE_ALGAE_NET);
+                        case PROCESSOR -> armManager.setState(ArmManagerStates.SCORE_ALGAE_PROCESSOR);
+                        default -> {
                         }
                     }
-                    break;
-                case GROUND_IDLE:
+                }
+                case SCORE_GROUND -> {
                     flags.remove(flag);
-                    if (getState() != RequestManagerStates.INDEPENDENT) {
-                        // do nothing
-                    } else {
-                        groundManager.setState(GroundManagerStates.PREPARE_IDLE);
+
+                    if (operatorOptions.scoreLocation == ScoreLocation.L1) {
+                        groundManager.setState(GroundManagerStates.SCORE_L1);
                     }
-                default:
-                    break;
+                }
+                case GROUND_IDLE -> {
+                    flags.remove(flag);
+                    groundManager.setState(GroundManagerStates.PREPARE_IDLE);
+                }
+                default -> {
+                }
             }
         }
     }
@@ -335,20 +279,16 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
         }
     }
 
+    public void handoffRequest() {
+        flags.check(RobotFlag.HANDOFF);
+    }
+
     public void invertedHandoffRequest() {
         flags.check(RobotFlag.INVERTED_HANDOFF);
     }
 
     public void intakeAlgaeRequest() {
         flags.check(RobotFlag.INTAKE_ALGAE);
-    }
-
-    public void algaeScoreLevelRequest() {
-        flags.check(RobotFlag.INTAKE_ALGAE);
-    }
-
-    public void handoffRequest() {
-        flags.check(RobotFlag.HANDOFF);
     }
 
     public void resetToIdleRequest() {
@@ -387,17 +327,6 @@ public class RequestManager extends StateMachine<RequestManagerStates> {
     public void setBarge() {
         operatorOptions.scoreLocation = OperatorOptions.ScoreLocation.BARGE;
         DogLog.log("Robot/ScoreLocation", "BARGE");
-
-    }
-
-    public void toggleCoralMode() {
-        if (operatorOptions.coralMode == CoralMode.CORAL_MODE) {
-            operatorOptions.coralMode = CoralMode.NORMAL_MODE;
-            DogLog.log("Robot/CoralMode", "NORMAL");
-        } else {
-            operatorOptions.coralMode = CoralMode.CORAL_MODE;
-            DogLog.log("Robot/CoralMode", "CORAL");
-        }
     }
 
     public void setHighReefAlgae() {
