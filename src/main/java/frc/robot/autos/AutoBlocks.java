@@ -1,9 +1,5 @@
 package frc.robot.autos;
 
-import java.util.List;
-
-import com.pathplanner.lib.config.RobotConfig;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -21,7 +17,6 @@ import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.subsystems.armManager.ArmManager;
-import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.trailblazer.AutoPoint;
 import frc.robot.trailblazer.AutoSegment;
 import frc.robot.trailblazer.Trailblazer;
@@ -118,7 +113,7 @@ public class AutoBlocks {
                                         ))
                                 ),
                 Robot.robotCommands.waitForWaitL4(),
-                RobotCommands.getInstance().scoreCommand().andThen(ArmManager.getInstance().finishScoring())
+                RobotCommands.getInstance().scoreCommand().andThen(ArmManager.getInstance().awaitFinishedScoringCommand())
         );
     }
     public Command scorePreloadL4(ReefPipe pipe, RobotScoringSide scoringSide) {
@@ -137,7 +132,7 @@ public class AutoBlocks {
                                     ))
                             ),
             Robot.robotCommands.waitForWaitL4(),
-            RobotCommands.getInstance().scoreCommand().andThen(ArmManager.getInstance().finishScoring())
+            RobotCommands.getInstance().scoreCommand().andThen(ArmManager.getInstance().awaitFinishedScoringCommand())
         );
     }
 

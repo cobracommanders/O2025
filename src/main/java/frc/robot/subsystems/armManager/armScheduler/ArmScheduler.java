@@ -1,7 +1,6 @@
 package frc.robot.subsystems.armManager.armScheduler;
 
 import frc.robot.stateMachine.OperatorOptions;
-import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
@@ -22,10 +21,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
     private HandStates handState;
     private ElevatorStates elevatorState;
 
-    private boolean begin = false;
-
     private ArmScheduler() {
-        super(ArmSchedulerStates.START);
+        super(ArmSchedulerStates.MATCH_START);
     }
 
     @Override
@@ -33,12 +30,6 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
         ArmSchedulerStates nextState = currentState;
 
         switch (currentState) {
-            case START -> {
-                if (begin) {
-                    begin = false;
-                    nextState = ArmSchedulerStates.ARM_UP;
-                }
-            }
             case ARM_UP -> {
                 if (arm.atGoal()) {
                     nextState = ArmSchedulerStates.ELEVATOR_TO_POSITION;
@@ -54,37 +45,10 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
                     nextState = ArmSchedulerStates.READY;
                 }
             }
-            case READY -> {
-                if (begin) {
-                    begin = false;
-                    nextState = ArmSchedulerStates.ARM_UP;
-                }
-            }
+            case READY, MATCH_START -> {}
         }
 
         return nextState;
-    }
-
-    public void scheduleStates(ArmStates armState, HandStates handState, ElevatorStates elevatorState) {
-        this.armState = armState;
-        this.handState = handState;
-        this.elevatorState = elevatorState;
-        if(OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE
-        && isArmManagerPrepareHandoff(ArmManager.getInstance().getState())
-        && isHandoffArmState(armState)
-        && Elevator.getInstance().getHeight() > ElevatorPositions.HANDOFF - Elevator.getInstance().tolerance){
-            this.setStateFromRequest(ArmSchedulerStates.ARM_TO_POSITION);
-        }else{
-            this.setStateFromRequest(ArmSchedulerStates.ARM_UP);
-        }
-    }
-
-    public boolean isHandoffArmState(ArmStates armState){
-        return armState == ArmStates.HANDOFF_LEFT || armState == ArmStates.HANDOFF_RIGHT || armState == ArmStates.HANDOFF_MIDDLE;
-    }
-
-    public boolean isArmManagerPrepareHandoff(ArmManagerStates armManagerState){
-        return armManagerState == ArmManagerStates.PREPARE_HANDOFF_LEFT || armManagerState == ArmManagerStates.PREPARE_HANDOFF_MIDDLE || armManagerState == ArmManagerStates.PREPARE_HANDOFF_RIGHT || armManagerState == ArmManagerStates.WAIT_HANDOFF_MIDDLE;
     }
 
     @Override
@@ -98,7 +62,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
                 elevator.setState(elevatorState);
             }
             case ARM_TO_POSITION -> {
-                hand.setState(handState); //needs to happen for coral mode skipping ARM_UP and ELE_TO_POS
+                hand.setState(handState); //needs to happen for coral mode skipping ARM_UP and ELEVATOR_TO_POS
                 arm.setState(armState);
             }
             case READY -> {
@@ -109,7 +73,29 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
         }
     }
 
-    public boolean isReady(){
+    public void scheduleStates(ArmStates armState, HandStates handState, ElevatorStates elevatorState) {
+        this.armState = armState;
+        this.handState = handState;
+        this.elevatorState = elevatorState;
+        if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE
+                && isArmManagerPrepareHandoff(ArmManager.getInstance().getState())
+                && isHandoffArmState(armState)
+                && elevator.getHeight() > ElevatorPositions.HANDOFF - elevator.tolerance) {
+            this.setStateFromRequest(ArmSchedulerStates.ARM_TO_POSITION);
+        } else {
+            this.setStateFromRequest(ArmSchedulerStates.ARM_UP);
+        }
+    }
+
+    public boolean isHandoffArmState(ArmStates armState) {
+        return armState == ArmStates.HANDOFF_LEFT || armState == ArmStates.HANDOFF_RIGHT || armState == ArmStates.HANDOFF_MIDDLE;
+    }
+
+    public boolean isArmManagerPrepareHandoff(ArmManagerStates armManagerState) {
+        return armManagerState == ArmManagerStates.PREPARE_HANDOFF_LEFT || armManagerState == ArmManagerStates.PREPARE_HANDOFF_MIDDLE || armManagerState == ArmManagerStates.PREPARE_HANDOFF_RIGHT || armManagerState == ArmManagerStates.WAIT_HANDOFF_MIDDLE;
+    }
+
+    public boolean isReady() {
         return getState() == ArmSchedulerStates.READY;
     }
 
