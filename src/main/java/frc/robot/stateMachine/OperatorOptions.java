@@ -10,7 +10,7 @@ public class OperatorOptions {
 
     public OperatorOptions() {
         this.scoreLocation = ScoreLocation.L4;
-        this.algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE;
+        this.algaeIntakeLevel = AlgaeIntakeLevel.LOW_REEF;
         DogLog.log("Robot/ScoreLocation", "L4");
         this.coralMode = CoralMode.NORMAL_MODE;
         DogLog.log("Robot/CoralMode", "NORMAL");
