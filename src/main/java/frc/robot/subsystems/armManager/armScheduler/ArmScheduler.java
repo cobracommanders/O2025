@@ -2,61 +2,67 @@ package frc.robot.subsystems.armManager.armScheduler;
 
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.armManager.ArmManager;
-import frc.robot.subsystems.armManager.ArmManagerStates;
 import frc.robot.subsystems.armManager.arm.Arm;
-import frc.robot.subsystems.armManager.arm.ArmStates;
+import frc.robot.subsystems.armManager.arm.ArmState;
 import frc.robot.subsystems.armManager.elevator.Elevator;
-import frc.robot.subsystems.armManager.elevator.ElevatorPositions;
-import frc.robot.subsystems.armManager.elevator.ElevatorStates;
+import frc.robot.subsystems.armManager.elevator.ElevatorPosition;
+import frc.robot.subsystems.armManager.elevator.ElevatorState;
 import frc.robot.subsystems.armManager.hand.Hand;
-import frc.robot.subsystems.armManager.hand.HandStates;
+import frc.robot.subsystems.armManager.hand.HandState;
 
-public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
-    private final Hand hand = Hand.getInstance();
-    private final Elevator elevator = Elevator.getInstance();
-    private final Arm arm = Arm.getInstance();
+public class ArmScheduler extends StateMachine<ArmSchedulerState> {
+    private final Hand hand;
+    private final Elevator elevator;
+    private final Arm arm;
 
-    private ArmStates armState;
-    private HandStates handState;
-    private ElevatorStates elevatorState;
+    private ArmState armState;
+    private HandState handState;
+    private ElevatorState elevatorState;
 
-    private ArmScheduler() {
-        super(ArmSchedulerStates.MATCH_START);
+    public ArmScheduler(
+            Hand hand,
+            Elevator elevator,
+            Arm arm
+    ) {
+        super(ArmSchedulerState.MATCH_START);
+        this.hand = hand;
+        this.elevator = elevator;
+        this.arm = arm;
     }
 
     @Override
-    protected ArmSchedulerStates getNextState(ArmSchedulerStates currentState) {
-        ArmSchedulerStates nextState = currentState;
+    protected ArmSchedulerState getNextState(ArmSchedulerState currentState) {
+        ArmSchedulerState nextState = currentState;
 
         switch (currentState) {
             case ARM_UP -> {
                 if (arm.atGoal()) {
-                    nextState = ArmSchedulerStates.ELEVATOR_TO_POSITION;
+                    nextState = ArmSchedulerState.ELEVATOR_TO_POSITION;
                 }
             }
             case ELEVATOR_TO_POSITION -> {
                 if (elevator.atGoal()) {
-                    nextState = ArmSchedulerStates.ARM_TO_POSITION;
+                    nextState = ArmSchedulerState.ARM_TO_POSITION;
                 }
             }
             case ARM_TO_POSITION -> {
                 if (arm.atGoal()) {
-                    nextState = ArmSchedulerStates.READY;
+                    nextState = ArmSchedulerState.READY;
                 }
             }
-            case READY, MATCH_START -> {}
+            case READY, MATCH_START -> {
+            }
         }
 
         return nextState;
     }
 
     @Override
-    protected void afterTransition(ArmSchedulerStates newState) {
+    protected void afterTransition(ArmSchedulerState newState) {
         switch (newState) {
             case ARM_UP -> {
                 hand.setState(handState);
-                arm.setState(ArmStates.IDLE);
+                arm.setState(ArmState.IDLE);
             }
             case ELEVATOR_TO_POSITION -> {
                 elevator.setState(elevatorState);
@@ -73,37 +79,24 @@ public class ArmScheduler extends StateMachine<ArmSchedulerStates> {
         }
     }
 
-    public void scheduleStates(ArmStates armState, HandStates handState, ElevatorStates elevatorState) {
+    public void scheduleStates(ArmState armState, HandState handState, ElevatorState elevatorState) {
         this.armState = armState;
         this.handState = handState;
         this.elevatorState = elevatorState;
         if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE
-                && isArmManagerPrepareHandoff(ArmManager.getInstance().getState())
                 && isHandoffArmState(armState)
-                && elevator.getHeight() > ElevatorPositions.HANDOFF - elevator.tolerance) {
-            this.setStateFromRequest(ArmSchedulerStates.ARM_TO_POSITION);
+                && elevator.getHeight() > ElevatorPosition.HANDOFF - elevator.tolerance) {
+            this.setStateFromRequest(ArmSchedulerState.ARM_TO_POSITION);
         } else {
-            this.setStateFromRequest(ArmSchedulerStates.ARM_UP);
+            this.setStateFromRequest(ArmSchedulerState.ARM_UP);
         }
     }
 
-    public boolean isHandoffArmState(ArmStates armState) {
-        return armState == ArmStates.HANDOFF_LEFT || armState == ArmStates.HANDOFF_RIGHT || armState == ArmStates.HANDOFF_MIDDLE;
-    }
-
-    public boolean isArmManagerPrepareHandoff(ArmManagerStates armManagerState) {
-        return armManagerState == ArmManagerStates.PREPARE_HANDOFF_LEFT || armManagerState == ArmManagerStates.PREPARE_HANDOFF_MIDDLE || armManagerState == ArmManagerStates.PREPARE_HANDOFF_RIGHT || armManagerState == ArmManagerStates.WAIT_HANDOFF_MIDDLE;
+    public boolean isHandoffArmState(ArmState armState) {
+        return armState == ArmState.HANDOFF_LEFT || armState == ArmState.HANDOFF_RIGHT || armState == ArmState.HANDOFF_MIDDLE;
     }
 
     public boolean isReady() {
-        return getState() == ArmSchedulerStates.READY;
-    }
-
-    private static ArmScheduler instance;
-
-    public static ArmScheduler getInstance() {
-        if (instance == null)
-            instance = new ArmScheduler(); // Make sure there is an instance (this will only run once)
-        return instance;
+        return getState() == ArmSchedulerState.READY;
     }
 }

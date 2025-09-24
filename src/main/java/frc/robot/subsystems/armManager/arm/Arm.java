@@ -1,7 +1,5 @@
 package frc.robot.subsystems.armManager.arm;
 
-import java.util.jar.Attributes.Name;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -14,23 +12,18 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Ports;
 import frc.robot.autoAlign.AutoAlign;
-import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
-import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
-import frc.robot.subsystems.drivetrain.DriveSubsystem;
-import frc.robot.vision.VisionSubsystem;
 
-public class Arm extends StateMachine<ArmStates> {
+public class Arm extends StateMachine<ArmState> {
     public String name = getName();
 
     public final DoubleSubscriber armSpeed = DogLog.tunable("Arm/Speed [-1, 1]", 0.0);
@@ -41,15 +34,15 @@ public class Arm extends StateMachine<ArmStates> {
                     .withKD(ArmConstants.D).withKG(ArmConstants.G)
                     .withGravityType(GravityTypeValue.Arm_Cosine))
             .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ArmConstants.ArmGearRatio));
-    private CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
+    private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     private double armPosition;
     private final double tolerance;
     private double absolutePosition;
-    private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
+    private final MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
-    private Arm() {
-        super(ArmStates.IDLE);
+    public Arm() {
+        super(ArmState.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MotionMagicCruiseVelocity;
@@ -73,52 +66,44 @@ public class Arm extends StateMachine<ArmStates> {
 
     public boolean atGoal() {
         return switch (getState()) {
-            case LOLLIPOP ->
-                MathUtil.isNear(ArmPositions.LOLLIPOP, armPosition, tolerance);
-            case IDLE ->
-                MathUtil.isNear(ArmPositions.IDLE, armPosition, tolerance);
-            case INTAKE_GROUND_ALGAE ->
-                MathUtil.isNear(ArmPositions.INTAKE_GROUND_ALGAE, armPosition, tolerance);
+            case LOLLIPOP -> MathUtil.isNear(ArmPosition.LOLLIPOP, armPosition, tolerance);
+            case IDLE -> MathUtil.isNear(ArmPosition.IDLE, armPosition, tolerance);
+            case INTAKE_GROUND_ALGAE -> MathUtil.isNear(ArmPosition.INTAKE_GROUND_ALGAE, armPosition, tolerance);
             case INTAKE_HIGH_REEF_ALGAE ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.INTAKE_HIGH_REEF_ALGAE) : ArmPosition.INTAKE_HIGH_REEF_ALGAE, armPosition, tolerance);
             case INTAKE_LOW_REEF_ALGAE ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.INTAKE_LOW_REEF_ALGAE) : ArmPosition.INTAKE_LOW_REEF_ALGAE, armPosition, tolerance);
             case ALGAE_NET ->
-                MathUtil.isNear(invertNet() ? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET, armPosition, tolerance);
-            case ALGAE_PROCESSOR ->
-                MathUtil.isNear(ArmPositions.ALGAE_PROCESSOR, armPosition, tolerance);
+                    MathUtil.isNear(invertNet() ? invertPosition(ArmPosition.ALGAE_NET) : ArmPosition.ALGAE_NET, armPosition, tolerance);
+            case ALGAE_PROCESSOR -> MathUtil.isNear(ArmPosition.ALGAE_PROCESSOR, armPosition, tolerance);
             case L4 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L4) : ArmPositions.L4, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.L4) : ArmPosition.L4, armPosition, tolerance);
             case SCORE_L4 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L4) : ArmPositions.SCORE_L4, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.SCORE_L4) : ArmPosition.SCORE_L4, armPosition, tolerance);
             case L3 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L3) : ArmPositions.L3, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.L3) : ArmPosition.L3, armPosition, tolerance);
             case SCORE_L3 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L3) : ArmPositions.SCORE_L3, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.SCORE_L3) : ArmPosition.SCORE_L3, armPosition, tolerance);
             case L2 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L2) : ArmPositions.L2, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.L2) : ArmPosition.L2, armPosition, tolerance);
             case SCORE_L2 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L2) : ArmPositions.SCORE_L2, armPosition, tolerance);
-            case HANDOFF_LEFT ->
-                MathUtil.isNear(ArmPositions.HANDOFF_LEFT, armPosition, tolerance);
-            case HANDOFF_MIDDLE ->
-                MathUtil.isNear(ArmPositions.HANDOFF_MIDDLE, armPosition, tolerance);
-            case HANDOFF_RIGHT ->
-                MathUtil.isNear(ArmPositions.HANDOFF_RIGHT, armPosition, tolerance);
-            case CLIMB ->
-                MathUtil.isNear(ArmPositions.CLIMB, armPosition, tolerance);
+                    MathUtil.isNear(invertArm() ? invertPosition(ArmPosition.SCORE_L2) : ArmPosition.SCORE_L2, armPosition, tolerance);
+            case HANDOFF_LEFT -> MathUtil.isNear(ArmPosition.HANDOFF_LEFT, armPosition, tolerance);
+            case HANDOFF_MIDDLE -> MathUtil.isNear(ArmPosition.HANDOFF_MIDDLE, armPosition, tolerance);
+            case HANDOFF_RIGHT -> MathUtil.isNear(ArmPosition.HANDOFF_RIGHT, armPosition, tolerance);
+            case CLIMB -> MathUtil.isNear(ArmPosition.CLIMB, armPosition, tolerance);
         };
 
     }
 
     public void syncEncoder() {
-        if(Utils.isSimulation()){
+        if (Utils.isSimulation()) {
             return;
         }
         motor.setPosition(absolutePosition);
     }
 
-    public boolean invertArm(){
+    public boolean invertArm() {
         switch (AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d(), true, true)) {
             case LEFT:
                 return true;
@@ -129,11 +114,11 @@ public class Arm extends StateMachine<ArmStates> {
         }
     }
 
-    public double invertPosition(double position){
+    public double invertPosition(double position) {
         return -position + 0.5;
-    } 
+    }
 
-    public boolean invertNet(){
+    public boolean invertNet() {
         switch (AutoAlign.getNetScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d())) {
             case LEFT:
                 return true;
@@ -145,7 +130,7 @@ public class Arm extends StateMachine<ArmStates> {
     }
 
 
-    @Override 
+    @Override
     public void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
         armPosition = motor.getPosition().getValueAsDouble();
@@ -164,28 +149,28 @@ public class Arm extends StateMachine<ArmStates> {
     // }
 
     @Override
-    public void periodic(){
+    public void periodic() {
         super.periodic();
         switch (getState()) {
             case L2:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.L2) : ArmPositions.L2);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.L2) : ArmPosition.L2);
                 break;
             case L3:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.L3) : ArmPositions.L3);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.L3) : ArmPosition.L3);
                 break;
             case L4:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.L4) : ArmPositions.L4);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.L4) : ArmPosition.L4);
                 break;
             case INTAKE_HIGH_REEF_ALGAE:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.INTAKE_HIGH_REEF_ALGAE) : ArmPosition.INTAKE_HIGH_REEF_ALGAE);
                 break;
             case INTAKE_LOW_REEF_ALGAE:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.INTAKE_LOW_REEF_ALGAE) : ArmPosition.INTAKE_LOW_REEF_ALGAE);
                 break;
             case ALGAE_NET:
-                setArmPosition(invertNet()? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET);
+                setArmPosition(invertNet() ? invertPosition(ArmPosition.ALGAE_NET) : ArmPosition.ALGAE_NET);
                 break;
-        
+
             default:
                 break;
         }
@@ -195,7 +180,7 @@ public class Arm extends StateMachine<ArmStates> {
         motor.set(armSpeed.get());
     }
 
-    public void setState(ArmStates state) {
+    public void setState(ArmState state) {
         setStateFromRequest(state);
     }
 
@@ -205,67 +190,59 @@ public class Arm extends StateMachine<ArmStates> {
     }
 
     @Override
-    protected void afterTransition(ArmStates newState) {
+    protected void afterTransition(ArmState newState) {
         switch (newState) {
             case LOLLIPOP -> {
-                setArmPosition(ArmPositions.LOLLIPOP);
+                setArmPosition(ArmPosition.LOLLIPOP);
             }
             case IDLE -> {
-                setArmPosition(ArmPositions.IDLE);
+                setArmPosition(ArmPosition.IDLE);
             }
             case INTAKE_GROUND_ALGAE -> {
-                setArmPosition(ArmPositions.INTAKE_GROUND_ALGAE);
+                setArmPosition(ArmPosition.INTAKE_GROUND_ALGAE);
             }
             case INTAKE_HIGH_REEF_ALGAE -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.INTAKE_HIGH_REEF_ALGAE) : ArmPosition.INTAKE_HIGH_REEF_ALGAE);
             }
             case INTAKE_LOW_REEF_ALGAE -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.INTAKE_LOW_REEF_ALGAE) : ArmPosition.INTAKE_LOW_REEF_ALGAE);
             }
             case ALGAE_PROCESSOR -> {
-                setArmPosition(ArmPositions.ALGAE_PROCESSOR);
+                setArmPosition(ArmPosition.ALGAE_PROCESSOR);
             }
             case ALGAE_NET -> {
-                setArmPosition(invertNet() ? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET);
+                setArmPosition(invertNet() ? invertPosition(ArmPosition.ALGAE_NET) : ArmPosition.ALGAE_NET);
             }
             case L4 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L4) : ArmPositions.L4);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.L4) : ArmPosition.L4);
             }
             case SCORE_L4 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L4) : ArmPositions.SCORE_L4);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.SCORE_L4) : ArmPosition.SCORE_L4);
             }
             case HANDOFF_LEFT -> {
-                setArmPosition(ArmPositions.HANDOFF_LEFT);
+                setArmPosition(ArmPosition.HANDOFF_LEFT);
             }
             case HANDOFF_MIDDLE -> {
-                setArmPosition(ArmPositions.HANDOFF_MIDDLE);
+                setArmPosition(ArmPosition.HANDOFF_MIDDLE);
             }
             case HANDOFF_RIGHT -> {
-                setArmPosition(ArmPositions.HANDOFF_RIGHT);
+                setArmPosition(ArmPosition.HANDOFF_RIGHT);
             }
             case L3 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L3) : ArmPositions.L3);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.L3) : ArmPosition.L3);
             }
             case SCORE_L3 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L3) : ArmPositions.SCORE_L3);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.SCORE_L3) : ArmPosition.SCORE_L3);
             }
             case L2 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L2) : ArmPositions.L2);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.L2) : ArmPosition.L2);
             }
             case SCORE_L2 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L2) : ArmPositions.SCORE_L2);
+                setArmPosition(invertArm() ? invertPosition(ArmPosition.SCORE_L2) : ArmPosition.SCORE_L2);
             }
             case CLIMB -> {
-                setArmPosition(ArmPositions.CLIMB);
+                setArmPosition(ArmPosition.CLIMB);
             }
         }
-    }
-
-    private static Arm instance;
-
-    public static Arm getInstance() {
-        if (instance == null)
-            instance = new Arm(); // Make sure there is an instance (this will only run once)
-        return instance;
     }
 }

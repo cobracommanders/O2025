@@ -1,6 +1,6 @@
 package frc.robot.subsystems.armManager.elevator;
 
-public class ElevatorPositions {
+public class ElevatorPosition {
     public static double IDLE = 0.1;
     public static double L4 = 1.3;
     public static double HIGH_REEF_ALGAE = 0.9;
@@ -8,7 +8,7 @@ public class ElevatorPositions {
     public static double GROUND_ALGAE = 0;
     public static double ALGAE_NET = 1.38;
     public static double ALGAE_PROCESSOR = 0.1;
-    public static double HANDOFF = 0.75; //prev .75
+    public static double HANDOFF = 0.75;
     public static double SCORE_L4 = 1.15;
     public static double L3 = 0.765;
     public static double SCORE_L3 = 0.624;

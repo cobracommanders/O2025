@@ -9,18 +9,15 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.DoubleSubscriber;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
+import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.armManager.arm.ArmStates;
 
-public class Elevator extends StateMachine<ElevatorStates> {
+public class Elevator extends StateMachine<ElevatorState> {
     public final DoubleSubscriber elevatorSpeed = DogLog.tunable("elevator/Speed [-1, 1]", 0.0);
     private final String name = getName();
     public static TalonFX lMotor;
@@ -33,11 +30,11 @@ public class Elevator extends StateMachine<ElevatorStates> {
 
     private double elevatorPosition;
     public final double tolerance;
-    private Follower right_motor_request = new Follower(Ports.ElevatorPorts.LMOTOR, true);
-    private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
+    private final Follower right_motor_request = new Follower(Ports.ElevatorPorts.LMOTOR, true);
+    private final MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
-    private Elevator() {
-        super(ElevatorStates.IDLE);
+    public Elevator() {
+        super(ElevatorState.IDLE);
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
@@ -56,42 +53,28 @@ public class Elevator extends StateMachine<ElevatorStates> {
         tolerance = 0.015;
     }
 
-    protected ElevatorStates getNexState(ElevatorStates currentState) {
+    protected ElevatorState getNexState(ElevatorState currentState) {
         return currentState;
     }
 
     public boolean atGoal() {
         return switch (getState()) {
-            case LOLLIPOP ->
-                MathUtil.isNear(ElevatorPositions.LOLLIPOP, elevatorPosition, tolerance);
-            case IDLE ->
-                MathUtil.isNear(ElevatorPositions.IDLE, elevatorPosition, tolerance);
-            case L4 ->
-                MathUtil.isNear(ElevatorPositions.L4, elevatorPosition, tolerance);
-            case HIGH_REEF_ALGAE ->
-                MathUtil.isNear(ElevatorPositions.HIGH_REEF_ALGAE, elevatorPosition, tolerance);
-            case LOW_REEF_ALGAE ->
-                MathUtil.isNear(ElevatorPositions.LOW_REEF_ALGAE, elevatorPosition, tolerance);
-            case GROUND_ALGAE ->
-                MathUtil.isNear(ElevatorPositions.GROUND_ALGAE, elevatorPosition, tolerance);
-            case ALGAE_NET ->
-                MathUtil.isNear(ElevatorPositions.ALGAE_NET, elevatorPosition, tolerance);
-            case ALGAE_PROCESSOR ->
-                MathUtil.isNear(ElevatorPositions.ALGAE_PROCESSOR, elevatorPosition, tolerance);
-            case HANDOFF ->
-                MathUtil.isNear(ElevatorPositions.HANDOFF, elevatorPosition, tolerance);
-            case SCORE_L4 ->
-                MathUtil.isNear(ElevatorPositions.SCORE_L4, elevatorPosition, tolerance);
-            case L3 -> 
-                MathUtil.isNear(ElevatorPositions.L3, elevatorPosition, tolerance);
-            case SCORE_L3 -> 
-                MathUtil.isNear(ElevatorPositions.SCORE_L3, elevatorPosition, tolerance);
-            case L2 -> 
-                MathUtil.isNear(ElevatorPositions.L2, elevatorPosition, tolerance);
-            case SCORE_L2 -> 
-                MathUtil.isNear(ElevatorPositions.SCORE_L2, elevatorPosition, tolerance);
-            case HANDOFF_CORAL_MODE -> 
-                MathUtil.isNear(ElevatorPositions.HANDOFF_CORAL_MODE, elevatorPosition, tolerance);
+            case LOLLIPOP -> MathUtil.isNear(ElevatorPosition.LOLLIPOP, elevatorPosition, tolerance);
+            case IDLE -> MathUtil.isNear(ElevatorPosition.IDLE, elevatorPosition, tolerance);
+            case L4 -> MathUtil.isNear(ElevatorPosition.L4, elevatorPosition, tolerance);
+            case HIGH_REEF_ALGAE -> MathUtil.isNear(ElevatorPosition.HIGH_REEF_ALGAE, elevatorPosition, tolerance);
+            case LOW_REEF_ALGAE -> MathUtil.isNear(ElevatorPosition.LOW_REEF_ALGAE, elevatorPosition, tolerance);
+            case GROUND_ALGAE -> MathUtil.isNear(ElevatorPosition.GROUND_ALGAE, elevatorPosition, tolerance);
+            case ALGAE_NET -> MathUtil.isNear(ElevatorPosition.ALGAE_NET, elevatorPosition, tolerance);
+            case ALGAE_PROCESSOR -> MathUtil.isNear(ElevatorPosition.ALGAE_PROCESSOR, elevatorPosition, tolerance);
+            case HANDOFF -> MathUtil.isNear(ElevatorPosition.HANDOFF, elevatorPosition, tolerance);
+            case SCORE_L4 -> MathUtil.isNear(ElevatorPosition.SCORE_L4, elevatorPosition, tolerance);
+            case L3 -> MathUtil.isNear(ElevatorPosition.L3, elevatorPosition, tolerance);
+            case SCORE_L3 -> MathUtil.isNear(ElevatorPosition.SCORE_L3, elevatorPosition, tolerance);
+            case L2 -> MathUtil.isNear(ElevatorPosition.L2, elevatorPosition, tolerance);
+            case SCORE_L2 -> MathUtil.isNear(ElevatorPosition.SCORE_L2, elevatorPosition, tolerance);
+            case HANDOFF_CORAL_MODE ->
+                    MathUtil.isNear(ElevatorPosition.HANDOFF_CORAL_MODE, elevatorPosition, tolerance);
         };
 
     }
@@ -111,18 +94,18 @@ public class Elevator extends StateMachine<ElevatorStates> {
         SimElevator.updateSimPosition(lMotor, rMotor);
     }
 
-    public double getHeight(){
+    public double getHeight() {
         return elevatorPosition;
     }
 
-    public void setState(ElevatorStates state){
+    public void setState(ElevatorState state) {
         setStateFromRequest(state);
     }
 
     public void setElevatorSpeed() {
         lMotor.set(elevatorSpeed.get());
         rMotor.set(-elevatorSpeed.get());
-      }
+    }
 
     public void setElevatorPosition(double position) {
         DogLog.log(name + "/Setpoint", position);
@@ -131,149 +114,142 @@ public class Elevator extends StateMachine<ElevatorStates> {
     }
 
     @Override
-    protected void afterTransition(ElevatorStates newState) {
+    protected void afterTransition(ElevatorState newState) {
         switch (newState) {
             case LOLLIPOP -> {
-                setElevatorPosition(ElevatorPositions.LOLLIPOP);
+                setElevatorPosition(ElevatorPosition.LOLLIPOP);
             }
             case IDLE -> {
-                setElevatorPosition(ElevatorPositions.IDLE);
+                setElevatorPosition(ElevatorPosition.IDLE);
             }
             case HANDOFF_CORAL_MODE -> {
-                setElevatorPosition(ElevatorPositions.HANDOFF_CORAL_MODE);
+                setElevatorPosition(ElevatorPosition.HANDOFF_CORAL_MODE);
             }
             case L4 -> {
-                setElevatorPosition(ElevatorPositions.L4);
+                setElevatorPosition(ElevatorPosition.L4);
             }
             case HIGH_REEF_ALGAE -> {
-                setElevatorPosition(ElevatorPositions.HIGH_REEF_ALGAE);
+                setElevatorPosition(ElevatorPosition.HIGH_REEF_ALGAE);
             }
             case LOW_REEF_ALGAE -> {
-                setElevatorPosition(ElevatorPositions.LOW_REEF_ALGAE);
+                setElevatorPosition(ElevatorPosition.LOW_REEF_ALGAE);
             }
             case GROUND_ALGAE -> {
-                setElevatorPosition(ElevatorPositions.GROUND_ALGAE);
+                setElevatorPosition(ElevatorPosition.GROUND_ALGAE);
             }
             case ALGAE_PROCESSOR -> {
-                setElevatorPosition(ElevatorPositions.ALGAE_PROCESSOR);
+                setElevatorPosition(ElevatorPosition.ALGAE_PROCESSOR);
             }
             case ALGAE_NET -> {
-                setElevatorPosition(ElevatorPositions.ALGAE_NET);
+                setElevatorPosition(ElevatorPosition.ALGAE_NET);
             }
             case HANDOFF -> {
-                setElevatorPosition(ElevatorPositions.HANDOFF);
+                setElevatorPosition(ElevatorPosition.HANDOFF);
             }
             case SCORE_L4 -> {
-                setElevatorPosition(ElevatorPositions.SCORE_L4);
+                setElevatorPosition(ElevatorPosition.SCORE_L4);
             }
             case L3 -> {
-                setElevatorPosition(ElevatorPositions.L3);
+                setElevatorPosition(ElevatorPosition.L3);
             }
             case SCORE_L3 -> {
-                setElevatorPosition(ElevatorPositions.SCORE_L3);
+                setElevatorPosition(ElevatorPosition.SCORE_L3);
             }
             case L2 -> {
-                setElevatorPosition(ElevatorPositions.L2);
+                setElevatorPosition(ElevatorPosition.L2);
             }
             case SCORE_L2 -> {
-                setElevatorPosition(ElevatorPositions.SCORE_L2);
+                setElevatorPosition(ElevatorPosition.SCORE_L2);
             }
         }
     }
 
-    public void tickUp(){
-        switch(getState()){
+    public void tickUp() {
+        switch (getState()) {
             case L4:
-                ElevatorPositions.L4 += .015;
-                setElevatorPosition(ElevatorPositions.L4);
-            break;
+                ElevatorPosition.L4 += .015;
+                setElevatorPosition(ElevatorPosition.L4);
+                break;
 
             case L3:
-                ElevatorPositions.L3 += .015;
-                setElevatorPosition(ElevatorPositions.L3);
-            break;
+                ElevatorPosition.L3 += .015;
+                setElevatorPosition(ElevatorPosition.L3);
+                break;
 
             case L2:
-                ElevatorPositions.L2 += .015;
-                setElevatorPosition(ElevatorPositions.L2);
-            break;
+                ElevatorPosition.L2 += .015;
+                setElevatorPosition(ElevatorPosition.L2);
+                break;
 
             case ALGAE_NET:
-                ElevatorPositions.ALGAE_NET += .015;
-                setElevatorPosition(ElevatorPositions.ALGAE_NET);
-            break;
+                ElevatorPosition.ALGAE_NET += .015;
+                setElevatorPosition(ElevatorPosition.ALGAE_NET);
+                break;
 
             case ALGAE_PROCESSOR:
-                ElevatorPositions.ALGAE_PROCESSOR += .015;
-                setElevatorPosition(ElevatorPositions.ALGAE_PROCESSOR);
-            break;
+                ElevatorPosition.ALGAE_PROCESSOR += .015;
+                setElevatorPosition(ElevatorPosition.ALGAE_PROCESSOR);
+                break;
 
             case HIGH_REEF_ALGAE:
-                ElevatorPositions.HIGH_REEF_ALGAE += .015;
-                setElevatorPosition(ElevatorPositions.HIGH_REEF_ALGAE);
-            break;
+                ElevatorPosition.HIGH_REEF_ALGAE += .015;
+                setElevatorPosition(ElevatorPosition.HIGH_REEF_ALGAE);
+                break;
 
             case LOW_REEF_ALGAE:
-                ElevatorPositions.LOW_REEF_ALGAE += .015;
-                setElevatorPosition(ElevatorPositions.LOW_REEF_ALGAE);
-            break;
+                ElevatorPosition.LOW_REEF_ALGAE += .015;
+                setElevatorPosition(ElevatorPosition.LOW_REEF_ALGAE);
+                break;
 
             case GROUND_ALGAE:
-                ElevatorPositions.GROUND_ALGAE += .015;
-                setElevatorPosition(ElevatorPositions.GROUND_ALGAE);
-            break;
+                ElevatorPosition.GROUND_ALGAE += .015;
+                setElevatorPosition(ElevatorPosition.GROUND_ALGAE);
+                break;
 
         }
     }
 
-    public void tickDown(){
-        switch(getState()){
+    public void tickDown() {
+        switch (getState()) {
             case L4:
-                ElevatorPositions.L4 -= .015;
-                setElevatorPosition(ElevatorPositions.L4);
-            break;
+                ElevatorPosition.L4 -= .015;
+                setElevatorPosition(ElevatorPosition.L4);
+                break;
 
             case L3:
-                ElevatorPositions.L3 -= .015;
-                setElevatorPosition(ElevatorPositions.L3);
-            break;
+                ElevatorPosition.L3 -= .015;
+                setElevatorPosition(ElevatorPosition.L3);
+                break;
 
             case L2:
-                ElevatorPositions.L2 -= .015;
-                setElevatorPosition(ElevatorPositions.L2);
-            break;
+                ElevatorPosition.L2 -= .015;
+                setElevatorPosition(ElevatorPosition.L2);
+                break;
 
             case ALGAE_NET:
-                ElevatorPositions.ALGAE_NET -= .015;
-                setElevatorPosition(ElevatorPositions.ALGAE_NET);
-            break;
+                ElevatorPosition.ALGAE_NET -= .015;
+                setElevatorPosition(ElevatorPosition.ALGAE_NET);
+                break;
 
             case ALGAE_PROCESSOR:
-                ElevatorPositions.ALGAE_PROCESSOR -= .015;
-                setElevatorPosition(ElevatorPositions.ALGAE_PROCESSOR);
-            break;
+                ElevatorPosition.ALGAE_PROCESSOR -= .015;
+                setElevatorPosition(ElevatorPosition.ALGAE_PROCESSOR);
+                break;
 
             case HIGH_REEF_ALGAE:
-                ElevatorPositions.HIGH_REEF_ALGAE -= .015;
-                setElevatorPosition(ElevatorPositions.HIGH_REEF_ALGAE);
-            break;
+                ElevatorPosition.HIGH_REEF_ALGAE -= .015;
+                setElevatorPosition(ElevatorPosition.HIGH_REEF_ALGAE);
+                break;
 
             case LOW_REEF_ALGAE:
-                ElevatorPositions.LOW_REEF_ALGAE -= .015;
-                setElevatorPosition(ElevatorPositions.LOW_REEF_ALGAE);
-            break;
+                ElevatorPosition.LOW_REEF_ALGAE -= .015;
+                setElevatorPosition(ElevatorPosition.LOW_REEF_ALGAE);
+                break;
 
             case GROUND_ALGAE:
-                ElevatorPositions.GROUND_ALGAE -= .015;
-                setElevatorPosition(ElevatorPositions.GROUND_ALGAE);
-            break;
+                ElevatorPosition.GROUND_ALGAE -= .015;
+                setElevatorPosition(ElevatorPosition.GROUND_ALGAE);
+                break;
         }
-    }
-    private static Elevator instance;
-
-    public static Elevator getInstance() {
-        if (instance == null)
-            instance = new Elevator(); // Make sure there is an instance (this will only run once)
-        return instance;
     }
 }

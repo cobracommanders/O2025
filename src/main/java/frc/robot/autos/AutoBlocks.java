@@ -7,16 +7,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
-import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.trailblazer.AutoPoint;
 import frc.robot.trailblazer.AutoSegment;
 import frc.robot.trailblazer.Trailblazer;
@@ -25,7 +24,6 @@ import frc.robot.util.MathHelpers;
 import frc.robot.util.PoseErrorTolerance;
 
 public class AutoBlocks {
-
     private static final PoseErrorTolerance AFTER_SCORE_POSITION_TOLERANCE = new PoseErrorTolerance(0.6, 25);
 
     private static final PoseErrorTolerance LOLLIPOP_APPROACH_TOLERANCE = new PoseErrorTolerance(0.6, 10);
@@ -78,17 +76,19 @@ public class AutoBlocks {
     public AutoBlocks(Trailblazer trailblazer) {
         this.trailblazer = trailblazer;
     }
+
     private Pose2d getLollipopCoordsBlue(int lollipop) {
         Translation2d translation = FieldConstants.StagingPositions.iceCreams[lollipop];
         Pose2d blue = new Pose2d(translation, AutoAlign.angleToReef(translation, false));
         blue = blue.plus(LOLLIPOP_OFFSET);
         return blue;
     }
+
     private Pose2d getLolliApproach(int lollipop) {
         Pose2d blue = getLollipopCoordsBlue(lollipop).plus(APPROACH_LOLLIPOP_OFFSET);
         return FmsSubsystem.getInstance().isRedAlliance() ? MathHelpers.pathflip(blue) : blue;
     }
-    
+
     private Pose2d getLolliIntake(int lollipop) {
         Pose2d blue = getLollipopCoordsBlue(lollipop);//.plus(LOLLIPOP_OFFSET);
         return FmsSubsystem.getInstance().isRedAlliance() ? MathHelpers.pathflip(blue) : blue;
@@ -97,6 +97,7 @@ public class AutoBlocks {
     public Pose2d getClearReefOffsetPose(ReefPipe pipe, RobotScoringSide scoringSide) {
         return pipe.getPose(ReefPipeLevel.L4, scoringSide).transformBy(clearReefOffset);
     }
+
     public Command scoreL4(ReefPipe pipe, RobotScoringSide scoringSide) {
         return Commands.sequence(
                 trailblazer.followSegment(
@@ -104,18 +105,19 @@ public class AutoBlocks {
                                 BASE_CONSTRAINTS,
                                 AutoBlocks.APPROACH_REEF_TOLERANCE,
                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4, scoringSide),
-                                                Robot.robotCommands.prepareScoreWithHandoffCheckCommand()))),
+                                        Robot.robotCommands.prepareScoreWithHandoffCheckCommand()))),
                 trailblazer.followSegment(
                         new AutoSegment(
                                 SCORING_CONSTRAINTS,
                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4, scoringSide),
                                         Robot.robotCommands.autoReefAlignCommandNoScore()
-                                        ))
-                                ),
+                                ))
+                ),
                 Robot.robotCommands.waitForWaitL4(),
-                RobotCommands.getInstance().scoreCommand().andThen(ArmManager.getInstance().awaitFinishedScoringCommand())
+                RobotCommands.getInstance().scoreCommand().andThen(Robot.armManager.awaitFinishedScoringCommand())
         );
     }
+
     public Command scorePreloadL4(ReefPipe pipe, RobotScoringSide scoringSide) {
         return Commands.sequence(
                 trailblazer.followSegment(
@@ -123,54 +125,56 @@ public class AutoBlocks {
                                 BASE_CONSTRAINTS,
                                 AutoBlocks.APPROACH_REEF_TOLERANCE,
                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4, scoringSide),
-                                                Robot.robotCommands.waitForAllIdle().andThen(Robot.robotCommands.prepareScoreWithHandoffCheckCommand())))),
+                                        Robot.robotCommands.waitForAllIdle().andThen(Robot.robotCommands.prepareScoreWithHandoffCheckCommand())))),
                 trailblazer.followSegment(
-                    new AutoSegment(
-                            SCORING_CONSTRAINTS,
-                            new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4, scoringSide),
-                                    Robot.robotCommands.autoReefAlignCommandNoScore()
-                                    ))
-                            ),
-            Robot.robotCommands.waitForWaitL4(),
-            RobotCommands.getInstance().scoreCommand().andThen(ArmManager.getInstance().awaitFinishedScoringCommand())
+                        new AutoSegment(
+                                SCORING_CONSTRAINTS,
+                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4, scoringSide),
+                                        Robot.robotCommands.autoReefAlignCommandNoScore()
+                                ))
+                ),
+                Robot.robotCommands.waitForWaitL4(),
+                RobotCommands.getInstance().scoreCommand().andThen(Robot.armManager.awaitFinishedScoringCommand())
         );
     }
 
 
     public Command backUpFromReef(ReefPipe pipe, RobotScoringSide scoringSide) {
         return trailblazer.followSegment(
-            new AutoSegment(
-                    BASE_CONSTRAINTS,
-                    AFTER_SCORE_POSITION_TOLERANCE,
-                    new AutoPoint(()-> getClearReefOffsetPose(pipe, scoringSide))
-            )
+                new AutoSegment(
+                        BASE_CONSTRAINTS,
+                        AFTER_SCORE_POSITION_TOLERANCE,
+                        new AutoPoint(() -> getClearReefOffsetPose(pipe, scoringSide))
+                )
         );
     }
+
     public Command pickUpLolli(Lollipop lollipop, ReefPipe pipe, RobotScoringSide scoringSide) {
         return Commands.sequence(
                 trailblazer.followSegment(
                         new AutoSegment(
                                 BASE_CONSTRAINTS,
                                 AutoBlocks.LOLLIPOP_APPROACH_TOLERANCE,
-                                new AutoPoint(()-> getLolliApproach(lollipop.index))
-                                
+                                new AutoPoint(() -> getLolliApproach(lollipop.index))
+
                         )
                 ),
                 trailblazer.followSegment(
                         new AutoSegment(
                                 LOLLIPOP_CONSTRAINTS,
-                                new AutoPoint(()-> getLolliIntake(lollipop.index))
+                                new AutoPoint(() -> getLolliIntake(lollipop.index))
                         )
                 )
         );
     }
+
     public enum Lollipop {
         RIGHT(0),
         MIDDLE(1),
         LEFT(2);
         public final int index;
 
-        private Lollipop(int val) {
+        Lollipop(int val) {
             this.index = val;
         }
     }

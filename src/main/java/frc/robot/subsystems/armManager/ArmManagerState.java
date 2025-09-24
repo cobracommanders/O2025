@@ -1,6 +1,6 @@
 package frc.robot.subsystems.armManager;
 
-public enum ArmManagerStates {
+public enum ArmManagerState {
     // Idle
     PREPARE_IDLE,
     IDLE,
@@ -35,6 +35,7 @@ public enum ArmManagerStates {
     // Inverted Handoff
     PREPARE_INVERTED_HANDOFF,
     WAIT_INVERTED_HANDOFF,
+    INVERTED_HANDOFF,
 
     // Coral Score
     PREPARE_SCORE_L4,
@@ -52,5 +53,5 @@ public enum ArmManagerStates {
     INTAKE_LOLLIPOP,
 
     // Climb
-    CLIMB;
+    CLIMB
 }

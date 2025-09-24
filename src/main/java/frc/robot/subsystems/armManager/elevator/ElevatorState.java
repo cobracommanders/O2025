@@ -1,6 +1,6 @@
 package frc.robot.subsystems.armManager.elevator;
 
-public enum ElevatorStates {
+public enum ElevatorState {
     IDLE,
     L4,
     SCORE_L4,

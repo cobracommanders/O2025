@@ -1,6 +1,6 @@
 package frc.robot.subsystems.armManager.hand;
 
-public enum HandStates {
+public enum HandState {
     IDLE,
     SCORE_CORAL,
     HANDOFF,

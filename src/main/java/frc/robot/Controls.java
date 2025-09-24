@@ -1,19 +1,15 @@
 package frc.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.*;
-
 import dev.doglog.DogLog;
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
-import frc.robot.stateMachine.RequestManager;
-import frc.robot.stateMachine.OperatorOptions.CoralMode;
-import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
+
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 
 public class Controls {
     DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
@@ -30,15 +26,15 @@ public class Controls {
 
     public void configureDefaultCommands() {
         driveSubsystem.setDefaultCommand(
-            driveSubsystem.run(
-                () -> {
-                    if (FmsSubsystem.getInstance().isTeleop()) {
-                        driveSubsystem.setTeleopSpeeds(
-                            driver.leftX(),
-                            driver.leftY(),
-                            driver.rightX());
-                    }
-                }));
+                driveSubsystem.run(
+                        () -> {
+                            if (FmsSubsystem.getInstance().isTeleop()) {
+                                driveSubsystem.setTeleopSpeeds(
+                                        driver.leftX(),
+                                        driver.leftY(),
+                                        driver.rightX());
+                            }
+                        }));
     }
 
     public void configureDriverCommands() {
@@ -47,8 +43,8 @@ public class Controls {
         driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand().andThen(Robot.robotCommands.driveTeleopCommand()));
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
-        driver.POV180().onTrue(runOnce(() -> Elevator.getInstance().tickDown()));
-        driver.POV0().onTrue(runOnce(() -> Elevator.getInstance().tickUp()));
+        driver.POV180().onTrue(runOnce(() -> Robot.armManager.elevatorTickDown()));
+        driver.POV0().onTrue(runOnce(() -> Robot.armManager.elevatorTickUp()));
         driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
@@ -56,7 +52,6 @@ public class Controls {
         driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
         driver.X().onTrue(Robot.robotCommands.driveTeleopCommand());
         driver.Y().onTrue(Robot.robotCommands.algaeAlignCommand());
-       
     }
 
     public void configureOperatorCommands() {
