@@ -1,11 +1,11 @@
 package frc.robot.subsystems.armManager.armScheduler;
 
+import frc.robot.Constants;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
 import frc.robot.subsystems.armManager.elevator.Elevator;
-import frc.robot.subsystems.armManager.elevator.ElevatorPosition;
 import frc.robot.subsystems.armManager.elevator.ElevatorState;
 import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.armManager.hand.HandState;
@@ -85,7 +85,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         this.elevatorState = elevatorState;
         if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE
                 && isHandoffArmState(armState)
-                && elevator.getHeight() > ElevatorPosition.HANDOFF - elevator.tolerance) {
+                && elevator.getHeight() > ElevatorState.HANDOFF.getPosition() - Constants.ElevatorConstants.Tolerance) {
             this.setStateFromRequest(ArmSchedulerState.ARM_TO_POSITION);
         } else {
             this.setStateFromRequest(ArmSchedulerState.ARM_UP);
@@ -96,7 +96,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         return armState == ArmState.HANDOFF_LEFT || armState == ArmState.HANDOFF_RIGHT || armState == ArmState.HANDOFF_MIDDLE;
     }
 
-    public boolean isReady() {
-        return getState() == ArmSchedulerState.READY;
+    /** Checks that the scheduler is in the READY state and both the Arm and Elevator are at position. */
+    public boolean atPosition() {
+        return getState() == ArmSchedulerState.READY && elevator.atGoal() && arm.atGoal();
     }
 }

@@ -78,9 +78,9 @@ public class RequestManager extends StateMachine<RequestManagerState> {
         switch (currentState) {
             case PREPARE_HANDOFF -> {
                 // TODO why not ArmManagerStates.WAIT_HANDOFF_CORAL_MODE as well?
-                if ((armManager.getState() == ArmManagerState.WAIT_HANDOFF_LEFT ||
-                        armManager.getState() == ArmManagerState.WAIT_HANDOFF_MIDDLE ||
-                        armManager.getState() == ArmManagerState.WAIT_HANDOFF_RIGHT) &&
+                if ((armManager.getState() == ArmManagerState.READY_HANDOFF_LEFT ||
+                        armManager.getState() == ArmManagerState.READY_HANDOFF_MIDDLE ||
+                        armManager.getState() == ArmManagerState.READY_HANDOFF_RIGHT) &&
                         groundManager.getState() == GroundManagerStates.WAIT_HANDOFF) {
                     nextState = RequestManagerState.HANDOFF;
                 }
@@ -110,7 +110,7 @@ public class RequestManager extends StateMachine<RequestManagerState> {
                         nextState = RequestManagerState.INDEPENDENT;
                     }
                 } else if (operatorOptions.coralMode == CoralMode.CORAL_MODE) {
-                    if (armManager.getState() == ArmManagerState.WAIT_HANDOFF_MIDDLE && groundManager.getState() == GroundManagerStates.IDLE) {
+                    if (armManager.getState() == ArmManagerState.READY_HANDOFF_MIDDLE && groundManager.getState() == GroundManagerStates.IDLE) {
                         nextState = RequestManagerState.INDEPENDENT;
                     }
                 }
@@ -149,7 +149,7 @@ public class RequestManager extends StateMachine<RequestManagerState> {
                 armManager.setState(ArmManagerState.PREPARE_INVERTED_HANDOFF);
                 groundManager.setState(GroundManagerStates.PREPARE_INVERTED_HANDOFF);
             }
-            case INVERTED_HANDOFF -> armManager.setState(ArmManagerState.INVERTED_HANDOFF);
+            case INVERTED_HANDOFF -> armManager.setState(ArmManagerState.EXECUTE_INVERTED_HANDOFF);
 
             case CLIMB -> {
                 climber.setState(ClimberStates.DEPLOYING);

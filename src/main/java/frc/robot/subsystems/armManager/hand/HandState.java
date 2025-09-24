@@ -1,15 +1,32 @@
 package frc.robot.subsystems.armManager.hand;
 
+import dev.doglog.DogLog;
+import edu.wpi.first.networktables.DoubleSubscriber;
+
 public enum HandState {
-    IDLE,
-    SCORE_CORAL,
-    HANDOFF,
-    INTAKE_LOW_REEF_ALGAE,
-    INTAKE_HIGH_REEF_ALGAE,
-    INTAKE_GROUND_ALGAE,
-    SCORE_ALGAE_NET,
-    SCORE_ALGAE_PROCESSOR,
-    CORAL_IDLE,
-    INVERTED_HANDOFF,
-    LOLLIPOP
+    IDLE_ALGAE(-0.1),
+    IDLE_CORAL(0.0),
+    IDLE_EMPTY(0.0),
+    CLEAR_ALGAE(0.5), // Clear algae that is dropped according to sensors
+
+    SCORE_CORAL(0.05),
+    HANDOFF(-1.0),
+    INTAKE_REEF_ALGAE(-.75),
+    INTAKE_GROUND_ALGAE(-.75),
+    SCORE_ALGAE_NET(0.8),
+    SCORE_ALGAE_PROCESSOR(0.5),
+    INVERTED_HANDOFF(1.0),
+    LOLLIPOP(-1.0);
+
+    private final double defaultSpeed;
+    private final DoubleSubscriber tunableSpeed;
+
+    HandState(double speed) {
+        this.defaultSpeed = speed;
+        this.tunableSpeed = DogLog.tunable("Hand/State/" + name(), defaultSpeed);
+    }
+
+    public double getSpeed() {
+        return tunableSpeed.get();
+    }
 }

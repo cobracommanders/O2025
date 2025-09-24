@@ -1,8 +1,6 @@
 package frc.robot.subsystems.ground_manager.coraldetection;
 
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
 import dev.doglog.DogLog;
@@ -10,9 +8,8 @@ import frc.robot.Constants;
 
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
-public class CoralDetector extends StateMachine<CoralDetectorStates> {
+public class CoralDetector extends StateMachine<CoralDetectorState> {
     private final CANrange lCANRange;
     private final CANrange rCANRange;
     public boolean lDetected = false;
@@ -24,7 +21,7 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     public boolean hasSimCoral = false;
 
     private CoralDetector() {
-        super(CoralDetectorStates.NONE);
+        super(CoralDetectorState.NONE);
         lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
         rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
         this.name = getName();
@@ -44,28 +41,28 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     }
 
     @Override
-    protected CoralDetectorStates getNextState(CoralDetectorStates currentState) {
+    protected CoralDetectorState getNextState(CoralDetectorState currentState) {
         if (Utils.isSimulation()){
             if (hasSimCoral){
-                return CoralDetectorStates.MIDDLE;
+                return CoralDetectorState.MIDDLE;
             } else {
-                return CoralDetectorStates.NONE;
+                return CoralDetectorState.NONE;
             }
         }
         if (lDetected && rDetected) {
-            return CoralDetectorStates.MIDDLE;
+            return CoralDetectorState.MIDDLE;
         } else if (!lDetected && !rDetected) {
-            return CoralDetectorStates.NONE;
+            return CoralDetectorState.NONE;
         } else if (lDetected && !rDetected) {
-            return CoralDetectorStates.LEFT;
+            return CoralDetectorState.LEFT;
         } else {
-            return CoralDetectorStates.RIGHT;
+            return CoralDetectorState.RIGHT;
         }
 
     }
 
     public boolean hasCoral(){
-        return getState() != CoralDetectorStates.NONE;
+        return getState() != CoralDetectorState.NONE;
     }
 
     public void setSimCoral(boolean hasCoral){

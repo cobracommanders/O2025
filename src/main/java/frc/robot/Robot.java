@@ -15,6 +15,7 @@ import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
+import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.Lights.LED;
 import frc.robot.subsystems.armManager.ArmManager;
@@ -30,7 +31,11 @@ public class Robot extends TimedRobot {
     private static final Elevator elevator = new Elevator();
     private static final Hand hand = new Hand();
 
-    public static ArmManager armManager = new ArmManager(hand, elevator, arm);
+    public static ArmManager armManager = new ArmManager(
+            hand,
+            elevator,
+            arm
+    );
 
     // Uncomment as needed
     public static RequestManager robotManager = RequestManager.getInstance();
