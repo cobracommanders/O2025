@@ -85,9 +85,10 @@ public class LED {
                 LEDPattern.solid(c).applyTo(m_middle);
             }
 
-            //start blinking the LEDs .5 seconds before the climber starts pulling the robot up
+            //For now its plain white
             if (RequestManager.getInstance().climber.getState() == ClimberStates.CONTINUE_SUCKING) {
-                LEDPattern.solid(c).blink(Seconds.of(.2)).applyTo(m_ledBuffer);
+                c = Color.kWhite;
+                LEDPattern.solid(c).applyTo(m_ledBuffer);
                 isBlinking = true;
             }
 
