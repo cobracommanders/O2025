@@ -68,8 +68,8 @@ public class Controls {
         operator.B().onTrue(Robot.robotCommands.setL4Command());
         operator.X().onTrue(Robot.robotCommands.setL2Command());
         operator.A().onTrue(Robot.robotCommands.setL1Command());
-        operator.POV0().onTrue(Robot.robotCommands.setHighReefAlgaeCommand());
 //        operator.POV0().onTrue(Robot.robotCommands.setHighReefAlgaeCommand());
+        operator.POV0().onTrue(Robot.robotCommands.reefAlignCommand());
         operator.POVMinus90().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.rightStick().onTrue(runOnce(() -> setCoralMode()));
