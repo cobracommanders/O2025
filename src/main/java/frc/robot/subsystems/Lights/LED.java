@@ -85,11 +85,11 @@ public class LED {
                 LEDPattern.solid(c).applyTo(m_middle);
             }
 
-            //start blinking the LEDs .5 seconds before the climber starts pulling the robot up
-            if (RequestManager.getInstance().climber.getState() == ClimberStates.CONTINUE_SUCKING) {
-                LEDPattern.solid(c).blink(Seconds.of(.2)).applyTo(m_ledBuffer);
-                isBlinking = true;
-            }
+//            //start blinking the LEDs .5 seconds before the climber starts pulling the robot up
+//            if (RequestManager.getInstance().climber.getState() == ClimberStates.CONTINUE_SUCKING) {
+//                LEDPattern.solid(c).blink(Seconds.of(.2)).applyTo(m_ledBuffer);
+//                isBlinking = true;
+//            }
 
             //Can we periodically assign the blink pattern? Or does it need to only be assigned once?
             if(FeatureFlags.LED_INTAKE_BLINK.getAsBoolean()){
