@@ -23,7 +23,7 @@ public class SimArm {
             Units.rotationsToRadians(-0.3),
             Units.rotationsToRadians(0.7),
             true,
-            Units.rotationsToRadians(ArmState.IDLE.getPosition()),
+            Units.rotationsToRadians(ArmState.START_POSITION.getPosition()),
             0.001,
             0);
 

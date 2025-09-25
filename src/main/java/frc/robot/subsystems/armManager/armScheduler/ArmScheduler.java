@@ -1,7 +1,5 @@
 package frc.robot.subsystems.armManager.armScheduler;
 
-import frc.robot.Constants;
-import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
@@ -59,45 +57,50 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
 
     @Override
     protected void afterTransition(ArmSchedulerState newState) {
-        switch (newState) {
-            case ARM_UP -> {
-                hand.setState(handState);
-                arm.setState(ArmState.IDLE);
-            }
-            case ELEVATOR_TO_POSITION -> {
-                elevator.setState(elevatorState);
-            }
-            case ARM_TO_POSITION -> {
-                hand.setState(handState); //needs to happen for coral mode skipping ARM_UP and ELEVATOR_TO_POS
-                arm.setState(armState);
-            }
-            case READY -> {
-                armState = null;
-                handState = null;
-                elevatorState = null;
-            }
-        }
+//        switch (newState) {
+//            case ARM_UP -> {
+//                hand.setState(handState);
+//                arm.setState(ArmState.IDLE);
+//            }
+//            case ELEVATOR_TO_POSITION -> {
+//                elevator.setState(elevatorState);
+//            }
+//            case ARM_TO_POSITION -> {
+//                hand.setState(handState); //needs to happen for coral mode skipping ARM_UP and ELEVATOR_TO_POS
+//                arm.setState(armState);
+//            }
+//            case READY -> {
+//                armState = null;
+//                handState = null;
+//                elevatorState = null;
+//            }
+//        }
     }
 
     public void scheduleStates(ArmState armState, HandState handState, ElevatorState elevatorState) {
         this.armState = armState;
         this.handState = handState;
         this.elevatorState = elevatorState;
-        if (OperatorOptions.getInstance().coralMode == OperatorOptions.CoralMode.CORAL_MODE
-                && isHandoffArmState(armState)
-                && elevator.getHeight() > ElevatorState.HANDOFF.getPosition() - Constants.ElevatorConstants.Tolerance) {
-            this.setStateFromRequest(ArmSchedulerState.ARM_TO_POSITION);
-        } else {
-            this.setStateFromRequest(ArmSchedulerState.ARM_UP);
-        }
+//        if (isHandoffArmState(armState)
+//                && elevator.getHeight() > ElevatorState.HANDOFF.getPosition() - Constants.ElevatorConstants.Tolerance) {
+//            this.setStateFromRequest(ArmSchedulerState.ARM_TO_POSITION);
+//        } else {
+//            this.setStateFromRequest(ArmSchedulerState.ARM_UP);
+//        }
+
+        arm.setState(armState);
+        hand.setState(handState);
+        elevator.setState(elevatorState);
     }
 
     public boolean isHandoffArmState(ArmState armState) {
         return armState == ArmState.HANDOFF_LEFT || armState == ArmState.HANDOFF_RIGHT || armState == ArmState.HANDOFF_MIDDLE;
     }
 
-    /** Checks that the scheduler is in the READY state and both the Arm and Elevator are at position. */
+    /**
+     * Checks that the scheduler is in the READY state and both the Arm and Elevator are at position.
+     */
     public boolean atPosition() {
-        return getState() == ArmSchedulerState.READY && elevator.atGoal() && arm.atGoal();
+        return /*getState() == ArmSchedulerState.READY &&*/ elevator.atGoal() && arm.atGoal();
     }
 }

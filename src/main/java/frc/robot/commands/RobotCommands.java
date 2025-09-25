@@ -1,9 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefSideOffset;
@@ -11,166 +9,121 @@ import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerState;
-import frc.robot.subsystems.armManager.ArmManagerState;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 
-import java.util.List;
-
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 public class RobotCommands {
-
-    private final RequestManager robotManager;
-    private final Subsystem[] requirements;
-
-    private final double reefSnapAngle = 0.0;
+    private final RequestManager robotManager = RequestManager.getInstance();
+    private final OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
     private RobotCommands() {
-        this.robotManager = RequestManager.getInstance();
-        var requirementsList = List.of();//List.of(robotManager.armManager, robotManager.groundManager, robotManager.climber);
-        requirements = requirementsList.toArray(Subsystem[]::new);
-    }
-
-    public Command[] getPathplannerCommands() {
-        return new Command[]{
-                scoreCommand(),
-                algaeIntakeCommand(),
-                coralIntakeCommand(),
-                prepareScoreCommand(),
-                setProcessorCommand(),
-                setBargeCommand(),
-                setL1Command(),
-                setL2Command(),
-                setL3Command(),
-                setL4Command(),
-                setHighReefAlgaeCommand(),
-                setLowReefAlgaeCommand(),
-                setGroundAlgaeCommand(),
-                waitForState(RequestManagerState.INDEPENDENT),
-                waitForGroundReady(),
-                waitForWaitL4(),
-                reefAlignCommand(),
-                autoReefAlignCommand()
-        };
-    }
-
-    public Command waitForState(RequestManagerState state) {
-        return robotManager.waitForState(state).withName("waitForState/" + state.toString());
-    }
-
-    public Command waitForGroundReady() {
-        return GroundManager.getInstance().waitForState(GroundManagerStates.WAIT_SCORE_L1)
-                .withName("waitForGroundState/WAIT_SCORE_L1");
     }
 
     public Command waitForAllIdle() {
         return GroundManager.getInstance().waitForState(GroundManagerStates.IDLE)
-                .alongWith(Robot.armManager.waitForState(ArmManagerState.IDLE))
+                .alongWith(waitUntil(() -> Robot.armManager.isIdleState()))
                 .withName("waitForState/ALL_IDLE");
     }
 
-    public Command waitForWaitL4() {
-        return Robot.armManager.waitForState(ArmManagerState.WAIT_L4)
-                .withName("waitForArmState/WAIT_L4");
+    public Command awaitCoralReadyToScore() {
+        return waitUntil(() -> Robot.armManager.isReadyToScoreCoral()).withName("awaitReadyToScoreCoral");
+    }
+
+    public Command awaitCoralFinishedScoring() {
+        return waitUntil(() -> Robot.armManager.getState().isCoralScoreState() && Robot.armManager.atPosition());
     }
 
     public Command scoreCommand() {
-        return Commands.runOnce(robotManager::scoreRequest).withName("score");
+        return runOnce(robotManager::scoreRequest).withName("score");
     }
 
-    // public Command waitForScoreCommand() {
-    //     return ArmManager.getInstance().wait.withName("score");
-    // }
-
     public Command algaeIntakeCommand() {
-        return Commands.runOnce(robotManager::intakeAlgaeRequest, requirements).withName("algaeIntake");
+        return runOnce(robotManager::intakeAlgaeRequest).withName("algaeIntake");
     }
 
     public Command coralIntakeCommand() {
-        return Commands.runOnce(robotManager::coralIntakeRequest, requirements).withName("coralIntake");
+        return runOnce(robotManager::coralIntakeRequest).withName("coralIntake");
     }
 
     public Command autoLollipopIntakeCommand() {
-        return Commands.runOnce(robotManager::lollipopIntakeRequest).withName("lollipopIntake");
+        return runOnce(robotManager::lollipopIntakeRequest).withName("lollipopIntake");
     }
 
     public Command prepareScoreCommand() {
-        return Commands.runOnce(robotManager::scoreLevelRequest, requirements).withName("prepareScore");
-        // .andThen(Commands.waitUntil(() -> robot.getState() == RobotState.WAIT_L1 ||
-        // robot.getState() == RobotState.WAIT_L4));
+        return runOnce(robotManager::scoreLevelRequest).withName("prepareScore");
     }
 
     public Command climbCommand() {
-        return Commands.runOnce(robotManager::climbRequest, requirements)
-                .andThen(Commands.waitUntil(() -> robotManager.getState() == RequestManagerState.CLIMB))
+        return runOnce(robotManager::climbRequest)
+                .andThen(waitUntil(() -> robotManager.getState() == RequestManagerState.CLIMB))
                 .withName("climb");
     }
 
-    public Command setProcessorCommand() {
-        return Commands.runOnce(() -> robotManager.setProcessor()).withName("setProcessor");
-    }
-
-    public Command setBargeCommand() {
-        return Commands.runOnce(() -> robotManager.setBarge()).withName("setBarge");
-    }
-
-    public Command setL1Command() {
-        return Commands.runOnce(() -> robotManager.setL1()).withName("setL1");
-    }
-
-    public Command setL2Command() {
-        return Commands.runOnce(() -> robotManager.setL2()).withName("setL2");
-    }
-
-    public Command setL3Command() {
-        return Commands.runOnce(() -> robotManager.setL3()).withName("setL3");
-    }
-
-    public Command setL4Command() {
-        return Commands.runOnce(() -> robotManager.setL4()).withName("setL4");
-    }
-
     public Command invertedHandoffCommand() {
-        return Commands.runOnce(() -> robotManager.invertedHandoffRequest()).withName("invertedHandoff");
+        return runOnce(robotManager::invertedHandoffRequest)
+                .andThen(robotManager.waitForState(RequestManagerState.INDEPENDENT))
+                .withName("invertedHandoff");
     }
 
     public Command handoffCommand() {
-        return Commands.runOnce(() -> robotManager.handoffRequest()).withName("handoff");
-    }
-
-    public Command setHighReefAlgaeCommand() {
-        return Commands.runOnce(() -> robotManager.setHighReefAlgae()).withName("setHighReefAlgae");
-    }
-
-    public Command setLowReefAlgaeCommand() {
-        return Commands.runOnce(() -> robotManager.setLowReefAlgae()).withName("setLowReefAlgae");
-    }
-
-    public Command setGroundAlgaeCommand() {
-        return Commands.runOnce(() -> robotManager.setGroundAlgae()).withName("setGroundAlgae");
+        return runOnce(robotManager::handoffRequest)
+                .andThen(robotManager.waitForState(RequestManagerState.INDEPENDENT))
+                .withName("handoff");
     }
 
     public Command resetToIdleCommand() {
-        return Commands.runOnce(() -> robotManager.resetToIdleRequest()).withName("resetToIdle");
+        return runOnce(robotManager::resetToIdleRequest).withName("resetToIdle");
     }
 
     public Command groundIdleCommand() {
-        return Commands.runOnce(() -> robotManager.groundIdleRequest()).withName("groundIdle");
+        return runOnce(robotManager::groundIdleRequest).withName("groundIdle");
     }
 
-    public Command invertedHandoffToIdleCommand() {
-        return invertedHandoffCommand()
-                .andThen(robotManager.waitForState(RequestManagerState.INDEPENDENT).andThen(resetToIdleCommand()));
+    public Command setProcessorCommand() {
+        return runOnce(() -> operatorOptions.scoreLocation = ScoreLocation.PROCESSOR).withName("setProcessor");
+    }
+
+    public Command setBargeCommand() {
+        return runOnce(() -> operatorOptions.scoreLocation = ScoreLocation.BARGE).withName("setBarge");
+    }
+
+    public Command setL1Command() {
+        return runOnce(() -> operatorOptions.scoreLocation = ScoreLocation.L1).withName("setL1");
+    }
+
+    public Command setL2Command() {
+        return runOnce(() -> operatorOptions.scoreLocation = ScoreLocation.L2).withName("setL2");
+    }
+
+    public Command setL3Command() {
+        return runOnce(() -> operatorOptions.scoreLocation = ScoreLocation.L3).withName("setL3");
+    }
+
+    public Command setL4Command() {
+        return runOnce(() -> operatorOptions.scoreLocation = ScoreLocation.L4).withName("setL4");
+    }
+
+    public Command setHighReefAlgaeCommand() {
+        return runOnce(() -> operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.HIGH_REEF).withName("setHighReefAlgae");
+    }
+
+    public Command setLowReefAlgaeCommand() {
+        return runOnce(() -> operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.LOW_REEF).withName("setLowReefAlgae");
+    }
+
+    public Command setGroundAlgaeCommand() {
+        return runOnce(() -> operatorOptions.algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE).withName("setGroundAlgae");
     }
 
     public Command prepareScoreWithHandoffCheckCommand() {
         return new ConditionalCommand(
-                handoffCommand().andThen(robotManager.waitForState(RequestManagerState.INDEPENDENT))
-                        .andThen(prepareScoreCommand()).andThen(groundIdleCommand()),
+                handoffCommand().andThen(prepareScoreCommand(), groundIdleCommand()),
                 prepareScoreCommand(),
                 () -> CoralDetector.getInstance().hasCoral() &&
                         (OperatorOptions.getInstance().scoreLocation != ScoreLocation.BARGE &&
@@ -181,31 +134,23 @@ public class RobotCommands {
     }
 
     public Command reefAlignCommand() {
-        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.TELEOP).andThen(scoreCommand())).withName("teleop align");
+        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.TELEOP).andThen(scoreCommand())).withName("teleop align");
     }
 
     public Command autoReefAlignCommand() {
-        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).andThen(scoreCommand()).withName("auto align");
+        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).andThen(scoreCommand()).withName("auto align");
     }
 
     public Command autoReefAlignCommandNoScore() {
-        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).withName("auto align");
+        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).withName("auto align");
     }
 
     public Command algaeAlignCommand() {
-        return Commands.runOnce(() -> AutoAlign.getInstance().setAlgaeIntakingOffset(ReefSideOffset.ALGAE_INTAKING)).andThen(runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.ALGAE_ALIGN_TELEOP)));
+        return runOnce(() -> AutoAlign.getInstance().setAlgaeIntakingOffset(ReefSideOffset.ALGAE_INTAKING)).andThen(runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.ALGAE_ALIGN_TELEOP)));
     }
 
     public Command driveTeleopCommand() {
-        return Commands.runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP));
-    }
-
-    public Command waitForSaikiranCommand() {
-        return Commands.waitUntil(() -> AutoAlign.getInstance().isAlignedDebounced());
-    }
-
-    public Command waitForL4() {
-        return Commands.waitUntil(() -> Robot.armManager.getState() == ArmManagerState.WAIT_L4);
+        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP));
     }
 
     private static RobotCommands instance;

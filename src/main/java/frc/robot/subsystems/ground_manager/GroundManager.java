@@ -1,12 +1,9 @@
 package frc.robot.subsystems.ground_manager;
 
 import com.ctre.phoenix6.Utils;
-
-import dev.doglog.DogLog;
-import frc.robot.Ports.coralDetectorPorts;
-import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 import frc.robot.subsystems.ground_manager.intake.IntakePivotStates;
 import frc.robot.subsystems.ground_manager.intakeRollers.IntakeRollers;
@@ -42,10 +39,17 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             case INTAKING -> {
                 if (coralDetector.hasCoral()) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                }
-                else if(Utils.isSimulation() && intakePivot.atGoal()){
+                } else if (Utils.isSimulation() && intakePivot.atGoal() && timeout(Math.random() + 0.5)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                    coralDetector.setSimCoral(true);
+                    int i = (int) (Math.random() * 3);
+                    System.out.println(i);
+                    CoralDetectorState simCoralPosition =
+                            switch (i) {
+                                case 1 -> CoralDetectorState.LEFT;
+                                case 2 -> CoralDetectorState.RIGHT;
+                                default -> CoralDetectorState.MIDDLE;
+                            };
+                    coralDetector.setSimCoral(simCoralPosition);
                 }
             }
             case PREPARE_HANDOFF -> {
@@ -65,10 +69,9 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             case SCORE_L1 -> {
                 if (timeout(1)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                }
-                else if(Utils.isSimulation() && intakePivot.atGoal()){
+                } else if (Utils.isSimulation() && intakePivot.atGoal()) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                    coralDetector.setSimCoral(false);
+                    coralDetector.setSimCoral(CoralDetectorState.NONE);
                 }
             }
             case WAIT_SCORE_L1 -> {
@@ -115,7 +118,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
             case HANDOFF -> {
                 rollers.setState(IntakeRollersStates.HANDOFF);
-                coralDetector.setSimCoral(false);
+                coralDetector.setSimCoral(CoralDetectorState.NONE);
             }
             case PREPARE_INVERTED_HANDOFF -> {
                 intakePivot.setState(IntakePivotStates.HANDOFF);

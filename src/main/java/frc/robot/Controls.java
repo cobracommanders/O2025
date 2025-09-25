@@ -1,12 +1,12 @@
 package frc.robot;
 
-import dev.doglog.DogLog;
 import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
-import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.GroundManager;
+import frc.robot.subsystems.ground_manager.GroundManagerStates;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
@@ -39,12 +39,12 @@ public class Controls {
 
     public void configureDriverCommands() {
         driver.leftBumper().onTrue(Robot.robotCommands.algaeIntakeCommand());
-        driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand());
+        driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand().andThen(GroundManager.getInstance().waitForState(GroundManagerStates.PREPARE_IDLE), Robot.robotCommands.handoffCommand()));
         driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand().andThen(Robot.robotCommands.driveTeleopCommand()));
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
-        driver.POV180().onTrue(runOnce(() -> Robot.armManager.elevatorTickDown()));
-        driver.POV0().onTrue(runOnce(() -> Robot.armManager.elevatorTickUp()));
+        // driver.POV180().onTrue(runOnce(() -> Robot.armManager.elevatorTickDown()));
+        // driver.POV0().onTrue(runOnce(() -> Robot.armManager.elevatorTickUp()));
         driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
@@ -64,21 +64,9 @@ public class Controls {
         operator.A().onTrue(Robot.robotCommands.setL1Command());
         operator.POV0().onTrue(Robot.robotCommands.setHighReefAlgaeCommand());
         operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
-        operator.rightStick().onTrue(runOnce(() -> setCoralMode()));
-        operator.leftStick().onTrue(runOnce(() -> setNormalMode()));
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
-        operator.back().onTrue(Robot.robotCommands.invertedHandoffToIdleCommand());
+        operator.back().onTrue(Robot.robotCommands.invertedHandoffCommand());
         operator.start().onTrue(Robot.robotCommands.resetToIdleCommand());
-    }
-
-    public void setCoralMode() {
-        OperatorOptions.getInstance().coralMode = OperatorOptions.CoralMode.CORAL_MODE;
-        DogLog.log("Control/Coral Mode Enabled", "CORAL");
-    }
-
-    public void setNormalMode() {
-        OperatorOptions.getInstance().coralMode = OperatorOptions.CoralMode.NORMAL_MODE;
-        DogLog.log("Control/Coral Mode Enabled", "NORMAL");
     }
 
     private static Controls instance;

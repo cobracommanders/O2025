@@ -10,8 +10,8 @@ public enum ElevatorState {
     GROUND_ALGAE(0),
     ALGAE_NET(1.38),
     ALGAE_PROCESSOR(0.1),
-    HANDOFF(0.75),
-    HANDOFF_CORAL_MODE(0.85),
+    HANDOFF(0.75), // Actual handoff position
+    PREPARE_HANDOFF(0.825), // State above the intake that allows the intake to move in/out freely
     LOLLIPOP(0),
     PREPARE_L4(1.3),
     PREPARE_L3(0.765),

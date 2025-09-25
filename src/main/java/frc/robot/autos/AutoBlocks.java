@@ -113,8 +113,8 @@ public class AutoBlocks {
                                         Robot.robotCommands.autoReefAlignCommandNoScore()
                                 ))
                 ),
-                Robot.robotCommands.waitForWaitL4(),
-                RobotCommands.getInstance().scoreCommand().andThen(Robot.armManager.awaitFinishedScoringCommand())
+                Robot.robotCommands.awaitCoralReadyToScore(),
+                RobotCommands.getInstance().scoreCommand().andThen(Robot.robotCommands.awaitCoralFinishedScoring())
         );
     }
 
@@ -133,8 +133,8 @@ public class AutoBlocks {
                                         Robot.robotCommands.autoReefAlignCommandNoScore()
                                 ))
                 ),
-                Robot.robotCommands.waitForWaitL4(),
-                RobotCommands.getInstance().scoreCommand().andThen(Robot.armManager.awaitFinishedScoringCommand())
+                Robot.robotCommands.awaitCoralReadyToScore(),
+                RobotCommands.getInstance().scoreCommand().andThen(Robot.robotCommands.awaitCoralFinishedScoring())
         );
     }
 

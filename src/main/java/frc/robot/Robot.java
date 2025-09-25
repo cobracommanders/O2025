@@ -15,7 +15,6 @@ import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
-import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.Lights.LED;
 import frc.robot.subsystems.armManager.ArmManager;
@@ -102,8 +101,9 @@ public class Robot extends TimedRobot {
         AutoAlign.getInstance().clearReefState();
 
 
-        if (autoChooser.getSelected() != null)
+        if (autoChooser.getSelected() != null) {
             autoChooser.getSelected().schedule();
+        }
         DogLog.log("Selected Auto", autoChooser.getSelected().getName());
     }
 

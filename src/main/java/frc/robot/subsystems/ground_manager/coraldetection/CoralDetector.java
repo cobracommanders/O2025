@@ -2,10 +2,8 @@ package frc.robot.subsystems.ground_manager.coraldetection;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.hardware.CANrange;
-
 import dev.doglog.DogLog;
 import frc.robot.Constants;
-
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
@@ -17,8 +15,8 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
     public double lDistance;
     public double rDistance;
     public final String name;
-    
-    public boolean hasSimCoral = false;
+
+    public CoralDetectorState simCoralPosition = CoralDetectorState.NONE;
 
     private CoralDetector() {
         super(CoralDetectorState.NONE);
@@ -30,7 +28,7 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
     protected void collectInputs() {
         lDistance = lCANRange.getDistance().getValueAsDouble();
         rDistance = rCANRange.getDistance().getValueAsDouble();
-        
+
         //We can switch to using .isDetected() if we would like.
         lDetected = lDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
         rDetected = rDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
@@ -42,12 +40,8 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
 
     @Override
     protected CoralDetectorState getNextState(CoralDetectorState currentState) {
-        if (Utils.isSimulation()){
-            if (hasSimCoral){
-                return CoralDetectorState.MIDDLE;
-            } else {
-                return CoralDetectorState.NONE;
-            }
+        if (Utils.isSimulation()) {
+            return simCoralPosition;
         }
         if (lDetected && rDetected) {
             return CoralDetectorState.MIDDLE;
@@ -61,12 +55,12 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
 
     }
 
-    public boolean hasCoral(){
+    public boolean hasCoral() {
         return getState() != CoralDetectorState.NONE;
     }
 
-    public void setSimCoral(boolean hasCoral){
-        this.hasSimCoral = hasCoral;
+    public void setSimCoral(CoralDetectorState position) {
+        this.simCoralPosition = position;
     }
 
     private static CoralDetector instance;

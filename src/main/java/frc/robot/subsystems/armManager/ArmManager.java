@@ -1,12 +1,13 @@
 package frc.robot.subsystems.armManager;
 
+import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.FieldConstants;
 import frc.robot.autoAlign.AutoAlign;
-import frc.robot.autoAlign.ReefPipeLevel;
+import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
@@ -25,8 +26,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     private final CoralDetector coralDetector = CoralDetector.getInstance();
     private final ArmScheduler armScheduler;
 
-    private final double HANDOFF_TIME = 0.2;
-    private final double INVERTED_HANDOFF_TIME = 0.2;
     private final double ALGAE_DROP_TIME = 0.1;
     private final Debouncer algaeDroppedOrMissingDebouncer = new Debouncer(0.3, Debouncer.DebounceType.kRising);
 
@@ -48,7 +47,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         //TODO Does it do something else in auto?
         if (DriverStation.isAutonomous()) return false;
         //TODO Is this just measuring distance from the target scoring pose? If so, would being 0.25m to the left/right also allow the arm to move?
-        return AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 0.25;
+        return timeout(0.5) && AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 0.25;
     }
 
     public boolean isReadyToReturnToIdleAfterIntakingAlgae() {
@@ -59,24 +58,13 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         return armScheduler.atPosition();
     }
 
-    public boolean isReadyToExecuteHandoff() {
-        return getState().isHandoffReadyState();
+    public boolean isIdleState() {
+        return getState().isIdleState();
     }
 
-    public void requestHandoffExecution() {
-        if (isReadyToExecuteHandoff()) {
-            setStateFromRequest(getState().getHandoffReadyToExecuteState());
-        }
-    }
-
-    public boolean isReadyToExecuteInvertedHandoff() {
-        return getState() == ArmManagerState.READY_INVERTED_HANDOFF;
-    }
-
-    public void requestInvertedHandoffExecution() {
-        if (isReadyToExecuteInvertedHandoff()) {
-            setStateFromRequest(ArmManagerState.EXECUTE_INVERTED_HANDOFF);
-        }
+    @Override
+    protected void collectInputs() {
+        DogLog.log("ArmManager/atPosition", atPosition());
     }
 
     protected ArmManagerState getNextState(ArmManagerState currentState) {
@@ -87,7 +75,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case START_POSITION -> {
                 if (DriverStation.isEnabled()) nextState = ArmManagerState.PREPARE_IDLE_CORAL;
             }
-
 
             /* ******** IDLE STATES ******** */
             case PREPARE_IDLE_EMPTY, PREPARE_IDLE_CORAL, PREPARE_IDLE_ALGAE -> {
@@ -114,43 +101,38 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
 
             /* ******** HANDOFF STATES ******** */
-            case PREPARE_HANDOFF_LEFT, PREPARE_HANDOFF_MIDDLE, PREPARE_HANDOFF_RIGHT -> {
+            case PREEMPTIVE_HANDOFF_LEFT, PREEMPTIVE_HANDOFF_MIDDLE, PREEMPTIVE_HANDOFF_RIGHT -> {
                 CoralDetectorState coralPosition = coralDetector.getState();
                 boolean hasCoral = coralPosition != CoralDetectorState.NONE;
-                ArmManagerState targetPrepareState = ArmManagerState.getHandoffPrepareFromCoralPosition(coralPosition);
+                ArmManagerState targetPreemptiveState = ArmManagerState.getHandoffPreemptiveFromCoralPosition(coralPosition);
 
                 if (!hasCoral) {
                     // If no coral, go back to idle empty
                     nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
-                } else if (targetPrepareState != currentState) {
+                } else if (targetPreemptiveState != currentState) {
                     // If the coral position has changed, prepare to move to the new position
-                    nextState = targetPrepareState;
-                } else if (atPosition()) {
-                    // If the arm is at position, wait for the intake to be in the right place
-                    nextState = currentState.getHandoffPrepareToReadyState();
+                    nextState = targetPreemptiveState;
                 } else {
-                    // The coral is present and the arm is moving to the right place, do nothing
+                    // The coral is present and the arm is in the correct state, do nothing
+                }
+            }
+
+            case PREPARE_HANDOFF_LEFT, PREPARE_HANDOFF_MIDDLE, PREPARE_HANDOFF_RIGHT -> {
+                if (atPosition()) {
+                    nextState = currentState.getHandoffPrepareToReadyState();
                 }
             }
 
             case READY_HANDOFF_LEFT, READY_HANDOFF_MIDDLE, READY_HANDOFF_RIGHT -> {
-                CoralDetectorState coralPosition = coralDetector.getState();
-                boolean hasCoral = coralPosition != CoralDetectorState.NONE;
-                ArmManagerState targetReadyState = ArmManagerState.getHandoffReadyFromCoralPosition(coralPosition);
+                boolean hasCoral = coralDetector.hasCoral();
 
                 if (!hasCoral) {
-                    // If no coral, go back to idle empty
                     nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
-                } else if (targetReadyState != currentState) {
-                    // If the coral position has changed, prepare to move to the new position
-                    nextState = targetReadyState;
-                } else {
-                    // The coral is present and the arm is in the right place, do nothing
                 }
             }
 
             case EXECUTE_HANDOFF_LEFT, EXECUTE_HANDOFF_MIDDLE, EXECUTE_HANDOFF_RIGHT -> {
-                if (timeout(HANDOFF_TIME)) {
+                if (timeout(RequestManager.HANDOFF_TIME)) {
                     nextState = ArmManagerState.PREPARE_IDLE_CORAL;
                 }
             }
@@ -164,7 +146,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case READY_INVERTED_HANDOFF -> { /* Await Control */ }
 
             case EXECUTE_INVERTED_HANDOFF -> {
-                if (timeout(INVERTED_HANDOFF_TIME)) {
+                if (timeout(RequestManager.INVERTED_HANDOFF_TIME)) {
                     nextState = ArmManagerState.IDLE_EMPTY;
                 }
             }
@@ -223,11 +205,11 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                 }
             }
 
-            case ACTIVE_INTAKE_GROUND_ALGAE -> { 
+            case ACTIVE_INTAKE_GROUND_ALGAE -> {
                 if (hand.hasAlgae()) {
                     nextState = ArmManagerState.PREPARE_IDLE_ALGAE;
                 }
-             }
+            }
 
 
             /* ******** ALGAE SCORE STATES ******** */
@@ -235,15 +217,13 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                  PREPARE_SCORE_ALGAE_NET_RIGHT,
                  PREPARE_SCORE_ALGAE_PROCESSOR -> {
                 if (atPosition()) {
-                    nextState = currentState.getAlgaeScorePrepareToReadyState();
+                    nextState = currentState.getAlgaeNetPrepareToReadyState();
                 }
             }
 
             case READY_SCORE_ALGAE_NET_LEFT,
                  READY_SCORE_ALGAE_NET_RIGHT,
-                 READY_SCORE_ALGAE_PROCESSOR -> {
-                /* Await Control */
-            }
+                 READY_SCORE_ALGAE_PROCESSOR -> { /* Await Control */ }
 
             case SCORE_ALGAE_NET_LEFT,
                  SCORE_ALGAE_NET_RIGHT,
@@ -261,8 +241,8 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             }
 
             case ACTIVE_INTAKE_LOLLIPOP -> { /* Await Control */ }
-     
-      
+
+
             /* ******** CLIMB STATES ******** */
             case PREPARE_CLIMB -> {
                 if (atPosition()) {
@@ -288,28 +268,34 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
             /* ******** IDLE STATES ******** */
             case PREPARE_IDLE_EMPTY, IDLE_EMPTY ->
-                    requestState(ArmState.IDLE, ElevatorState.IDLE, HandState.IDLE_EMPTY);
+                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
             case PREPARE_IDLE_CORAL, IDLE_CORAL ->
-                    requestState(ArmState.IDLE, ElevatorState.IDLE, HandState.IDLE_CORAL);
+                    requestState(ArmState.IDLE_CORAL, ElevatorState.IDLE, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_ALGAE, IDLE_ALGAE ->
-                    requestState(ArmState.IDLE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
-            case IDLE_ALGAE_DROPPED -> requestState(ArmState.IDLE, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
+                    requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
+            case IDLE_ALGAE_DROPPED -> requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
 
 
             /* ******** HANDOFF STATES ******** */
             case PREPARE_HANDOFF_LEFT ->
-                    requestState(ArmState.HANDOFF_LEFT, ElevatorState.HANDOFF, HandState.IDLE_EMPTY);
+                    requestState(ArmState.HANDOFF_LEFT, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
             case PREPARE_HANDOFF_MIDDLE ->
-                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.HANDOFF, HandState.IDLE_EMPTY);
+                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
             case PREPARE_HANDOFF_RIGHT ->
-                    requestState(ArmState.HANDOFF_RIGHT, ElevatorState.HANDOFF, HandState.IDLE_EMPTY);
+                    requestState(ArmState.HANDOFF_RIGHT, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
 
-            case READY_HANDOFF_LEFT, EXECUTE_HANDOFF_LEFT ->
-                    requestState(ArmState.HANDOFF_LEFT, ElevatorState.HANDOFF, HandState.HANDOFF);
-            case READY_HANDOFF_MIDDLE, EXECUTE_HANDOFF_MIDDLE ->
+            case READY_HANDOFF_LEFT ->
+                    requestState(ArmState.HANDOFF_LEFT, ElevatorState.PREPARE_HANDOFF, HandState.HANDOFF);
+            case READY_HANDOFF_MIDDLE ->
+                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.HANDOFF);
+            case READY_HANDOFF_RIGHT ->
+                    requestState(ArmState.HANDOFF_RIGHT, ElevatorState.PREPARE_HANDOFF, HandState.HANDOFF);
+
+            case EXECUTE_HANDOFF_LEFT -> requestState(ArmState.HANDOFF_LEFT, ElevatorState.HANDOFF, HandState.HANDOFF);
+            case EXECUTE_HANDOFF_MIDDLE ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.HANDOFF, HandState.HANDOFF);
-            case READY_HANDOFF_RIGHT, EXECUTE_HANDOFF_RIGHT ->
+            case EXECUTE_HANDOFF_RIGHT ->
                     requestState(ArmState.HANDOFF_RIGHT, ElevatorState.HANDOFF, HandState.HANDOFF);
 
 
@@ -343,30 +329,134 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
 
             /* ******** ALGAE INTAKE STATES ******** */
-            case PREPARE_INTAKE_HIGH_REEF_ALGAE_LEFT, ACTIVE_INTAKE_HIGH_REEF_ALGAE_LEFT -> requestState(ArmState.INTAKE_HIGH_REEF_ALGAE_LEFT, ElevatorState.HIGH_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_HIGH_REEF_ALGAE_RIGHT, ACTIVE_INTAKE_HIGH_REEF_ALGAE_RIGHT -> requestState(ArmState.INTAKE_HIGH_REEF_ALGAE_RIGHT, ElevatorState.HIGH_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_LOW_REEF_ALGAE_LEFT, ACTIVE_INTAKE_LOW_REEF_ALGAE_LEFT -> requestState(ArmState.INTAKE_LOW_REEF_ALGAE_LEFT, ElevatorState.LOW_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_LOW_REEF_ALGAE_RIGHT, ACTIVE_INTAKE_LOW_REEF_ALGAE_RIGHT -> requestState(ArmState.INTAKE_LOW_REEF_ALGAE_RIGHT, ElevatorState.LOW_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_GROUND_ALGAE, ACTIVE_INTAKE_GROUND_ALGAE -> requestState(ArmState.INTAKE_GROUND_ALGAE, ElevatorState.GROUND_ALGAE, HandState.INTAKE_GROUND_ALGAE);
+            case PREPARE_INTAKE_HIGH_REEF_ALGAE_LEFT, ACTIVE_INTAKE_HIGH_REEF_ALGAE_LEFT ->
+                    requestState(ArmState.INTAKE_HIGH_REEF_ALGAE_LEFT, ElevatorState.HIGH_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
+            case PREPARE_INTAKE_HIGH_REEF_ALGAE_RIGHT, ACTIVE_INTAKE_HIGH_REEF_ALGAE_RIGHT ->
+                    requestState(ArmState.INTAKE_HIGH_REEF_ALGAE_RIGHT, ElevatorState.HIGH_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
+            case PREPARE_INTAKE_LOW_REEF_ALGAE_LEFT, ACTIVE_INTAKE_LOW_REEF_ALGAE_LEFT ->
+                    requestState(ArmState.INTAKE_LOW_REEF_ALGAE_LEFT, ElevatorState.LOW_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
+            case PREPARE_INTAKE_LOW_REEF_ALGAE_RIGHT, ACTIVE_INTAKE_LOW_REEF_ALGAE_RIGHT ->
+                    requestState(ArmState.INTAKE_LOW_REEF_ALGAE_RIGHT, ElevatorState.LOW_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
+            case PREPARE_INTAKE_GROUND_ALGAE, ACTIVE_INTAKE_GROUND_ALGAE ->
+                    requestState(ArmState.INTAKE_GROUND_ALGAE, ElevatorState.GROUND_ALGAE, HandState.INTAKE_GROUND_ALGAE);
 
 
 
             /* ******** ALGAE SCORE STATES ******** */
-            case PREPARE_SCORE_ALGAE_NET_LEFT, READY_SCORE_ALGAE_NET_LEFT -> requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
-            case PREPARE_SCORE_ALGAE_NET_RIGHT, READY_SCORE_ALGAE_NET_RIGHT -> requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
-            case PREPARE_SCORE_ALGAE_PROCESSOR, READY_SCORE_ALGAE_PROCESSOR -> requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE);
-            case SCORE_ALGAE_NET_LEFT -> requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.SCORE_ALGAE_NET);
-            case SCORE_ALGAE_NET_RIGHT -> requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.SCORE_ALGAE_NET);
-            case SCORE_ALGAE_PROCESSOR -> requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR);
+            case PREPARE_SCORE_ALGAE_NET_LEFT, READY_SCORE_ALGAE_NET_LEFT ->
+                    requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
+            case PREPARE_SCORE_ALGAE_NET_RIGHT, READY_SCORE_ALGAE_NET_RIGHT ->
+                    requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
+            case PREPARE_SCORE_ALGAE_PROCESSOR, READY_SCORE_ALGAE_PROCESSOR ->
+                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE);
+            case SCORE_ALGAE_NET_LEFT ->
+                    requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.SCORE_ALGAE_NET);
+            case SCORE_ALGAE_NET_RIGHT ->
+                    requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.SCORE_ALGAE_NET);
+            case SCORE_ALGAE_PROCESSOR ->
+                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR);
 
 
             /* ******** LOLLIPOP INTAKE STATES ******** */
-            case PREPARE_INTAKE_LOLLIPOP, ACTIVE_INTAKE_LOLLIPOP -> armScheduler.scheduleStates(ArmState.LOLLIPOP, HandState.LOLLIPOP, ElevatorState.LOLLIPOP);
+            case PREPARE_INTAKE_LOLLIPOP, ACTIVE_INTAKE_LOLLIPOP ->
+                    armScheduler.scheduleStates(ArmState.LOLLIPOP, HandState.LOLLIPOP, ElevatorState.LOLLIPOP);
 
 
             /* ******** CLIMB STATES ******** */
-            case PREPARE_CLIMB, READY_CLIMB -> armScheduler.scheduleStates(ArmState.CLIMB, HandState.CLEAR_ALGAE, ElevatorState.IDLE);
+            case PREPARE_CLIMB, READY_CLIMB ->
+                    armScheduler.scheduleStates(ArmState.CLIMB, HandState.CLEAR_ALGAE, ElevatorState.IDLE);
         }
     }
 
+    public void requestHandoff() {
+        setStateFromRequest(ArmManagerState.getHandoffPrepareFromCoralPosition(coralDetector.getState()));
+    }
+
+    public boolean isReadyToExecuteHandoff() {
+        return getState().isHandoffReadyState();
+    }
+
+    public void requestHandoffExecution() {
+        if (isReadyToExecuteHandoff()) {
+            setStateFromRequest(getState().getHandoffReadyToExecuteState());
+        }
+    }
+
+    public void requestInvertedHandoff() {
+        setStateFromRequest(ArmManagerState.PREPARE_INVERTED_HANDOFF);
+    }
+
+    public boolean isReadyToExecuteInvertedHandoff() {
+        return getState() == ArmManagerState.READY_INVERTED_HANDOFF;
+    }
+
+    public void requestInvertedHandoffExecution() {
+        if (isReadyToExecuteInvertedHandoff()) {
+            setStateFromRequest(ArmManagerState.EXECUTE_INVERTED_HANDOFF);
+        }
+    }
+
+    public void requestClimb() {
+        setStateFromRequest(ArmManagerState.PREPARE_CLIMB);
+    }
+
+    public void requestIdle() {
+        setStateFromRequest(ArmManagerState.getIdleStateFor(getState().handGamePieceState));
+    }
+
+    public void requestIdleClearGamePiece() {
+        setStateFromRequest(ArmManagerState.IDLE_ALGAE_DROPPED);
+    }
+
+    public void requestReefAlgaeIntake(RobotScoringSide side, boolean top) {
+        setStateFromRequest(ArmManagerState.getAlgaeIntakePrepare(side, top));
+    }
+
+    public void requestGroundAlgaeIntake() {
+        setStateFromRequest(ArmManagerState.PREPARE_INTAKE_GROUND_ALGAE);
+    }
+
+    public void requestLollipopIntake() {
+        setStateFromRequest(ArmManagerState.PREPARE_INTAKE_LOLLIPOP);
+    }
+
+    public void requestCoralPrepare(RobotScoringSide robotSide, FieldConstants.PipeScoringLevel scoringLevel) {
+        setStateFromRequest(ArmManagerState.getCoralPrepareScore(robotSide, scoringLevel));
+    }
+
+    public boolean isReadyToScoreCoral() {
+        return getState().isCoralScoreState();
+    }
+
+    public void requestCoralScoreExecution() {
+        setStateFromRequest(getState().getCoralReadyToScoreState());
+    }
+
+    public void requestAlgaeNetScore(RobotScoringSide robotSide) {
+        setStateFromRequest(ArmManagerState.getNetPrepareScore(robotSide));
+    }
+
+    public boolean isReadyToScoreAlgaeNet() {
+        return getState().isNetReadyState();
+    }
+
+    public void requestAlgaeNetScoreExecution() {
+        if (isReadyToScoreAlgaeNet()) {
+            setStateFromRequest(getState().getAlgaeNetReadyToScoreState());
+        }
+    }
+
+    public void requestProcessorScore() {
+        setStateFromRequest(ArmManagerState.PREPARE_SCORE_ALGAE_PROCESSOR);
+    }
+
+    public boolean isReadyToScoreProcessor() {
+        return getState() == ArmManagerState.READY_SCORE_ALGAE_PROCESSOR;
+    }
+
+    public void requestProcessorScoreExecution() {
+        if (isReadyToScoreProcessor()) {
+            setStateFromRequest(ArmManagerState.SCORE_ALGAE_PROCESSOR);
+        }
+    }
 }
