@@ -8,7 +8,7 @@ public class ArmPositions {
     public static final double ALGAE_PROCESSOR = 0;
     public static final double ALGAE_NET = 0.19;
     public static final double L4 = 0.1;
-    public static final double SCORE_L4 = -0.01;
+    public static final double SCORE_L4 = -0.005;
     public static final double HANDOFF_RIGHT = -0.235;
     public static final double HANDOFF_LEFT = -0.265;
     public static final double HANDOFF_MIDDLE = -0.25;
