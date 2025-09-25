@@ -36,7 +36,7 @@ public class blueL4 extends BaseAuto {
   @Override
   protected Command createAutoCommand() {
     return Commands.sequence(
-      blocks.scorePreloadL4(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+      blocks.scorePreloadL4AutoAlignFirst(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
       blocks.backUpFromReef(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
       RobotCommands.getInstance().autoLollipopIntakeCommand(),
       // Commands.parallel(

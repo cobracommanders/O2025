@@ -318,13 +318,13 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 // arm.setState(ArmStates.L4);
                 // hand.setState(HandStates.CORAL_IDLE);
                 // elevator.setState(ElevatorStates.L4);
-                if (DriverStation.isAutonomous()) {
-                    arm.setState(ArmStates.L4);
-                    hand.setState(HandStates.CORAL_IDLE);
-                    elevator.setState(ElevatorStates.L4);
-                } else {
+                    // if (DriverStation.isAutonomous()) {
+                    //     arm.setState(ArmStates.L4);
+                    //     hand.setState(HandStates.CORAL_IDLE);
+                    //     elevator.setState(ElevatorStates.L4);
+                    // } else {
                     armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
-                }
+                //}
             }
             case WAIT_L4 -> {
                 // armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);

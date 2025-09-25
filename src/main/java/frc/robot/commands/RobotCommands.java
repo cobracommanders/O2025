@@ -18,6 +18,9 @@ import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
+import frc.robot.subsystems.armManager.arm.ArmStates;
+import frc.robot.subsystems.armManager.elevator.ElevatorStates;
+import frc.robot.subsystems.armManager.hand.HandStates;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
@@ -99,7 +102,7 @@ public class RobotCommands {
     }
 
     public Command prepareScoreCommand() {
-        return Commands.runOnce(robotManager::scoreLevelRequest, requirements).withName("prepareScore");
+        return Commands.runOnce(robotManager::scoreLevelRequest).withName("prepareScore");
         // .andThen(Commands.waitUntil(() -> robot.getState() == RobotState.WAIT_L1 ||
         // robot.getState() == RobotState.WAIT_L4));
     }
@@ -181,7 +184,10 @@ public class RobotCommands {
                                 robotManager.operatorOptions.scoreLocation != ScoreLocation.PROCESSOR &&
                                 robotManager.operatorOptions.scoreLocation != ScoreLocation.L1))
                 .withName("prepareScoreWithHandoffCheck");
+    }
 
+    public Command prepareScorePreLoadL4(){
+        return Commands.runOnce(() -> ArmManager.getInstance().armScheduler.scheduleStates(ArmStates.L4, HandStates.IDLE, ElevatorStates.L4));
     }
 
     public Command reefAlignCommand() {

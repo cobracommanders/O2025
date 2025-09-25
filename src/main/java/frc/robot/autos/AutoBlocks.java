@@ -71,12 +71,12 @@ public class AutoBlocks {
 
         public static final AutoConstraintOptions CORAL_MAP_CONSTRAINTS = new AutoConstraintOptions(4.0, 10, 2.5, 10);
         private static final AutoConstraintOptions SCORING_CONSTRAINTS = BASE_CONSTRAINTS.withMaxLinearVelocity(2);
-                        //.withMaxLinearAcceleration(1.75);
+        // .withMaxLinearAcceleration(1.75);
         private static final AutoConstraintOptions L2_SCORING_CONSTRAINTS = BASE_CONSTRAINTS.withMaxLinearVelocity(3.3)
                         .withMaxLinearAcceleration(2.15);
         private static final AutoConstraintOptions LOLLIPOP_CONSTRAINTS = BASE_CONSTRAINTS;
-                        // .withMaxLinearAcceleration(2.0)
-                        // .withMaxLinearVelocity(1.7).withMaxAngularVelocity(40);
+        // .withMaxLinearAcceleration(2.0)
+        // .withMaxLinearVelocity(1.7).withMaxAngularVelocity(40);
 
         private static final AutoConstraintOptions SUPER_FAST_LOLLIPOP_CONSTRAINTS = BASE_CONSTRAINTS
                         .withMaxLinearAcceleration(3.0).withMaxLinearVelocity(4.5);
@@ -129,6 +129,15 @@ public class AutoBlocks {
 
         public Command scoreL4(ReefPipe pipe, RobotScoringSide scoringSide) {
                 return Commands.sequence(
+                        new WaitCommand(0.2),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                                SCORING_CONSTRAINTS,
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
+                                                                                scoringSide),
+                                                                                Robot.robotCommands
+                                                                                                .autoReefAlignCommandNoScore()))),
+                                                                                                Robot.robotCommands.waitForWaitL4(),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 BASE_CONSTRAINTS,
@@ -138,14 +147,13 @@ public class AutoBlocks {
                                                                                 Robot.robotCommands
                                                                                                 .prepareScoreCommand()))),
                                 new WaitCommand(0.2),
-                                trailblazer.followSegment(
-                                                new AutoSegment(
-                                                                SCORING_CONSTRAINTS,
-                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
-                                                                                scoringSide),
-                                                                                Robot.robotCommands
-                                                                                                .autoReefAlignCommandNoScore()))),
-                                Robot.robotCommands.waitForWaitL4(),
+                                // trailblazer.followSegment(
+                                //                 new AutoSegment(
+                                //                                 SCORING_CONSTRAINTS,
+                                //                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
+                                //                                                 scoringSide),
+                                //                                                 Robot.robotCommands
+                                //                                                                 .autoReefAlignCommandNoScore()))),
                                 RobotCommands.getInstance().scoreCommand()
                                                 .andThen(ArmManager.getInstance().finishScoring()));
         }
@@ -169,6 +177,26 @@ public class AutoBlocks {
                                                                                 scoringSide),
                                                                                 Robot.robotCommands
                                                                                                 .autoReefAlignCommandNoScore()))),
+                                Robot.robotCommands.waitForWaitL4(),
+                                RobotCommands.getInstance().scoreCommand()
+                                                .andThen(ArmManager.getInstance().finishScoring()));
+        }
+
+        public Command scorePreloadL4AutoAlignFirst(ReefPipe pipe, RobotScoringSide scoringSide) {
+                return Commands.sequence(
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                                SCORING_CONSTRAINTS,
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
+                                                                                scoringSide),Robot.robotCommands.autoReefAlignCommandNoScore()))), // 67
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                                //BASE_CONSTRAINTS,
+                                                                AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
+                                                                                scoringSide),
+                                                                                //Robot.robotCommands.waitForAllIdle()
+                                                                                        Robot.robotCommands.prepareScoreCommand()))),
                                 Robot.robotCommands.waitForWaitL4(),
                                 RobotCommands.getInstance().scoreCommand()
                                                 .andThen(ArmManager.getInstance().finishScoring()));
