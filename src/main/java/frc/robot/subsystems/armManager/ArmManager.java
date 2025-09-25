@@ -55,7 +55,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
 
     public boolean isReadyToMove(){
         if (DriverStation.isAutonomous()) return false;
-       return AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 0.25;
+       return AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 0.2;
     }
 
     @Override
@@ -81,7 +81,10 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case PREPARE_SCORE_L4 -> {
-                if (atGoal()) {
+                if (DriverStation.isAutonomous() && atGoal()) {
+                    nextState = ArmManagerStates.WAIT_L4;
+                }
+                else if (DriverStation.isTeleop() && armScheduler.isReady()){
                     nextState = ArmManagerStates.WAIT_L4;
                 }
             }
@@ -312,16 +315,16 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 hand.setState(HandStates.SCORE_ALGAE_PROCESSOR);
             }
             case PREPARE_SCORE_L4 -> {
-                arm.setState(ArmStates.L4);
-                hand.setState(HandStates.CORAL_IDLE);
-                elevator.setState(ElevatorStates.L4);
-                // if (DriverStation.isAutonomous()) {
-                //     arm.setState(ArmStates.L4);
-                //     hand.setState(HandStates.CORAL_IDLE);
-                //     elevator.setState(ElevatorStates.L4);
-                // } else {
-                //     armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
-                // }
+                // arm.setState(ArmStates.L4);
+                // hand.setState(HandStates.CORAL_IDLE);
+                // elevator.setState(ElevatorStates.L4);
+                if (DriverStation.isAutonomous()) {
+                    arm.setState(ArmStates.L4);
+                    hand.setState(HandStates.CORAL_IDLE);
+                    elevator.setState(ElevatorStates.L4);
+                } else {
+                    armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
+                }
             }
             case WAIT_L4 -> {
                 // armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
