@@ -68,32 +68,27 @@ public class Climber extends StateMachine<ClimberStates> {
       case IDLE:
         // none
         break;
-      case DEPLOYING:
-        if (atGoal()) {
-          nextState = ClimberStates.WAIT_FOR_CAGE;
-        }
-        break;
-      case WAIT_FOR_CAGE:
-        if (atGoal()) {
-          nextState = ClimberStates.KEEP_SUCKING;
-        }
-        break;
+        case WAIT_FOR_CAGE:
+          if (atGoal()) {
+            nextState = ClimberStates.CONTINUE_SUCKING;
+          }
+          break;
+          case CONTINUE_SUCKING:
+                  if(timeout(0.5)){
+                      nextState = ClimberStates.CLIMBING;
+                  }
 
-      case KEEP_SUCKING:
-        if (timeout(.5)) {
-          nextState = ClimberStates.CLIMBING;
-        }
-        break;
-      case CLIMBING:
-        if (atGoal()) {
-          nextState = ClimberStates.CLIMBED;
-        }
-        break;
-      case CLIMBED:
-        // do nothing, robot is done
-        break;
-    }
-    return nextState;
+
+        case CLIMBING:
+           if (atGoal()){
+            nextState = ClimberStates.CLIMBED;
+           }
+           break;
+        case CLIMBED:
+           //do nothing, robot is done
+           break;
+      }
+      return nextState;
   }
 
   public boolean atGoal() {
@@ -136,8 +131,11 @@ public class Climber extends StateMachine<ClimberStates> {
         setWinchSpeed(ClimberPositions.IDLE);
         // do nothing
         break;
-      case KEEP_SUCKING:
-        // do nothing
+      // case KEEP_SUCKING:
+      //   // do nothing
+      //   break;
+    case CONTINUE_SUCKING:
+        //do nothing!
         break;
       default:
         break;
