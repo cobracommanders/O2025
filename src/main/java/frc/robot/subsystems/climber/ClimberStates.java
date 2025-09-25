@@ -7,5 +7,4 @@ public enum ClimberStates {
     CONTINUE_SUCKING,
     CLIMBING,
     CLIMBED,   
-    TEST
 }
