@@ -18,8 +18,6 @@ import frc.robot.stateMachine.RequestManagerStates;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerStates;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManagerStates;
@@ -82,10 +80,6 @@ public class RobotCommands {
 
     public Command scoreCommand() {
         return Commands.runOnce(robotManager::scoreRequest).withName("score");
-    }
-
-    public Command climberTest(){
-        return Commands.runOnce(() -> Climber.getInstance().setState(ClimberStates.TEST)).withName("climberTest");
     }
 
     // public Command waitForScoreCommand() {
