@@ -46,6 +46,8 @@ public class Arm extends StateMachine<ArmState> {
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MotionMagicCruiseVelocity;
         motor_config.MotionMagic.MotionMagicAcceleration = ArmConstants.MotionMagicAcceleration;
         motor_config.MotionMagic.MotionMagicJerk = ArmConstants.MotionMagicJerk;
+        motor_config.ClosedLoopGeneral.ContinuousWrap = true;
+
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
         canCoderConfig.MagnetSensor.MagnetOffset = Constants.ArmConstants.encoderOffset;
         canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.7;
@@ -62,7 +64,7 @@ public class Arm extends StateMachine<ArmState> {
     }
 
     public boolean atGoal() {
-        return MathUtil.isNear(getState().getPosition(), armPosition, ArmConstants.Tolerance);
+        return MathUtil.isNear(getState().getPosition(), getNormalizedPosition(), ArmConstants.Tolerance);
     }
 
     public void syncEncoder() {

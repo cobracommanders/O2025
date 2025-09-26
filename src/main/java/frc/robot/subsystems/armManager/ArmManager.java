@@ -9,6 +9,7 @@ import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.armManager.ArmManagerState.HandGamePieceState;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
 import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
@@ -205,8 +206,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             }
 
             case ACTIVE_INTAKE_GROUND_ALGAE -> {
-                hand.hasAlgae();
-                if (false) {
+                if (hand.hasAlgae()) {
                     nextState = ArmManagerState.PREPARE_IDLE_ALGAE;
                 }
             }
@@ -382,7 +382,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestInvertedHandoff() {
-        setStateFromRequest(ArmManagerState.PREPARE_INVERTED_HANDOFF);
+        if (getState().handGamePieceState == HandGamePieceState.CORAL) {
+            setStateFromRequest(ArmManagerState.PREPARE_INVERTED_HANDOFF);
+        }
     }
 
     public boolean isReadyToExecuteInvertedHandoff() {
@@ -420,7 +422,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestCoralPrepare(RobotScoringSide robotSide, FieldConstants.PipeScoringLevel scoringLevel) {
-        if (getState() == ArmManagerState.IDLE_CORAL || getState() == ArmManagerState.PREPARE_IDLE_CORAL) {
+        if (getState().handGamePieceState == HandGamePieceState.CORAL) {
             setStateFromRequest(ArmManagerState.getCoralPrepareScore(robotSide, scoringLevel));
         }
     }

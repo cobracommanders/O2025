@@ -3,6 +3,9 @@ package frc.robot.subsystems.armManager.armScheduler;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
@@ -52,14 +55,26 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private final double intakeWidth = Units.inchesToMeters(21.25);
 
     private ArmSchedulerState assessState() {
-        boolean canMoveElevator = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());
-        boolean canMoveArm = !willArmHitIntakeOrDrivetrain(targetArmState.getPosition(), elevator.getHeight());
+        boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());
+        boolean canMoveArmInternally = !willArmHitIntakeOrDrivetrain(targetArmState.getPosition(), elevator.getHeight());
+        boolean willArmExtendOutOfFrame = willArmExtendOutOfFrame(targetArmState.getPosition());
+        boolean isArmExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
 
-        if (canMoveElevator && canMoveArm) {
+        if (willArmExtendOutOfFrame && isArmExtendingOutOfFrame) {
             return ArmSchedulerState.PARALLEL;
-        } else if (canMoveElevator) {
+        }
+
+        if (willArmExtendOutOfFrame && !elevatorAtPosition() && canMoveElevatorInternally) {
             return ArmSchedulerState.ELEVATOR_FIRST;
-        } else if (canMoveArm) {
+        } else if (isArmExtendingOutOfFrame && !armAtPosition() && canMoveArmInternally) {
+            return ArmSchedulerState.ARM_FIRST;
+        }
+
+        if (canMoveElevatorInternally && canMoveArmInternally) {
+            return ArmSchedulerState.PARALLEL;
+        } else if (canMoveElevatorInternally) {
+            return ArmSchedulerState.ELEVATOR_FIRST;
+        } else if (canMoveArmInternally) {
             return ArmSchedulerState.ARM_FIRST;
         } else {
             // TODO remove for actual robot
@@ -83,6 +98,20 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
         return (coordinate1.y() < driveHeight && abs(coordinate1.x() - driveWidth) > handHeight) || (coordinate2.y() < driveHeight && abs(coordinate2.x() - driveWidth) > handHeight);
+    }
+
+    private boolean willArmExtendOutOfFrame(double armPosition) {
+        Coordinate[] coordinates = getArmCoordinates(armPosition, 0.0);
+        Coordinate coordinate1 = coordinates[0];
+        Coordinate coordinate2 = coordinates[1];
+        return abs(coordinate1.x()) > driveWidth / 2.0 || abs(coordinate2.x()) > driveWidth / 2.0;
+    }
+
+    /**
+     * Checks if the arm will swing through the outside of the frame perimiter, but starts and ends within the frame.
+     */
+    private boolean willArmSwingThroughOutsideFrame(double armPosition, double targetArmPosition) {
+        return !willArmExtendOutOfFrame(armPosition) && !willArmExtendOutOfFrame(targetArmPosition) && (isArmUp(armPosition) != isArmUp(targetArmPosition));
     }
 
     private Coordinate[] getArmCoordinates(double armPosition, double elevatorPosition) {
@@ -122,20 +151,40 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         return nextState;
     }
 
+    /**
+     * Gets the arm state that ensures that if the arm will swing through the outside of the frame perimiter, it will swing in the correct direction away from the reef.
+     */
+    private ArmState getArmStateWithSwingDirection(ArmState state) {
+        boolean willSwingOutOfFrame = willArmSwingThroughOutsideFrame(arm.getNormalizedPosition(), state.getPosition());
+
+        if (willSwingOutOfFrame) {
+            RobotScoringSide reefSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d());
+            return switch (reefSide) {
+                case RIGHT -> ArmState.TRANSITION_OUTSIDE_FRAME_LEFT;
+                case LEFT -> ArmState.TRANSITION_OUTSIDE_FRAME_RIGHT;
+            };
+        } else {
+            return state;
+        }
+    }
+
     @Override
-    protected void afterTransition(ArmSchedulerState newState) {
-        switch (newState) {
+    public void periodic() {
+        super.periodic();
+
+        // We want constant updating, so this goes in periodic instead of after Transition()
+        switch (getState()) {
             case NEW_COMMAND -> {
             }
             case PARALLEL -> {
-                arm.setState(targetArmState);
+                arm.setState(getArmStateWithSwingDirection(targetArmState));
                 elevator.setState(targetElevatorState);
             }
             case ELEVATOR_FIRST -> {
                 elevator.setState(targetElevatorState);
             }
             case ARM_FIRST -> {
-                arm.setState(targetArmState);
+                arm.setState(getArmStateWithSwingDirection(targetArmState));
             }
             case READY -> {
                 // Clear target state
@@ -159,6 +208,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         SmartDashboard.putData("ArmScheduler/ArmViz", visualization.getMechanism2d());
         DogLog.log("ArmScheduler/armHittingIntake", willArmHitIntake(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armHittingDrivetrain", willArmHitDrivetrain(arm.getNormalizedPosition(), elevator.getHeight()));
+        DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
         Coordinate[] coordinates = getArmCoordinates(arm.getNormalizedPosition(), elevator.getHeight());
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
@@ -188,7 +238,15 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
      * Checks that both the Arm and Elevator are at position in the final state.
      */
     private boolean atPosition() {
-        return elevator.atGoal() && arm.atGoal() && elevator.getState() == targetElevatorState && arm.getState() == targetArmState;
+        return elevatorAtPosition() && armAtPosition();
+    }
+
+    private boolean armAtPosition() {
+        return arm.atGoal() && arm.getState() == targetArmState;
+    }
+
+    private boolean elevatorAtPosition() {
+        return elevator.atGoal() && elevator.getState() == targetElevatorState;
     }
 
     public boolean isReady() {

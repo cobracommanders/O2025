@@ -42,9 +42,9 @@ public class ArmSchedulerVisualization {
     public void drawArm(double pivotY, double armX1, double armY1, double armX2, double armY2) {
         armRoot.setPosition(windowCenter, pivotY);
         armLine1.setAngle(Units.radiansToDegrees(Math.atan2(armY1 - pivotY, armX1)));
-        armLine1.setLength(Math.sqrt(Math.pow(armX1, 2) + Math.pow(armY1 - pivotY, 2)));
+        armLine1.setLength(Math.hypot(armX1, armY1 - pivotY));
         armLine2.setAngle(Units.radiansToDegrees(Math.atan2(armY2 - pivotY, armX2)));
-        armLine2.setLength(Math.sqrt(Math.pow(armX2, 2) + Math.pow(armY2 - pivotY, 2)));
+        armLine2.setLength(Math.hypot(armX2, armY2 - pivotY));
     }
 
     public void drawIntake(double intakeWidth, double finalIntakeHeight) {
