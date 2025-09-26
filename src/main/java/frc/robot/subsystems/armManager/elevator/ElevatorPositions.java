@@ -12,7 +12,7 @@ public class ElevatorPositions {
     public static double SCORE_L4 = 1.15;
     public static double L3 = 0.765;
     public static double SCORE_L3 = 0.624;
-    public static double L2 = 0.41;
+    public static double L2 = 0.3;
     public static double SCORE_L2 = 0.3;
     public static double HANDOFF_CORAL_MODE = 0.85;
     public static double LOLLIPOP = 0;
