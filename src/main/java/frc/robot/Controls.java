@@ -16,6 +16,7 @@ import frc.robot.stateMachine.OperatorOptions.CoralMode;
 import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
+import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
@@ -82,7 +83,8 @@ public class Controls {
     }
 
     public void configureTestBindings(){
-        operator.A().onTrue(Robot.robotCommands.climberTest());
+        operator.A().whileTrue(Robot.robotCommands.climberTest());
+        operator.A().onFalse(Robot.robotCommands.climberIdle());
     }
 
     public void setCoralMode() {

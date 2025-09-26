@@ -111,7 +111,7 @@ public class Climber extends StateMachine<ClimberStates> {
   protected void afterTransition(ClimberStates currentState) {
     switch (currentState) {
       case IDLE:
-        // do nothing
+        setWinchSpeed(WinchSpeeds.IDLE);
         break;
       case DEPLOYING:
         setWinchSpeed(WinchSpeeds.DEPLOYING);
