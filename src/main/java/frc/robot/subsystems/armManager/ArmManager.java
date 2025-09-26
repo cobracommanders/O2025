@@ -367,6 +367,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         }
     }
 
+    public HandGamePieceState getSimHandGamePiece() {
+        return getState().handGamePieceState;
+    }
+
     public void requestHandoff() {
         setStateFromRequest(ArmManagerState.getHandoffPrepareFromCoralPosition(coralDetector.getState()));
     }
