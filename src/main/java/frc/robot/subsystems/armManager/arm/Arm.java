@@ -82,6 +82,15 @@ public class Arm extends StateMachine<ArmState> {
         MechanismVisualizer.setArmPosition(armPosition);
     }
 
+    public double getNormalizedPosition() {
+        double position = armPosition % 1.0;
+        if (position > 0.5)
+            return position - 1.0;
+        if (position < -0.5)
+            return position + 1.0;
+        return position;
+    }
+
     @Override
     public void simulationPeriodic() {
         SimArm.updateSimPosition(motor, encoder);
@@ -89,6 +98,11 @@ public class Arm extends StateMachine<ArmState> {
 
     public void setState(ArmState state) {
         setStateFromRequest(state);
+    }
+
+    @Override
+    public ArmState getState() {
+        return super.getState();
     }
 
     @Override

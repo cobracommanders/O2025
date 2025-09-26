@@ -36,7 +36,7 @@ public class RobotCommands {
     }
 
     public Command awaitCoralFinishedScoring() {
-        return waitUntil(() -> Robot.armManager.getState().isCoralScoreState() && Robot.armManager.atPosition());
+        return waitUntil(() -> Robot.armManager.getState().isCoralReadyToScoreState() && Robot.armManager.atPosition());
     }
 
     public Command scoreCommand() {

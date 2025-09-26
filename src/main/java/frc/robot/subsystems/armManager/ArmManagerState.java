@@ -260,7 +260,7 @@ public enum ArmManagerState {
 
 
     /* ******** Coral Score Utilities ******** */
-    public boolean isCoralScoreState() {
+    public boolean isCoralReadyToScoreState() {
         return switch (this) {
             case READY_L4_LEFT, READY_L3_LEFT, READY_L2_LEFT, READY_L4_RIGHT, READY_L3_RIGHT, READY_L2_RIGHT -> true;
             default -> false;

@@ -5,12 +5,13 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum ElevatorState {
     IDLE(0.1),
+    IDLE_CORAL(0.2),
     HIGH_REEF_ALGAE(0.9),
     LOW_REEF_ALGAE(0.53),
     GROUND_ALGAE(0),
     ALGAE_NET(1.38),
     ALGAE_PROCESSOR(0.1),
-    HANDOFF(0.75), // Actual handoff position
+    HANDOFF(0.8), // Actual handoff position
     PREPARE_HANDOFF(0.825), // State above the intake that allows the intake to move in/out freely
     LOLLIPOP(0),
     PREPARE_L4(1.3),

@@ -1,9 +1,9 @@
 package frc.robot.subsystems.armManager.armScheduler;
 
 public enum ArmSchedulerState {
-    MATCH_START,
-    ARM_UP,
-    ELEVATOR_TO_POSITION,
-    ARM_TO_POSITION,
+    NEW_COMMAND,
+    PARALLEL,
+    ELEVATOR_FIRST,
+    ARM_FIRST,
     READY
 }

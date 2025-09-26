@@ -26,8 +26,8 @@ public class RequestManager extends StateMachine<RequestManagerState> {
     private final FlagManager<RobotFlag> flags = new FlagManager<>("RequestManager", RobotFlag.class);
     private final OperatorOptions operatorOptions = OperatorOptions.getInstance();
 
-    public static final double HANDOFF_TIME = 0.2;
-    public static final double INVERTED_HANDOFF_TIME = 0.2;
+    public static final double HANDOFF_TIME = 0.5;
+    public static final double INVERTED_HANDOFF_TIME = 0.5;
 
     private RequestManager() {
         super(RequestManagerState.INDEPENDENT);

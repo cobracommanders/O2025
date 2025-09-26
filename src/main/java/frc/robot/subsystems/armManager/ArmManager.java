@@ -29,7 +29,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     private final double ALGAE_DROP_TIME = 0.1;
     private final Debouncer algaeDroppedOrMissingDebouncer = new Debouncer(0.3, Debouncer.DebounceType.kRising);
 
-
     public ArmManager(
             Hand hand,
             Elevator elevator,
@@ -40,7 +39,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         this.elevator = elevator;
         this.arm = arm;
 
-        this.armScheduler = new ArmScheduler(hand, elevator, arm);
+        this.armScheduler = new ArmScheduler(arm, elevator, hand);
     }
 
     public boolean isReadyToReturnToIdleAfterScoringCoral() {
@@ -55,7 +54,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public boolean atPosition() {
-        return armScheduler.atPosition();
+        return armScheduler.isReady();
     }
 
     public boolean isIdleState() {
@@ -93,7 +92,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
             case IDLE_EMPTY -> {
                 if (coralDetector.hasCoral()) {
-                    nextState = ArmManagerState.getHandoffPrepareFromCoralPosition(coralDetector.getState());
+                    nextState = ArmManagerState.getHandoffPreemptiveFromCoralPosition(coralDetector.getState());
                 }
             }
 
@@ -206,7 +205,8 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             }
 
             case ACTIVE_INTAKE_GROUND_ALGAE -> {
-                if (hand.hasAlgae()) {
+                hand.hasAlgae();
+                if (false) {
                     nextState = ArmManagerState.PREPARE_IDLE_ALGAE;
                 }
             }
@@ -257,7 +257,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState) {
-        armScheduler.scheduleStates(armState, handState, elevatorState);
+        armScheduler.scheduleStates(armState, elevatorState, handState);
     }
 
     @Override
@@ -270,7 +270,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case PREPARE_IDLE_EMPTY, IDLE_EMPTY ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
             case PREPARE_IDLE_CORAL, IDLE_CORAL ->
-                    requestState(ArmState.IDLE_CORAL, ElevatorState.IDLE, HandState.IDLE_CORAL);
+                    requestState(ArmState.IDLE_CORAL, ElevatorState.IDLE_CORAL, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_ALGAE, IDLE_ALGAE ->
                     requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
@@ -278,11 +278,11 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
 
             /* ******** HANDOFF STATES ******** */
-            case PREPARE_HANDOFF_LEFT ->
+            case PREPARE_HANDOFF_LEFT, PREEMPTIVE_HANDOFF_LEFT ->
                     requestState(ArmState.HANDOFF_LEFT, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
-            case PREPARE_HANDOFF_MIDDLE ->
+            case PREPARE_HANDOFF_MIDDLE, PREEMPTIVE_HANDOFF_MIDDLE ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
-            case PREPARE_HANDOFF_RIGHT ->
+            case PREPARE_HANDOFF_RIGHT, PREEMPTIVE_HANDOFF_RIGHT ->
                     requestState(ArmState.HANDOFF_RIGHT, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
 
             case READY_HANDOFF_LEFT ->
@@ -359,12 +359,11 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
             /* ******** LOLLIPOP INTAKE STATES ******** */
             case PREPARE_INTAKE_LOLLIPOP, ACTIVE_INTAKE_LOLLIPOP ->
-                    armScheduler.scheduleStates(ArmState.LOLLIPOP, HandState.LOLLIPOP, ElevatorState.LOLLIPOP);
+                    requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
 
 
             /* ******** CLIMB STATES ******** */
-            case PREPARE_CLIMB, READY_CLIMB ->
-                    armScheduler.scheduleStates(ArmState.CLIMB, HandState.CLEAR_ALGAE, ElevatorState.IDLE);
+            case PREPARE_CLIMB, READY_CLIMB -> requestState(ArmState.CLIMB, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
         }
     }
 
@@ -421,11 +420,13 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestCoralPrepare(RobotScoringSide robotSide, FieldConstants.PipeScoringLevel scoringLevel) {
-        setStateFromRequest(ArmManagerState.getCoralPrepareScore(robotSide, scoringLevel));
+        if (getState() == ArmManagerState.IDLE_CORAL || getState() == ArmManagerState.PREPARE_IDLE_CORAL) {
+            setStateFromRequest(ArmManagerState.getCoralPrepareScore(robotSide, scoringLevel));
+        }
     }
 
     public boolean isReadyToScoreCoral() {
-        return getState().isCoralScoreState();
+        return getState().isCoralReadyToScoreState();
     }
 
     public void requestCoralScoreExecution() {

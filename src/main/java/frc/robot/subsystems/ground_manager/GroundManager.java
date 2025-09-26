@@ -41,10 +41,8 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 } else if (Utils.isSimulation() && intakePivot.atGoal() && timeout(Math.random() + 0.5)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                    int i = (int) (Math.random() * 3);
-                    System.out.println(i);
                     CoralDetectorState simCoralPosition =
-                            switch (i) {
+                            switch ((int) (Math.random() * 3)) {
                                 case 1 -> CoralDetectorState.LEFT;
                                 case 2 -> CoralDetectorState.RIGHT;
                                 default -> CoralDetectorState.MIDDLE;

@@ -79,6 +79,11 @@ public class Elevator extends StateMachine<ElevatorState> {
     }
 
     @Override
+    public ElevatorState getState() {
+        return super.getState();
+    }
+
+    @Override
     protected void afterTransition(ElevatorState newState) {
         switch (newState) {
             // Custom cases can go here, default to standard position control
