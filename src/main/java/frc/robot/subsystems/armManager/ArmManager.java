@@ -81,10 +81,13 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
             case PREPARE_SCORE_L4 -> {
-                if (DriverStation.isAutonomous() && atGoal()) {
-                    nextState = ArmManagerStates.WAIT_L4;
-                }
-                else if (DriverStation.isTeleop() && armScheduler.isReady()){
+                // if (DriverStation.isAutonomous() && atGoal()) {
+                //     nextState = ArmManagerStates.WAIT_L4;
+                // }
+                // else if (DriverStation.isTeleop() && armScheduler.isReady()){
+                //     nextState = ArmManagerStates.WAIT_L4;
+                // }
+                if(armScheduler.isReady()){
                     nextState = ArmManagerStates.WAIT_L4;
                 }
             }
@@ -318,13 +321,14 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 // arm.setState(ArmStates.L4);
                 // hand.setState(HandStates.CORAL_IDLE);
                 // elevator.setState(ElevatorStates.L4);
-                if (DriverStation.isAutonomous()) {
-                    arm.setState(ArmStates.L4);
-                    hand.setState(HandStates.CORAL_IDLE);
-                    elevator.setState(ElevatorStates.L4);
-                } else {
-                    armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
-                }
+                // if (DriverStation.isAutonomous()) {
+                //     arm.setState(ArmStates.L4);
+                //     hand.setState(HandStates.CORAL_IDLE);
+                //     elevator.setState(ElevatorStates.L4);
+                // } else {
+                //     armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
+                // }
+                armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);
             }
             case WAIT_L4 -> {
                 // armScheduler.scheduleStates(ArmStates.L4, HandStates.CORAL_IDLE, ElevatorStates.L4);

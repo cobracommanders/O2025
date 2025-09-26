@@ -29,9 +29,9 @@ public final class Constants {
         public static final double I = 0;
         public static final double D = 0;
         public static final double G = 0.48;
-        public static final double MotionMagicCruiseVelocity = 3;
-        public static final double MotionMagicAcceleration = 60;
-        public static final double MotionMagicJerk = 200;
+        public static final double MotionMagicCruiseVelocity = 3.6;
+        public static final double MotionMagicAcceleration = 72;
+        public static final double MotionMagicJerk = 240;
     }
 
     public static final class IntakePivotConstants {
