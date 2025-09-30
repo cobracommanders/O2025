@@ -4,6 +4,9 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.Ports.OIPorts;
 import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
@@ -11,6 +14,9 @@ import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.OperatorOptions.CoralMode;
 import frc.robot.subsystems.armManager.elevator.Elevator;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberStates;
+import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
@@ -77,6 +83,11 @@ public class Controls {
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
         operator.back().onTrue(Robot.robotCommands.invertedHandoffToIdleCommand());
         operator.start().onTrue(Robot.robotCommands.resetToIdleCommand());
+    }
+
+    public void configureTestBindings(){
+        operator.A().whileTrue(Robot.robotCommands.climberTest());
+        operator.A().onFalse(Robot.robotCommands.climberIdle());
     }
 
     public void setCoralMode() {

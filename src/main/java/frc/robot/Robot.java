@@ -174,11 +174,12 @@ public class Robot extends TimedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+    Controls.getInstance().configureTestBindings();
   }
 
   @Override
   public void testPeriodic() {
-    Climber.getInstance().setWinchSpeed(-WinchSpeeds.DEPLOYING);
+    //Climber.getInstance().setWinchSpeed(WinchSpeeds.TEST_SPEEDS);
     // arm.setState(ArmStates.IDLE);
     // elevator.setState(ElevatorStates.L4);
   }
