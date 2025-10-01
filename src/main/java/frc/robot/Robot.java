@@ -5,14 +5,16 @@
 package frc.robot;
 
 import com.ctre.phoenix6.Utils;
-
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autos.Autos;
 import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
@@ -25,9 +27,9 @@ import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
-import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.trailblazer.Trailblazer;
 
 public class Robot extends TimedRobot {
     private static final Arm arm = new Arm();
@@ -39,7 +41,7 @@ public class Robot extends TimedRobot {
             elevator,
             arm
     );
-  private Command autonomousCommand = Commands.none();
+    private Command autonomousCommand = Commands.none();
 
     // Uncomment as needed
     public static RequestManager robotManager = RequestManager.getInstance();
@@ -97,15 +99,14 @@ public class Robot extends TimedRobot {
         seedImuTimer.reset();
         seedImuTimer.start();
 
-    autonomousCommand = autos.getAutoCommand();
+        autonomousCommand = autos.getAutoCommand();
 
-    if(Utils.isSimulation()){
-      localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
+        if (Utils.isSimulation()) {
+            localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
+        }
+        DogLog.log("Selected Auto", autonomousCommand.getName());
+        autonomousCommand.schedule();
     }
-    DogLog.log("Selected Auto", autonomousCommand.getName());
-    autonomousCommand.schedule();
-    AutoAlign.getInstance().clearReefState();
-  }
 
     // if (autoChooser.getSelected() != null)
     //   autoChooser.getSelected().schedule();
@@ -117,8 +118,8 @@ public class Robot extends TimedRobot {
         Controls.getInstance().configureDriverCommands();
         Controls.getInstance().configureOperatorCommands();
         Controls.getInstance().configureDefaultCommands();
-  DriveSubsystem.getInstance().setState(DriveStates.TELEOP);
-  }
+        DriveSubsystem.getInstance().setState(DriveStates.TELEOP);
+    }
 
     @Override
     public void testInit() {

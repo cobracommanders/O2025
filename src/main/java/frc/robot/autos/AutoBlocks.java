@@ -146,9 +146,9 @@ public class AutoBlocks {
                                                                                 //Robot.robotCommands.waitForAllIdle()
                                                                                                 Robot.robotCommands
                                                                                                                 .prepareScoreCommand()))),
-                                Robot.robotCommands.waitForWaitL2(),
+                                Robot.robotCommands.awaitCoralReadyToScore(),
                                 RobotCommands.getInstance().scoreCommand()
-                                                .andThen(ArmManager.getInstance().finishScoring()));
+                                                .andThen(() -> Robot.robotManager.scoreRequest()));
         }
 
         public Command scorePreloadL2(ReefPipe pipe, RobotScoringSide scoringSide) {
@@ -171,9 +171,9 @@ public class AutoBlocks {
                                                                                 //Robot.robotCommands.waitForAllIdle()
                                                                                                 Robot.robotCommands
                                                                                                                 .prepareScoreCommand()))),
-                                Robot.robotCommands.waitForWaitL2(),
+                                Robot.robotCommands.awaitCoralReadyToScore(),
                                 RobotCommands.getInstance().scoreCommand()
-                                                .andThen(ArmManager.getInstance().finishScoring()));
+                                                .andThen(() -> Robot.robotManager.scoreRequest()));
         }
 
         public Command scoreL4(ReefPipe pipe, RobotScoringSide scoringSide) {
@@ -196,9 +196,9 @@ public class AutoBlocks {
                                                                                 //Robot.robotCommands.waitForAllIdle()
                                                                                                 Robot.robotCommands
                                                                                                                 .prepareScoreCommand()))),
-                                Robot.robotCommands.waitForWaitL4(),
+                                Robot.robotCommands.awaitCoralReadyToScore(),
                                 RobotCommands.getInstance().scoreCommand()
-                                                .andThen(ArmManager.getInstance().finishScoring()));
+                                                .andThen(() -> Robot.robotManager.scoreRequest()));
         }
 
         public Command scorePreloadL4(ReefPipe pipe, RobotScoringSide scoringSide) {
@@ -221,9 +221,9 @@ public class AutoBlocks {
                                                                                 //Robot.robotCommands.waitForAllIdle()
                                                                                                 Robot.robotCommands
                                                                                                                 .prepareScoreCommand()))),
-                                Robot.robotCommands.waitForWaitL4(),
+                                Robot.robotCommands.awaitCoralReadyToScore(),
                                 RobotCommands.getInstance().scoreCommand()
-                                                .andThen(ArmManager.getInstance().finishScoring()));
+                                                .andThen(() -> Robot.robotManager.scoreRequest()));
         }
 
         public Command driveToBackReefRedNonProcessor() {
