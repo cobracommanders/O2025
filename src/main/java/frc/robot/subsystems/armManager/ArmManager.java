@@ -48,11 +48,11 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         //TODO Does it do something else in auto?
         if (DriverStation.isAutonomous()) return false;
         //TODO Is this just measuring distance from the target scoring pose? If so, would being 0.25m to the left/right also allow the arm to move?
-        return timeout(0.5) && AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 0.25;
+        return timeout(0.5) && AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose().getTranslation()) >= 0.25;
     }
 
     public boolean isReadyToReturnToIdleAfterIntakingAlgae() {
-        return AutoAlign.getInstance().getAlgaeDistance().getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose2d().getTranslation()) >= 1.25;
+        return AutoAlign.getInstance().getAlgaeDistance().getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose().getTranslation()) >= 1.25;
     }
 
     public boolean atPosition() {

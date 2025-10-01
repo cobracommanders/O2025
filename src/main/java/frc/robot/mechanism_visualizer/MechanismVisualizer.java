@@ -50,7 +50,7 @@ public class MechanismVisualizer {
         );
 
         if (Robot.isSimulation()) {
-            Pose3d robotPose3d = new Pose3d(LocalizationSubsystem.getInstance().getPose2d());
+            Pose3d robotPose3d = new Pose3d(LocalizationSubsystem.getInstance().getPose());
 
             if (CoralDetector.getInstance().hasCoral()) {
                 Transform3d intakeCoralTransform = switch (CoralDetector.getInstance().getState()) {

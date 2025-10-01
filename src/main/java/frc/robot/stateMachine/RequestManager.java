@@ -172,7 +172,7 @@ public class RequestManager extends StateMachine<RequestManagerState> {
                             } else {
                                 top = operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
                             }
-                            armManager.requestReefAlgaeIntake(AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d()), top);
+                            armManager.requestReefAlgaeIntake(AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose()), top);
                         }
                     }
                 }
@@ -189,8 +189,8 @@ public class RequestManager extends StateMachine<RequestManagerState> {
                 case PREPARE_SCORE_ARM -> {
                     flags.remove(flag);
 
-                    var coralRobotSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d());
-                    var algaeRobotSide = AutoAlign.getNetScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d());
+                    var coralRobotSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
+                    var algaeRobotSide = AutoAlign.getNetScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
                     switch (operatorOptions.scoreLocation) {
                         case L2 -> armManager.requestCoralPrepare(coralRobotSide, FieldConstants.PipeScoringLevel.L2);
                         case L3 -> armManager.requestCoralPrepare(coralRobotSide, FieldConstants.PipeScoringLevel.L3);

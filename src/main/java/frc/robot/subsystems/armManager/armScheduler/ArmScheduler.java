@@ -158,7 +158,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         boolean willSwingOutOfFrame = willArmSwingThroughOutsideFrame(arm.getNormalizedPosition(), state.getPosition());
 
         if (willSwingOutOfFrame) {
-            RobotScoringSide reefSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d());
+            RobotScoringSide reefSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
             return switch (reefSide) {
                 case RIGHT -> ArmState.TRANSITION_OUTSIDE_FRAME_LEFT;
                 case LEFT -> ArmState.TRANSITION_OUTSIDE_FRAME_RIGHT;

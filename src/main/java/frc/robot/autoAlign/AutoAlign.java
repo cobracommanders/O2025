@@ -11,13 +11,13 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.AutoConstaints.AutoConstraintOptions;
 import frc.robot.autoAlign.tagAlign.TagAlign;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.MathHelpers;
 import frc.robot.util.PolarChassisSpeeds;
 import frc.robot.util.PoseErrorTolerance;
@@ -152,7 +152,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
     @Override
     protected void collectInputs() {
-        robotPose = localization.getPose2d();
+        robotPose = localization.getPose();
         bestReefPipe = tagAlign.getBestPipe();
         usedScoringPose = tagAlign.getUsedScoringPose(bestReefPipe);
         isAligned = tagAlign.isAligned(bestReefPipe);
@@ -214,7 +214,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
     public ObstructionKind getObstruction() {
         // Account for distance we'll be at once we finish forward motion
-        var lookaheadPose = localization.getPose2d();
+        var lookaheadPose = localization.getPose();
         var lookaheadPoseDistance =
                 lookaheadPose
                         .getTranslation()
