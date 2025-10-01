@@ -4,6 +4,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.FieldConstants;
+import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.localization.LocalizationSubsystem;
@@ -82,7 +83,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             }
 
             case IDLE_ALGAE -> {
-                if (algaeDroppedOrMissingDebouncer.calculate(!hand.hasAlgae())) {
+                if (algaeDroppedOrMissingDebouncer.calculate(!hand.hasAlgae()) && !Robot.isSimulation()) {
                     nextState = ArmManagerState.IDLE_ALGAE_DROPPED;
                 }
             }
@@ -214,10 +215,15 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
             /* ******** ALGAE SCORE STATES ******** */
             case PREPARE_SCORE_ALGAE_NET_LEFT,
-                 PREPARE_SCORE_ALGAE_NET_RIGHT,
-                 PREPARE_SCORE_ALGAE_PROCESSOR -> {
+                 PREPARE_SCORE_ALGAE_NET_RIGHT -> {
                 if (atPosition()) {
                     nextState = currentState.getAlgaeNetPrepareToReadyState();
+                }
+            }
+
+            case PREPARE_SCORE_ALGAE_PROCESSOR -> {
+                if (atPosition()) {
+                    nextState = ArmManagerState.READY_SCORE_ALGAE_PROCESSOR;
                 }
             }
 
@@ -372,7 +378,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestHandoff() {
-        setStateFromRequest(ArmManagerState.getHandoffPrepareFromCoralPosition(coralDetector.getState()));
+        if (getState().handGamePieceState == HandGamePieceState.NONE) {
+            setStateFromRequest(ArmManagerState.getHandoffPrepareFromCoralPosition(coralDetector.getState()));
+        }
     }
 
     public boolean isReadyToExecuteHandoff() {
@@ -440,7 +448,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestAlgaeNetScore(RobotScoringSide robotSide) {
-        setStateFromRequest(ArmManagerState.getNetPrepareScore(robotSide));
+        if (getState().handGamePieceState == HandGamePieceState.ALGAE) {
+            setStateFromRequest(ArmManagerState.getNetPrepareScore(robotSide));
+        }
     }
 
     public boolean isReadyToScoreAlgaeNet() {
@@ -454,7 +464,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestProcessorScore() {
-        setStateFromRequest(ArmManagerState.PREPARE_SCORE_ALGAE_PROCESSOR);
+        if (getState().handGamePieceState == HandGamePieceState.ALGAE) {
+            setStateFromRequest(ArmManagerState.PREPARE_SCORE_ALGAE_PROCESSOR);
+        }
     }
 
     public boolean isReadyToScoreProcessor() {

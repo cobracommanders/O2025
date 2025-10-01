@@ -9,6 +9,7 @@ import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.RequestManagerState;
+import frc.robot.subsystems.armManager.ArmManagerState.HandGamePieceState;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
@@ -74,6 +75,7 @@ public class RobotCommands {
     public Command handoffCommand() {
         return runOnce(robotManager::handoffRequest)
                 .andThen(robotManager.waitForState(RequestManagerState.INDEPENDENT))
+                .onlyIf(() -> Robot.armManager.getState().handGamePieceState == HandGamePieceState.NONE)
                 .withName("handoff");
     }
 

@@ -120,7 +120,7 @@ public class RequestManager extends StateMachine<RequestManagerState> {
         switch (newState) {
             case PREPARE_IDLE -> {
                 groundManager.setState(GroundManagerStates.PREPARE_IDLE);
-                armManager.requestIdle();
+                armManager.requestIdleClearGamePiece();
             }
 
             case PREPARE_HANDOFF_GROUND -> {
