@@ -40,7 +40,7 @@ public class Controls {
     public void configureDriverCommands() {
         driver.leftBumper().onTrue(Robot.robotCommands.algaeIntakeCommand());
         driver.leftTrigger().onTrue(Robot.robotCommands.coralIntakeCommand().andThen(GroundManager.getInstance().waitForState(GroundManagerStates.PREPARE_IDLE), Robot.robotCommands.handoffCommand()));
-        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
+//        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         driver.rightTrigger().onTrue(Robot.robotCommands.scoreCommand().andThen(Robot.robotCommands.driveTeleopCommand()));
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
         // driver.POV180().onTrue(runOnce(() -> Robot.armManager.elevatorTickDown()));
@@ -49,7 +49,8 @@ public class Controls {
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(Robot.robotCommands.resetToIdleCommand());
         driver.back().onTrue(Robot.robotCommands.groundIdleCommand());
-        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
+//        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
+        driver.rightBumper().onTrue(Robot.robotCommands.reefAlignCommand());
         driver.X().onTrue(Robot.robotCommands.driveTeleopCommand());
         driver.Y().onTrue(Robot.robotCommands.algaeAlignCommand());
     }
@@ -63,6 +64,8 @@ public class Controls {
         operator.X().onTrue(Robot.robotCommands.setL2Command());
         operator.A().onTrue(Robot.robotCommands.setL1Command());
         operator.POV0().onTrue(Robot.robotCommands.setHighReefAlgaeCommand());
+//        operator.POV0().onTrue(Robot.robotCommands.setHighReefAlgaeCommand());
+        operator.POVMinus90().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         operator.POV90().onTrue(Robot.robotCommands.setGroundAlgaeCommand());
         operator.POV180().onTrue(Robot.robotCommands.setLowReefAlgaeCommand());
         operator.back().onTrue(Robot.robotCommands.invertedHandoffCommand());

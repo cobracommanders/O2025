@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.Utils;
+
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -23,6 +25,8 @@ import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
+import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 
 public class Robot extends TimedRobot {
@@ -35,6 +39,7 @@ public class Robot extends TimedRobot {
             elevator,
             arm
     );
+  private Command autonomousCommand = Commands.none();
 
     // Uncomment as needed
     public static RequestManager robotManager = RequestManager.getInstance();
@@ -42,15 +47,15 @@ public class Robot extends TimedRobot {
     public static DriveSubsystem swerve = DriveSubsystem.getInstance();
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
     // public static final Controls controls = new Controls();
-    private SendableChooser<Command> autoChooser;
+    //private SendableChooser<Command> autoChooser;
     private final Timer seedImuTimer = new Timer();
     public static LED lights;
-    //private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+    private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
     //private final Autos autos = new Autos(trailblazer);
     // public static OperatorOptions operatorOptions =
     // OperatorOptions.getInstance();
 
-    //private final Autos autos = new Autos(trailblazer);
+    private final Autos autos = new Autos(trailblazer);
 
 
     public Robot() {
@@ -92,25 +97,28 @@ public class Robot extends TimedRobot {
         seedImuTimer.reset();
         seedImuTimer.start();
 
-        // if(Utils.isSimulation()){
-        //   localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
-        // }
-        // DogLog.log("Selected Auto", autonomousCommand.getName());
-        // autonomousCommand.schedule();
+    autonomousCommand = autos.getAutoCommand();
 
-
-        if (autoChooser.getSelected() != null) {
-            autoChooser.getSelected().schedule();
-        }
-        DogLog.log("Selected Auto", autoChooser.getSelected().getName());
+    if(Utils.isSimulation()){
+      localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
     }
+    DogLog.log("Selected Auto", autonomousCommand.getName());
+    autonomousCommand.schedule();
+    AutoAlign.getInstance().clearReefState();
+  }
+
+    // if (autoChooser.getSelected() != null)
+    //   autoChooser.getSelected().schedule();
+    // DogLog.log("Selected Auto", autoChooser.getSelected().getName());
+//}
 
     @Override
     public void teleopInit() {
         Controls.getInstance().configureDriverCommands();
         Controls.getInstance().configureOperatorCommands();
         Controls.getInstance().configureDefaultCommands();
-    }
+  DriveSubsystem.getInstance().setState(DriveStates.TELEOP);
+  }
 
     @Override
     public void testInit() {

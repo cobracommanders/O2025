@@ -40,6 +40,11 @@ public class RobotCommands {
         return waitUntil(() -> Robot.armManager.getState().isCoralReadyToScoreState() && Robot.armManager.atPosition());
     }
 
+    public Command waitForWaitL2() {
+        return robotManager.armManager.waitForState(ArmManagerStates.WAIT_L2)
+                .withName("waitForArmState/WAIT_L2");
+    }
+
     public Command scoreCommand() {
         return runOnce(robotManager::scoreRequest).withName("score");
     }

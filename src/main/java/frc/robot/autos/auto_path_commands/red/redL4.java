@@ -14,7 +14,7 @@ import frc.robot.trailblazer.Trailblazer;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 
 public class redL4 extends BaseAuto {
-    private static final AutoConstraintOptions CONSTRAINTS = new AutoConstraintOptions(2, 57, 4, 30);
+    private static final AutoConstraintOptions CONSTRAINTS = new AutoConstraintOptions(2, 57, 1, 30);
 
     public redL4(RequestManager robotManager, Trailblazer trailblazer) {
         super(robotManager, trailblazer);
@@ -40,19 +40,22 @@ public class redL4 extends BaseAuto {
                 blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_J, RobotScoringSide.LEFT),
                 // ),
                 blocks.scoreL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
+                blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
+                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+      RobotCommands.getInstance().autoLollipopIntakeCommand(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.scoreL4(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
+                blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
+      blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
 
         );
     }
