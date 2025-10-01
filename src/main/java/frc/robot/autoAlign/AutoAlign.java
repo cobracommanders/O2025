@@ -196,10 +196,6 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         return isNearRotation;
     }
 
-    public int getL1ScoredCount() {
-        return tagAlign.getL1ScoredCount(bestReefPipe);
-    }
-
     public void setCoralL1Offset(OptionalDouble tx) {
         tagAlign.setCoralL1Offset(tx);
     }
@@ -246,18 +242,6 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         return bestReefPipe;
     }
 
-    public void markPipeScored() {
-        tagAlign.markScored(bestReefPipe);
-    }
-
-    public void markAlgaeRemoved() {
-        tagAlign.markAlgaeRemoved(closestSide);
-    }
-
-    public boolean isAlgaeRemoved() {
-        return tagAlign.isAlgaeRemoved(closestSide);
-    }
-
     public void setScoringLevel(
             ReefPipeLevel level, ReefPipeLevel preferredLevel, RobotScoringSide side) {
         robotScoringSide = side;
@@ -268,10 +252,6 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
     public void setAlgaeIntakingOffset(ReefSideOffset offset) {
         reefSideOffset = offset;
-    }
-
-    public void clearReefState() {
-        tagAlign.clearReefState();
     }
 
     public boolean isAligned() {

@@ -89,7 +89,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-
         seedImuTimer.reset();
         seedImuTimer.start();
 
@@ -98,7 +97,6 @@ public class Robot extends TimedRobot {
         // }
         // DogLog.log("Selected Auto", autonomousCommand.getName());
         // autonomousCommand.schedule();
-        AutoAlign.getInstance().clearReefState();
 
 
         if (autoChooser.getSelected() != null) {

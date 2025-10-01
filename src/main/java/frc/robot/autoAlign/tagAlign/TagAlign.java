@@ -105,7 +105,6 @@ public class TagAlign {
 
     private final AlignmentCostUtil alignmentCostUtil;
     private final LocalizationSubsystem localization;
-    private final ReefState reefState = new ReefState();
 
     private ReefPipeLevel pipeLevel = ReefPipeLevel.RAISING;
     private ReefPipeLevel preferedScoringLevel = ReefPipeLevel.L4;
@@ -136,7 +135,7 @@ public class TagAlign {
 
     public TagAlign(DriveSubsystem swerve, LocalizationSubsystem localization) {
         this.localization = localization;
-        alignmentCostUtil = new AlignmentCostUtil(localization, swerve, reefState, robotScoringSide);
+        alignmentCostUtil = new AlignmentCostUtil(localization, swerve, robotScoringSide);
         ALGAE_ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
         L1_ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
         REEF_PIPE_ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
@@ -233,7 +232,6 @@ public class TagAlign {
                 DogLog.timestamp("AutoAlign/PipeSwitch/Right");
                 partnerPipe = rightPipe;
             }
-            reefState.removeCoral(partnerPipe, preferedScoringLevel);
             setPipeOveride(partnerPipe);
         }
     }
@@ -305,21 +303,6 @@ public class TagAlign {
         return translationGood && rotationGood;
     }
 
-    public void markScored(ReefPipe pipe) {
-        if (preferedScoringLevel.equals(ReefPipeLevel.L1)) {
-            resetL1();
-        }
-        reefState.markCoralScored(pipe, preferedScoringLevel);
-    }
-
-    public void markAlgaeRemoved(ReefSide side) {
-        reefState.markAlgaeRemoved(side);
-    }
-
-    public boolean isAlgaeRemoved(ReefSide side) {
-        return reefState.isAlgaeRemoved(side);
-    }
-
     public void reset() {
         resetL1NextLoop = true;
         resetAlgaeNextLoop = true;
@@ -328,10 +311,6 @@ public class TagAlign {
 
     private void resetL1() {
         coralL1Offset = OptionalDouble.empty();
-    }
-
-    public void clearReefState() {
-        reefState.clear();
     }
 
     public Pose2d getUsedScoringPose(ReefPipe pipe) {
@@ -384,9 +363,7 @@ public class TagAlign {
                             .limit(2)
                             .toList();
 
-            return closestTwoPipes.stream()
-                    .min(Comparator.comparingDouble(p -> reefState.getL1Count(p)))
-                    .orElse(getClosestPipe());
+            return getClosestPipe();
         }
         if (pipeLevel.equals(ReefPipeLevel.BACK_AWAY)) {
             return ALL_REEF_PIPES.stream()
@@ -406,10 +383,6 @@ public class TagAlign {
         return ALL_REEF_PIPES.stream()
                 .min(alignmentCostUtil.getReefPipeComparator(level))
                 .orElseThrow();
-    }
-
-    public int getL1ScoredCount(ReefPipe pipe) {
-        return reefState.getL1Count(pipe);
     }
 
     public ReefPipe getClosestPipe() {

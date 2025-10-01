@@ -13,9 +13,6 @@ import frc.robot.util.MathHelpersDog;
 import java.util.Comparator;
 
 public class AlignmentCostUtil {
-    private static final double REEF_STATE_COST = 0.6;
-    private static final double ALGAE_STATE_COST = 0.3;
-
     private static final double DRIVE_DIRECTION_SCALAR = 0.02;
     private static final double ANGLE_ERROR_SCALAR = 0.3;
 
@@ -62,32 +59,8 @@ public class AlignmentCostUtil {
         return distanceCost + angleErrorCost + driveAngleCost;
     }
 
-    public static double getCoralAlignCost(
-            Pose2d target, Pose2d robotPose, ChassisSpeeds robotVelocity) {
-
-        var distanceCost = target.getTranslation().getDistance(robotPose.getTranslation());
-        if (target.getTranslation().equals(Translation2d.kZero)
-                || robotPose.getTranslation().equals(Translation2d.kZero)) {
-            return distanceCost;
-        }
-
-        if (Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond) == 0.0) {
-            return distanceCost;
-        }
-
-        var targetRobotRelative = target.getTranslation().minus(robotPose.getTranslation());
-        var targetDirection = targetRobotRelative.getAngle();
-
-        var driveAngleCost =
-                DRIVE_DIRECTION_SCALAR_CORAL
-                        * Math.abs(
-                        targetDirection.minus(MathHelpersDog.vectorDirection(robotVelocity)).getRadians());
-        return distanceCost + driveAngleCost;
-    }
-
     private final LocalizationSubsystem localization;
     private final DriveSubsystem swerve;
-    private final ReefState reefState;
     private RobotScoringSide side;
 
     private final Comparator<ReefPipe> pipeL4Comparator = createReefPipeComparator(ReefPipeLevel.L4);
@@ -99,11 +72,9 @@ public class AlignmentCostUtil {
     public AlignmentCostUtil(
             LocalizationSubsystem localization,
             DriveSubsystem swerve,
-            ReefState reefState,
             RobotScoringSide side) {
         this.localization = localization;
         this.swerve = swerve;
-        this.reefState = reefState;
         this.side = side;
     }
 
@@ -144,8 +115,7 @@ public class AlignmentCostUtil {
                                                     p ->
                                                             p.getPose(level, side, localization.getPose())
                                                                     .getTranslation()
-                                                                    .getDistance(localization.getPose().getTranslation())
-                                                                    + reefState.getL1Count(p)))
+                                                                    .getDistance(localization.getPose().getTranslation())))
                                     .map(
                                             p ->
                                                     getAlignCost(
@@ -161,11 +131,7 @@ public class AlignmentCostUtil {
                                 getAlignCost(
                                         pipe.getPose(level, side, localization.getPose()),
                                         localization.getPose(),
-                                        swerve.getTeleopSpeeds())
-                                        + (reefState.isCoralScored(pipe, level)
-                                        && FeatureFlags.AUTO_ALIGN_REEF_STATE_COST.getAsBoolean()
-                                        ? REEF_STATE_COST
-                                        : 0.0));
+                                        swerve.getTeleopSpeeds()));
             }
         };
     }
@@ -176,10 +142,6 @@ public class AlignmentCostUtil {
                         getAlignCost(
                                 side.getPose(localization.getPose()),
                                 localization.getPose(),
-                                swerve.getTeleopSpeeds())
-                                + (reefState.isAlgaeRemoved(side)
-                                && FeatureFlags.AUTO_ALIGN_REEF_STATE_COST.getAsBoolean()
-                                ? ALGAE_STATE_COST
-                                : 0.0));
+                                swerve.getTeleopSpeeds()));
     }
 }
