@@ -78,6 +78,11 @@ public class RobotCommands {
                 .withName("waitForArmState/WAIT_L4");
     }
 
+    public Command waitForWaitL2() {
+        return robotManager.armManager.waitForState(ArmManagerStates.WAIT_L2)
+                .withName("waitForArmState/WAIT_L2");
+    }
+
     public Command scoreCommand() {
         return Commands.runOnce(robotManager::scoreRequest).withName("score");
     }

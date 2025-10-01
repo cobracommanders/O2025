@@ -92,6 +92,18 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 }
             }
 
+            case PREPARE_SCORE_L2 -> {
+                // if (DriverStation.isAutonomous() && atGoal()) {
+                //     nextState = ArmManagerStates.WAIT_L4;
+                // }
+                // else if (DriverStation.isTeleop() && armScheduler.isReady()){
+                //     nextState = ArmManagerStates.WAIT_L4;
+                // }
+                if(armScheduler.isReady()){
+                    nextState = ArmManagerStates.WAIT_L2;
+                }
+            }
+
             case SCORE_L4 -> {
                 if(isReadyToMove()) {
                     if(RequestManager.getInstance().operatorOptions.coralMode == OperatorOptions.CoralMode.NORMAL_MODE){
@@ -353,7 +365,7 @@ public class ArmManager extends StateMachine<ArmManagerStates> {
                 armScheduler.scheduleStates(ArmStates.L2, HandStates.CORAL_IDLE, ElevatorStates.L2);
             }
             case WAIT_L2 -> {
-                armScheduler.scheduleStates(ArmStates.L2, HandStates.CORAL_IDLE, ElevatorStates.L2);
+                //armScheduler.scheduleStates(ArmStates.L2, HandStates.CORAL_IDLE, ElevatorStates.L2);
             }
             case SCORE_L2 -> {
                 hand.setState(HandStates.SCORE_CORAL);

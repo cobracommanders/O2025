@@ -129,6 +129,55 @@ public class AutoBlocks {
         public Pose2d getClearReefOffsetPose(ReefPipe pipe, RobotScoringSide scoringSide) {
                 return pipe.getPose(ReefPipeLevel.L4, scoringSide).transformBy(clearReefOffset);
         }
+        public Command scoreL2(ReefPipe pipe, RobotScoringSide scoringSide) {
+                return Commands.sequence(
+                                //new WaitCommand(0.2),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                        BASE_CONSTRAINTS,
+                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
+                                                                                scoringSide)))),
+                                Robot.robotCommands.autoReefAlignCommandNoScore(),
+                                //Robot.robotCommands.waitForWaitL4(),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                                BASE_CONSTRAINTS,
+                                                                AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
+                                                                                scoringSide),
+                                                                                //Robot.robotCommands.waitForAllIdle()
+                                                                                                Robot.robotCommands
+                                                                                                                .prepareScoreCommand()))),
+                                Robot.robotCommands.waitForWaitL2(),
+                                RobotCommands.getInstance().scoreCommand()
+                                                .andThen(ArmManager.getInstance().finishScoring()));
+        }
+
+        public Command scorePreloadL2(ReefPipe pipe, RobotScoringSide scoringSide) {
+                return Commands.sequence(
+                                //new WaitCommand(0.2),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                        BASE_CONSTRAINTS,
+                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
+                                                                                scoringSide)))),
+                                //Robot.robotCommands.waitForWaitL4(),
+                                Robot.robotCommands.autoReefAlignCommandNoScore(),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                                BASE_CONSTRAINTS,
+                                                                //AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
+                                                                                scoringSide),
+                                                                                //Robot.robotCommands.waitForAllIdle()
+                                                                                                Robot.robotCommands
+                                                                                                                .prepareScoreCommand()))),
+                                Robot.robotCommands.waitForWaitL2(),
+                                RobotCommands.getInstance().scoreCommand()
+                                                .andThen(ArmManager.getInstance().finishScoring()));
+        }
 
         public Command scoreL4(ReefPipe pipe, RobotScoringSide scoringSide) {
                 return Commands.sequence(
@@ -178,6 +227,50 @@ public class AutoBlocks {
                                 Robot.robotCommands.waitForWaitL4(),
                                 RobotCommands.getInstance().scoreCommand()
                                                 .andThen(ArmManager.getInstance().finishScoring()));
+        }
+
+        public Command driveToBackReefRedNonProcessor() {
+                return Commands.sequence(
+                                //new WaitCommand(0.2),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                        BASE_CONSTRAINTS,
+                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                        new AutoPoint(new Pose2d(12.836, 1.085, Rotation2d.fromDegrees(90.0))),
+                                                        new AutoPoint(new Pose2d(14.644, 2.240, Rotation2d.fromDegrees(90.0))))));
+        }
+
+        public Command driveToBackReefRedProcessor() {
+                return Commands.sequence(
+                                //new WaitCommand(0.2),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                        BASE_CONSTRAINTS,
+                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                        new AutoPoint(new Pose2d(12.836, 6.965, Rotation2d.fromDegrees(90))),
+                                                        new AutoPoint(new Pose2d(14.644, 5.81, Rotation2d.fromDegrees(90))))));
+        }
+
+        public Command driveToBackReefBlueNonProcessor() {
+                return Commands.sequence(
+                                //new WaitCommand(0.2),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                        BASE_CONSTRAINTS,
+                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                        new AutoPoint(new Pose2d(4.714, 6.965, Rotation2d.fromDegrees(-90))),
+                                                        new AutoPoint(new Pose2d(2.906, 5.81, Rotation2d.fromDegrees(-90))))));
+        }
+
+        public Command driveToBackReefBlueProcessor() {
+                return Commands.sequence(
+                                //new WaitCommand(0.2),
+                                trailblazer.followSegment(
+                                                new AutoSegment(
+                                                        BASE_CONSTRAINTS,
+                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                        new AutoPoint(new Pose2d(4.714, 1.085, Rotation2d.fromDegrees(-90))),
+                                                        new AutoPoint(new Pose2d(2.906, 2.24, Rotation2d.fromDegrees(-90))))));
         }
 
         public Command backUpFromReef(ReefPipe pipe, RobotScoringSide scoringSide) {
