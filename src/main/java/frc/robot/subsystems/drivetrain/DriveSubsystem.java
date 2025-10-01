@@ -164,7 +164,7 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
       case AUTO, TELEOP ->
         FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
       case REEF_ALIGN_TELEOP ->
-        AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.REEF_ALIGN_TELEOP;
+        AutoAlign.getInstance().isAligned() ? DriveStates.TELEOP : DriveStates.REEF_ALIGN_TELEOP;
       case ALGAE_ALIGN_TELEOP ->
         AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
 
