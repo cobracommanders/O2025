@@ -362,12 +362,12 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         }
     }
 
-    public HandGamePieceState getSimHandGamePiece() {
+    public HandGamePieceState getCurrentGamePiece() {
         return getState().handGamePieceState;
     }
 
     public void requestHandoff() {
-        if (getState().handGamePieceState == HandGamePieceState.NONE) {
+        if (getState().handGamePieceState.isNone()) {
             setStateFromRequest(ArmManagerState.getHandoffPrepareFromCoralPosition(coralDetector.getState()));
         }
     }
@@ -383,7 +383,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestInvertedHandoff() {
-        if (getState().handGamePieceState == HandGamePieceState.CORAL) {
+        if (getState().handGamePieceState.isCoral()) {
             setStateFromRequest(ArmManagerState.PREPARE_INVERTED_HANDOFF);
         }
     }
@@ -428,7 +428,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
     public void requestCoralPrepare(RobotScoringSide robotSide, FieldConstants.PipeScoringLevel scoringLevel) {
         ArmManagerState coralPrepareState = ArmManagerState.getCoralPrepareScore(robotSide, scoringLevel);
-        if (getState().handGamePieceState == HandGamePieceState.CORAL && getState() != coralPrepareState.getCoralPrepareToReadyState()) {
+        if (getState().handGamePieceState.isCoral() && getState() != coralPrepareState.getCoralPrepareToReadyState()) {
             setStateFromRequest(coralPrepareState);
         }
     }
@@ -442,7 +442,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestAlgaeNetScore(RobotScoringSide robotSide) {
-        if (getState().handGamePieceState == HandGamePieceState.ALGAE) {
+        if (getState().handGamePieceState.isAlgae()) {
             setStateFromRequest(ArmManagerState.getNetPrepareScore(robotSide));
         }
     }
@@ -458,7 +458,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestProcessorScore() {
-        if (getState().handGamePieceState == HandGamePieceState.ALGAE) {
+        if (getState().handGamePieceState.isAlgae()) {
             setStateFromRequest(ArmManagerState.PREPARE_SCORE_ALGAE_PROCESSOR);
         }
     }
@@ -606,7 +606,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     .runOnce(armManager::requestHandoff)
                     .andThen(Commands.waitUntil(armManager::isReadyToExecuteHandoff))
                     // Only let this run if the hand is not holding a game piece
-                    .onlyIf(() -> armManager.getState().handGamePieceState == HandGamePieceState.NONE)
+                    .onlyIf(() -> armManager.getState().handGamePieceState.isNone())
                     .withName("requestHandoffAndAwaitReady");
         }
 
@@ -618,7 +618,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     .runOnce(armManager::requestInvertedHandoff)
                     .andThen(Commands.waitUntil(armManager::isReadyToExecuteInvertedHandoff))
                     // Only let this run if the hand is holding a coral
-                    .onlyIf(() -> armManager.getState().handGamePieceState == HandGamePieceState.CORAL)
+                    .onlyIf(() -> armManager.getState().handGamePieceState.isCoral())
                     .withName("requestInvertedHandoffAndAwaitReady");
         }
 
@@ -639,20 +639,20 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             return Commands.idle(armManager);
         }
 
-        public HandGamePieceState getCurrentHandGamePieceState() {
-            return armManager.getState().handGamePieceState;
-        }
-
-        public boolean currentGamePieceIsCoral() {
-            return getCurrentHandGamePieceState() == HandGamePieceState.CORAL;
-        }
-
-        public boolean currentGamePieceIsAlgae() {
-            return getCurrentHandGamePieceState() == HandGamePieceState.ALGAE;
+        public HandGamePieceState getCurrentGamePiece() {
+            return armManager.getCurrentGamePiece();
         }
 
         public boolean currentGamePieceIsNone() {
-            return getCurrentHandGamePieceState() == HandGamePieceState.NONE;
+            return getCurrentGamePiece().isNone();
+        }
+
+        public boolean currentGamePieceIsCoral() {
+            return getCurrentGamePiece().isCoral();
+        }
+
+        public boolean currentGamePieceIsAlgae() {
+            return getCurrentGamePiece().isAlgae();
         }
     }
 }

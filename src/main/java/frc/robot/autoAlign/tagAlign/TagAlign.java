@@ -20,7 +20,6 @@ import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
-import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.MathHelpersDog;
@@ -318,7 +317,7 @@ public class TagAlign {
     }
 
     public Pose2d getUsedScoringPose(ReefPipe pipe, RobotScoringSide side) {
-        if (OperatorOptions.getInstance().scoreLocation == ScoreLocation.L1) {
+        if (OperatorOptions.getInstance().isCoralScoringL1()) {
             var reefPose = ReefSide.fromPipe(pipe).getPose(localization.getPose());
             var pipePose = pipe.getPose(pipeLevel, side, localization.getPose());
             var rotatedPipePose =

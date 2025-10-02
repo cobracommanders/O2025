@@ -46,12 +46,13 @@ public class Controls {
     }
 
     public void configureDriveteamCommands() {
+        var operatorOptions = OperatorOptions.getInstance();
 
         /* ******** DRIVER ******** */
         driver.leftBumper().onTrue(Commands.either(
                 requestManager.groundAlgaeIntake(),
                 requestManager.reefAlgaeIntake(),
-                () -> OperatorOptions.getInstance().algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
+                () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
         ));
 
         driver.leftTrigger().onTrue(requestManager.coralIntakeUntilPiece());
@@ -70,17 +71,17 @@ public class Controls {
 
 
         /* ******** OPERATOR ******** */
-        operator.leftBumper().onTrue(robotCommands.setProcessorCommand());
+        operator.leftBumper().onTrue(operatorOptions.setProcessorCommand());
         operator.leftTrigger().and(operator.rightTrigger()).onTrue(requestManager.climbRequest());
-        operator.rightBumper().onTrue(robotCommands.setBargeCommand());
-        operator.Y().onTrue(robotCommands.setL3Command());
-        operator.B().onTrue(robotCommands.setL4Command());
-        operator.X().onTrue(robotCommands.setL2Command());
-        operator.A().onTrue(robotCommands.setL1Command());
-        operator.POV0().onTrue(robotCommands.setHighReefAlgaeCommand());
+        operator.rightBumper().onTrue(operatorOptions.setBargeCommand());
+        operator.Y().onTrue(operatorOptions.setL3Command());
+        operator.B().onTrue(operatorOptions.setL4Command());
+        operator.X().onTrue(operatorOptions.setL2Command());
+        operator.A().onTrue(operatorOptions.setL1Command());
+        operator.POV0().onTrue(operatorOptions.setHighReefAlgaeCommand());
         operator.POVMinus90().onTrue(requestManager.prepareCoralScoreAndAwaitReady().andThen(robotCommands.driveTeleopCommand()));
-        operator.POV90().onTrue(robotCommands.setGroundAlgaeCommand());
-        operator.POV180().onTrue(robotCommands.setLowReefAlgaeCommand());
+        operator.POV90().onTrue(operatorOptions.setGroundAlgaeCommand());
+        operator.POV180().onTrue(operatorOptions.setLowReefAlgaeCommand());
         operator.back().onTrue(requestManager.invertedHandoffRequest());
         operator.start().onTrue(requestManager.resetArmGamePieceAndIdle());
     }

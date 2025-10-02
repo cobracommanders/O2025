@@ -157,7 +157,16 @@ public enum ArmManagerState {
     READY_CLIMB(NONE);
 
     public enum HandGamePieceState {
-        CORAL, ALGAE, NONE
+        CORAL, ALGAE, NONE;
+        public boolean isCoral() {
+            return this == CORAL;
+        }
+        public boolean isAlgae() {
+            return this == ALGAE;
+        }
+        public boolean isNone() {
+            return this == NONE;
+        }
     }
 
     public final HandGamePieceState handGamePieceState;

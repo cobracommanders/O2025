@@ -13,8 +13,6 @@ import frc.robot.Robot;
 import frc.robot.config.FeatureFlags;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.subsystems.armManager.ArmManagerState;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 
 import static edu.wpi.first.units.Units.Seconds;
@@ -50,38 +48,39 @@ public class LED {
     public void periodic() {
         //when the robot is blinking, the cage has been detected, robot is done for the match
         if (!isBlinking) {
-            switch (OperatorOptions.getInstance().scoreLocation) {
-                case L1:
-                    c = Color.kRed;
-                    LEDPattern.solid(c).applyTo(m_ledBuffer);
-                    break;
-                case L2:
-                    c = Color.kYellow;
-                    LEDPattern.solid(c).applyTo(m_ledBuffer);
-                    break;
-                case L3:
-                    c = Color.kDodgerBlue;
-                    LEDPattern.solid(c).applyTo(m_ledBuffer);
-                    break;
-                case L4:
-                    c = Color.kGreen;
-                    LEDPattern.solid(c).applyTo(m_ledBuffer);
-                    break;
-                case PROCESSOR:
-                    c = Color.kDarkOliveGreen;
-                    LEDPattern.solid(c).applyTo(m_ledBuffer);
-                    break;
-                case BARGE:
-                    c = Color.kPurple;
-                    LEDPattern.solid(c).applyTo(m_ledBuffer);
-                    break;
-                default:
-                    c = Color.kBlack;
-                    LEDPattern.solid(c).applyTo(m_ledBuffer);
-                    break;
+            if (Robot.armManager.getCurrentGamePiece().isAlgae()) {
+                switch (OperatorOptions.getInstance().algaeScoreLocation) {
+                    case PROCESSOR:
+                        c = Color.kDarkOliveGreen;
+                        LEDPattern.solid(c).applyTo(m_ledBuffer);
+                        break;
+                    case BARGE:
+                        c = Color.kPurple;
+                        LEDPattern.solid(c).applyTo(m_ledBuffer);
+                        break;
+                }
+            } else {
+                switch (OperatorOptions.getInstance().coralScoreLocation) {
+                    case L1:
+                        c = Color.kRed;
+                        LEDPattern.solid(c).applyTo(m_ledBuffer);
+                        break;
+                    case L2:
+                        c = Color.kYellow;
+                        LEDPattern.solid(c).applyTo(m_ledBuffer);
+                        break;
+                    case L3:
+                        c = Color.kDodgerBlue;
+                        LEDPattern.solid(c).applyTo(m_ledBuffer);
+                        break;
+                    case L4:
+                        c = Color.kGreen;
+                        LEDPattern.solid(c).applyTo(m_ledBuffer);
+                        break;
+                }
             }
 
-            if (Robot.armManager.getState().handGamePieceState == ArmManagerState.HandGamePieceState.CORAL) {
+            if (Robot.armManager.getCurrentGamePiece().isCoral()) {
                 LEDPattern.solid(Color.kWhite).applyTo(m_middle);
             } else {
                 LEDPattern.solid(c).applyTo(m_middle);

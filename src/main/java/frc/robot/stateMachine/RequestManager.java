@@ -85,7 +85,7 @@ public class RequestManager {
     public Command prepareCoralScoreAndAwaitReady() {
         return prepareCoralScoreAndAwaitReady(
                 this::reefRobotSide,
-                () -> OperatorOptions.getInstance().scoreLocation.toPipeScoringLevelOrL4()
+                () -> OperatorOptions.getInstance().getPipeScoringLevelOrL4()
         );
     }
 

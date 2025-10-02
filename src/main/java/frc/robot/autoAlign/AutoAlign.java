@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.autoAlign.tagAlign.TagAlign;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
-import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
@@ -228,7 +227,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
     public ChassisSpeeds getTagAlignSpeeds() {
         DogLog.log("AutoAlign/TagAlignSpeeds", tagAlignSpeeds);
-        if (OperatorOptions.getInstance().scoreLocation == ScoreLocation.L1) {
+        if (OperatorOptions.getInstance().isCoralScoringL1()) {
             return l1AlignSpeeds;
         }
         return tagAlignSpeeds;
