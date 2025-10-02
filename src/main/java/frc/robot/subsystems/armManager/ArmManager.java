@@ -3,12 +3,14 @@ package frc.robot.subsystems.armManager;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.localization.LocalizationSubsystem;
-import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.ArmManagerState.HandGamePieceState;
 import frc.robot.subsystems.armManager.arm.Arm;
@@ -20,6 +22,8 @@ import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.armManager.hand.HandState;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
+
+import java.util.function.Supplier;
 
 public class ArmManager extends StateMachine<ArmManagerState> {
     private final Hand hand;
@@ -34,8 +38,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     public ArmManager(
             Hand hand,
             Elevator elevator,
-            Arm arm
-    ) {
+            Arm arm) {
         super(ArmManagerState.START_POSITION);
         this.hand = hand;
         this.elevator = elevator;
@@ -132,12 +135,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                 }
             }
 
-            case EXECUTE_HANDOFF_LEFT, EXECUTE_HANDOFF_MIDDLE, EXECUTE_HANDOFF_RIGHT -> {
-                if (timeout(RequestManager.HANDOFF_TIME)) {
-                    nextState = ArmManagerState.PREPARE_IDLE_CORAL;
-                }
-            }
-
+            case EXECUTE_HANDOFF_LEFT, EXECUTE_HANDOFF_MIDDLE, EXECUTE_HANDOFF_RIGHT -> { /* Await Control */ }
 
             /* ******** INVERTED HANDOFF STATES ******** */
             case PREPARE_INVERTED_HANDOFF -> {
@@ -146,12 +144,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
             case READY_INVERTED_HANDOFF -> { /* Await Control */ }
 
-            case EXECUTE_INVERTED_HANDOFF -> {
-                if (timeout(RequestManager.INVERTED_HANDOFF_TIME)) {
-                    nextState = ArmManagerState.IDLE_EMPTY;
-                }
-            }
-
+            case EXECUTE_INVERTED_HANDOFF -> { /* Await Control */ }
 
             /* ******** CORAL SCORE STATES ******** */
             case PREPARE_L4_LEFT,
@@ -282,7 +275,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
             case IDLE_ALGAE_DROPPED -> requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
 
-
             /* ******** HANDOFF STATES ******** */
             case PREPARE_HANDOFF_LEFT, PREEMPTIVE_HANDOFF_LEFT ->
                     requestState(ArmState.HANDOFF_LEFT, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
@@ -347,7 +339,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.INTAKE_GROUND_ALGAE, ElevatorState.GROUND_ALGAE, HandState.INTAKE_GROUND_ALGAE);
 
 
-
             /* ******** ALGAE SCORE STATES ******** */
             case PREPARE_SCORE_ALGAE_NET_LEFT, READY_SCORE_ALGAE_NET_LEFT ->
                     requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
@@ -362,11 +353,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case SCORE_ALGAE_PROCESSOR ->
                     requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR);
 
-
             /* ******** LOLLIPOP INTAKE STATES ******** */
             case PREPARE_INTAKE_LOLLIPOP, ACTIVE_INTAKE_LOLLIPOP ->
                     requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
-
 
             /* ******** CLIMB STATES ******** */
             case PREPARE_CLIMB, READY_CLIMB -> requestState(ArmState.CLIMB, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
@@ -433,9 +422,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         setStateFromRequest(ArmManagerState.PREPARE_INTAKE_LOLLIPOP);
     }
 
+    public boolean isLollipopIntakeReady() {
+        return getState() == ArmManagerState.ACTIVE_INTAKE_LOLLIPOP;
+    }
+
     public void requestCoralPrepare(RobotScoringSide robotSide, FieldConstants.PipeScoringLevel scoringLevel) {
-        if (getState().handGamePieceState == HandGamePieceState.CORAL) {
-            setStateFromRequest(ArmManagerState.getCoralPrepareScore(robotSide, scoringLevel));
+        ArmManagerState coralPrepareState = ArmManagerState.getCoralPrepareScore(robotSide, scoringLevel);
+        if (getState().handGamePieceState == HandGamePieceState.CORAL && getState() != coralPrepareState.getCoralPrepareToReadyState()) {
+            setStateFromRequest(coralPrepareState);
         }
     }
 
@@ -476,6 +470,189 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     public void requestProcessorScoreExecution() {
         if (isReadyToScoreProcessor()) {
             setStateFromRequest(ArmManagerState.SCORE_ALGAE_PROCESSOR);
+        }
+    }
+
+    public static class CommandWrapper {
+        private final ArmManager armManager;
+
+        public CommandWrapper(ArmManager armManager) {
+            this.armManager = armManager;
+        }
+
+
+        /**
+         * Request algae processor score and await ready state.
+         */
+        public Command requestAlgaeProcessorPrepareAndAwaitReady() {
+            return armManager.runOnce(armManager::requestProcessorScore)
+                    .andThen(Commands.waitUntil(armManager::isReadyToScoreProcessor))
+                    .withName("requestAlgaeProcessorScoreAndAwaitReady");
+        }
+
+        /**
+         * Execute algae processor score and await idle state.
+         */
+        public Command executeAlgaeProcessorScoreAndAwaitIdle() {
+            return armManager.runOnce(armManager::requestProcessorScoreExecution)
+                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_EMPTY))
+                    .withName("executeAlgaeProcessorScoreAndAwaitIdle");
+        }
+
+        /**
+         * Request algae net score and await ready state.
+         * Will ONLY use the scoring side from the supplier at the time of scheduling.
+         */
+        public Command requestAlgaeNetPrepareAndAwaitReady(Supplier<RobotScoringSide> side) {
+            return armManager.runOnce(() -> armManager.requestAlgaeNetScore(side.get()))
+                    .andThen(Commands.waitUntil(armManager::isReadyToScoreAlgaeNet))
+                    .withName("requestAlgaeNetScoreAndAwaitReady");
+        }
+
+        /**
+         * Execute algae net score and await idle state.
+         */
+        public Command executeAlgaeNetScoreAndAwaitIdle() {
+            return armManager.runOnce(armManager::requestAlgaeNetScoreExecution)
+                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_EMPTY))
+                    .withName("executeAlgaeNetScoreAndAwaitIdle");
+        }
+
+        /**
+         * Request climb and do nothing.
+         */
+        public Command requestClimbAndDoNothing() {
+            return armManager.runOnce(armManager::requestClimb)
+                    .andThen(doNothing())
+                    .withName("requestClimbAndDoNothing");
+        }
+
+        /**
+         * Prepare for coral score and await ready state.
+         * Will constantly update the scoring side and level based on the value of the supplier.
+         */
+        public Command requestCoralPrepareAndAwaitReady(Supplier<RobotScoringSide> side,
+                                                        Supplier<FieldConstants.PipeScoringLevel> scoringLevel) {
+            return armManager.runOnce(() -> armManager.requestCoralPrepare(side.get(), scoringLevel.get()))
+                    .repeatedly().until(armManager::isReadyToScoreCoral)
+                    .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+                    .withName("requestCoralPrepareAndAwaitReady");
+        }
+
+        public Command executeCoralScoreAndAwaitIdleOrAuto() {
+            return armManager.runOnce(armManager::requestCoralScoreExecution)
+                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_EMPTY).unless(DriverStation::isAutonomousEnabled))
+                    .onlyIf(armManager::isReadyToScoreCoral)
+                    .withName("executeCoralScoreAndAwaitIdle");
+        }
+
+        /**
+         * Move the arm to applicable idle state based on the current game piece state.
+         */
+        public Command idleAndAwaitReady() {
+            return armManager
+                    .runOnce(armManager::requestIdle)
+                    .andThen(Commands.waitUntil(armManager::isIdleState))
+                    .withName("idleAndAwaitReady");
+        }
+
+        /**
+         * Request idle clear game piece.
+         */
+        public Command idleClearGamePieceAndAwaitReady() {
+            return armManager.runOnce(armManager::requestIdleClearGamePiece)
+                    .andThen(Commands.waitUntil(armManager::isIdleState))
+                    .withName("requestIdleClearGamePieceAndAwaitReady");
+        }
+
+        /**
+         * Request algae reef intake and await idle state after collecting a game piece.
+         * Will constantly update the scoring side based on the value of the supplier.
+         */
+        public Command requestAlgaeReefIntakeAndAwaitIdle(Supplier<RobotScoringSide> side, boolean top) {
+            return armManager.runOnce(() -> armManager.requestReefAlgaeIntake(side.get(), top))
+                    .repeatedly()
+                    .withDeadline(armManager.waitForState(ArmManagerState.PREPARE_IDLE_ALGAE))
+                    .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+                    .withName("requestAlgaeReefIntakeAndAwaitIdle");
+        }
+
+        /**
+         * Request ground algae intake and await game piece.
+         */
+        public Command requestGroundAlgaeIntakeAndAwaitGamePiece() {
+            return armManager.runOnce(armManager::requestGroundAlgaeIntake)
+                    .andThen(armManager.waitForState(ArmManagerState.ACTIVE_INTAKE_GROUND_ALGAE))
+                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_ALGAE))
+                    .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
+                    .withName("requestGroundAlgaeIntakeAndAwaitGamePiece");
+        }
+
+        /**
+         * Request lollipop intake and await ready state.
+         */
+        public Command requestLollipopIntakeAndAwaitReady() {
+            return armManager
+                    .runOnce(armManager::requestLollipopIntake)
+                    .andThen(Commands.waitUntil(armManager::isLollipopIntakeReady))
+                    .withName("requestLollipopIntakeAndAwaitReady");
+        }
+
+        /**
+         * Prepare for handoff and await ready state.
+         */
+        public Command requestHandoffAndAwaitReady() {
+            return armManager
+                    .runOnce(armManager::requestHandoff)
+                    .andThen(Commands.waitUntil(armManager::isReadyToExecuteHandoff))
+                    // Only let this run if the hand is not holding a game piece
+                    .onlyIf(() -> armManager.getState().handGamePieceState == HandGamePieceState.NONE)
+                    .withName("requestHandoffAndAwaitReady");
+        }
+
+        /**
+         * Prepare for inverted handoff and await ready state.
+         */
+        public Command requestInvertedHandoffAndAwaitReady() {
+            return armManager
+                    .runOnce(armManager::requestInvertedHandoff)
+                    .andThen(Commands.waitUntil(armManager::isReadyToExecuteInvertedHandoff))
+                    // Only let this run if the hand is holding a coral
+                    .onlyIf(() -> armManager.getState().handGamePieceState == HandGamePieceState.CORAL)
+                    .withName("requestInvertedHandoffAndAwaitReady");
+        }
+
+        public Command executeHandoff() {
+            return armManager.runOnce(armManager::requestHandoffExecution)
+                    .withName("executeHandoff");
+        }
+
+        public Command executeInvertedHandoff() {
+            return armManager.runOnce(armManager::requestInvertedHandoffExecution)
+                    .withName("executeInvertedHandoff");
+        }
+
+        /**
+         * Do nothing until interrupted externally.
+         */
+        public Command doNothing() {
+            return Commands.idle(armManager);
+        }
+
+        public HandGamePieceState getCurrentHandGamePieceState() {
+            return armManager.getState().handGamePieceState;
+        }
+
+        public boolean currentGamePieceIsCoral() {
+            return getCurrentHandGamePieceState() == HandGamePieceState.CORAL;
+        }
+
+        public boolean currentGamePieceIsAlgae() {
+            return getCurrentHandGamePieceState() == HandGamePieceState.ALGAE;
+        }
+
+        public boolean currentGamePieceIsNone() {
+            return getCurrentHandGamePieceState() == HandGamePieceState.NONE;
         }
     }
 }

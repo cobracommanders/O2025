@@ -40,7 +40,7 @@ public enum ArmManagerState {
      *
      * PREPARE_HANDOFF_<side> -> READY_HANDOFF_<side> when At Position
      * READY_HANDOFF_<side> -> EXECUTE_HANDOFF_<side> when External Signal
-     * EXECUTE_HANDOFF_<side> -> PREPARE_IDLE_CORAL when Slight Delay
+     * EXECUTE_HANDOFF_<side> -> PREPARE_IDLE_CORAL when External Signal
      */
     PREEMPTIVE_HANDOFF_LEFT(NONE), // Prepare above intake
     PREEMPTIVE_HANDOFF_MIDDLE(NONE), // Prepare above intake
@@ -61,6 +61,7 @@ public enum ArmManagerState {
      *
      * PREPARE_INVERTED_HANDOFF -> READY_INVERTED_HANDOFF when At Position
      * READY_INVERTED_HANDOFF -> EXECUTE_INVERTED_HANDOFF when External Signal
+     * EXECUTE_INVERTED_HANDOFF -> IDLE_EMPTY when External Signal
      */
     PREPARE_INVERTED_HANDOFF(CORAL),
     READY_INVERTED_HANDOFF(CORAL),
@@ -168,7 +169,7 @@ public enum ArmManagerState {
     /* ******** Idle Utilities ******** */
     public boolean isIdleState() {
         return switch (this) {
-            case IDLE_ALGAE, IDLE_CORAL, IDLE_EMPTY, IDLE_ALGAE_DROPPED -> true;
+            case IDLE_ALGAE, IDLE_CORAL, IDLE_EMPTY -> true;
             default -> false;
         };
     }

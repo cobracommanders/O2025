@@ -29,6 +29,7 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.trailblazer.Trailblazer;
 
 public class Robot extends TimedRobot {
@@ -44,20 +45,25 @@ public class Robot extends TimedRobot {
     private Command autonomousCommand = Commands.none();
 
     // Uncomment as needed
-    public static RequestManager robotManager = RequestManager.getInstance();
-    public static RobotCommands robotCommands = RobotCommands.getInstance();
+    public static RequestManager requestManager = new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
+    private RobotCommands robotCommands = RobotCommands.getInstance();
     public static DriveSubsystem swerve = DriveSubsystem.getInstance();
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
+
+    private final Controls controls = new Controls(requestManager, robotCommands);
+
     // public static final Controls controls = new Controls();
     //private SendableChooser<Command> autoChooser;
     private final Timer seedImuTimer = new Timer();
     public static LED lights;
     private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+
+
     //private final Autos autos = new Autos(trailblazer);
     // public static OperatorOptions operatorOptions =
     // OperatorOptions.getInstance();
 
-    private final Autos autos = new Autos(trailblazer);
+    private final Autos autos = new Autos(trailblazer, requestManager);
 
 
     public Robot() {
@@ -115,9 +121,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        Controls.getInstance().configureDriverCommands();
-        Controls.getInstance().configureOperatorCommands();
-        Controls.getInstance().configureDefaultCommands();
+        controls.configureDriveteamCommands();
+        controls.configureDefaultCommands();
         DriveSubsystem.getInstance().setState(DriveStates.TELEOP);
     }
 

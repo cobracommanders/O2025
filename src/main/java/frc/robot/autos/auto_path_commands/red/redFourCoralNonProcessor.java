@@ -35,7 +35,7 @@ public class redFourCoralNonProcessor extends BaseAuto {
                 blocks.driveToBackReefRedNonProcessor(),
                 blocks.scorePreloadL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
+                requestManager.prepareLollipopAndAwaitReady(),
                 RobotCommands.getInstance().setL2Command(),
                 // Commands.parallel(
 
@@ -43,14 +43,14 @@ public class redFourCoralNonProcessor extends BaseAuto {
                 // ),
                 blocks.scoreL2(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
+                requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.scoreL2(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
+                requestManager.prepareLollipopAndAwaitReady(),
                 RobotCommands.getInstance().setL4Command(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),

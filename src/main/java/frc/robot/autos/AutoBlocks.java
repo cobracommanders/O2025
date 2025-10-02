@@ -1,11 +1,5 @@
 package frc.robot.autos;
 
-import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
-
-import java.util.List;
-
-import com.pathplanner.lib.config.RobotConfig;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -13,16 +7,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.FieldConstants;
-import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.AutoPoint;
 import frc.robot.trailblazer.AutoSegment;
 import frc.robot.trailblazer.Trailblazer;
@@ -86,11 +79,11 @@ public class AutoBlocks {
         private static final AutoConstraintOptions SCORING_CONSTRAINTS_FOR_GROUND_AUTOS = BASE_CONSTRAINTS_FOR_GROUND_AUTOS
                         .withMaxLinearAcceleration(1.25).withMaxLinearVelocity(3);
 
+        private final RequestManager requestManager;
         private final Trailblazer trailblazer;
 
-        private final AutoCommands autoCommands = AutoCommands.getInstance();
-
-    public AutoBlocks(Trailblazer trailblazer) {
+    public AutoBlocks(RequestManager requestManager, Trailblazer trailblazer) {
+        this.requestManager = requestManager;
         this.trailblazer = trailblazer;
     }
 
@@ -135,46 +128,19 @@ public class AutoBlocks {
                                                         AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
                                                                                 scoringSide)))),
-                                Robot.robotCommands.autoReefAlignCommandNoScore(),
+                                RobotCommands.getInstance().autoReefAlignCommand(),
                                 //Robot.robotCommands.waitForWaitL4(),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 BASE_CONSTRAINTS,
                                                                 AutoBlocks.APPROACH_REEF_TOLERANCE,
-                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
-                                                                                scoringSide),
-                                                                                //Robot.robotCommands.waitForAllIdle()
-                                                                                                Robot.robotCommands
-                                                                                                                .prepareScoreCommand()))),
-                                Robot.robotCommands.awaitCoralReadyToScore(),
-                                RobotCommands.getInstance().scoreCommand()
-                                                .andThen(() -> Robot.robotManager.scoreRequest()));
+                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2, scoringSide))))
+                                        // Moves the arm in parallel, the group won't move on until this command finishes and the arm is ready
+                                        .alongWith(requestManager.prepareCoralScoreAndAwaitReady(FieldConstants.PipeScoringLevel.L2)),
+
+                                requestManager.executeCoralScoreAndAwaitIdleOrAuto());
         }
 
-        public Command scorePreloadL2(ReefPipe pipe, RobotScoringSide scoringSide) {
-                return Commands.sequence(
-                                //new WaitCommand(0.2),
-                                trailblazer.followSegment(
-                                                new AutoSegment(
-                                                        BASE_CONSTRAINTS,
-                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
-                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
-                                                                                scoringSide)))),
-                                //Robot.robotCommands.waitForWaitL4(),
-                                Robot.robotCommands.autoReefAlignCommandNoScore(),
-                                trailblazer.followSegment(
-                                                new AutoSegment(
-                                                                BASE_CONSTRAINTS,
-                                                                //AutoBlocks.APPROACH_REEF_TOLERANCE,
-                                                                new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
-                                                                                scoringSide),
-                                                                                //Robot.robotCommands.waitForAllIdle()
-                                                                                                Robot.robotCommands
-                                                                                                                .prepareScoreCommand()))),
-                                Robot.robotCommands.awaitCoralReadyToScore(),
-                                RobotCommands.getInstance().scoreCommand()
-                                                .andThen(() -> Robot.robotManager.scoreRequest()));
-        }
 
         public Command scoreL4(ReefPipe pipe, RobotScoringSide scoringSide) {
                 return Commands.sequence(
@@ -185,20 +151,18 @@ public class AutoBlocks {
                                                         AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
                                                                                 scoringSide)))),
-                                Robot.robotCommands.autoReefAlignCommandNoScore(),
+                                RobotCommands.getInstance().autoReefAlignCommand(),
                                 //Robot.robotCommands.waitForWaitL4(),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 BASE_CONSTRAINTS,
                                                                 AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
-                                                                                scoringSide),
-                                                                                //Robot.robotCommands.waitForAllIdle()
-                                                                                                Robot.robotCommands
-                                                                                                                .prepareScoreCommand()))),
-                                Robot.robotCommands.awaitCoralReadyToScore(),
-                                RobotCommands.getInstance().scoreCommand()
-                                                .andThen(() -> Robot.robotManager.scoreRequest()));
+                                                                                scoringSide))))
+                                        // Moves the arm in parallel, the group won't move on until this command finishes and the arm is ready
+                                        .alongWith(requestManager.prepareCoralScoreAndAwaitReady(FieldConstants.PipeScoringLevel.L4))
+                        ,
+                                requestManager.executeCoralScoreAndAwaitIdleOrAuto());
         }
 
         public Command scorePreloadL4(ReefPipe pipe, RobotScoringSide scoringSide) {
@@ -211,19 +175,17 @@ public class AutoBlocks {
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
                                                                                 scoringSide)))),
                                 //Robot.robotCommands.waitForWaitL4(),
-                                Robot.robotCommands.autoReefAlignCommandNoScore(),
+                                RobotCommands.getInstance().autoReefAlignCommand(),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 BASE_CONSTRAINTS,
                                                                 //AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
-                                                                                scoringSide),
-                                                                                //Robot.robotCommands.waitForAllIdle()
-                                                                                                Robot.robotCommands
-                                                                                                                .prepareScoreCommand()))),
-                                Robot.robotCommands.awaitCoralReadyToScore(),
-                                RobotCommands.getInstance().scoreCommand()
-                                                .andThen(() -> Robot.robotManager.scoreRequest()));
+                                                                                scoringSide))))
+                        // Moves the arm in parallel, the group won't move on until this command finishes and the arm is ready
+                                        .alongWith(requestManager.prepareCoralScoreAndAwaitReady(FieldConstants.PipeScoringLevel.L4))
+                        ,
+                                requestManager.executeCoralScoreAndAwaitIdleOrAuto());
         }
 
         public Command driveToBackReefRedNonProcessor() {

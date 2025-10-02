@@ -17,7 +17,6 @@ public abstract class BaseAuto implements NamedAuto {
   protected final RequestManager requestManager;
   protected final Trailblazer trailblazer;
   protected final RobotCommands actions;
-  protected final AutoCommands autoCommands;
   protected final AutoBlocks blocks;
   protected final AutoTiming timing;
   private final String autoName;
@@ -27,8 +26,7 @@ public abstract class BaseAuto implements NamedAuto {
     this.requestManager = robotManager;
     this.trailblazer = trailblazer;
     actions = RobotCommands.getInstance();
-    autoCommands = new AutoCommands();
-    blocks = new AutoBlocks(trailblazer);
+    blocks = new AutoBlocks(requestManager, trailblazer);
 
     var className = this.getClass().getSimpleName();
     autoName = className.substring(className.lastIndexOf('.') + 1);

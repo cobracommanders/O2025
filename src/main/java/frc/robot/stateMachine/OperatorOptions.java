@@ -1,6 +1,7 @@
 package frc.robot.stateMachine;
 
 import dev.doglog.DogLog;
+import frc.robot.FieldConstants;
 
 public class OperatorOptions {
 
@@ -21,7 +22,15 @@ public class OperatorOptions {
         L3,
         L4,
         BARGE,
-        PROCESSOR
+        PROCESSOR;
+        FieldConstants.PipeScoringLevel toPipeScoringLevelOrL4() {
+            return switch (this) {
+                case L2 -> FieldConstants.PipeScoringLevel.L2;
+                case L3 -> FieldConstants.PipeScoringLevel.L3;
+                case L4 -> FieldConstants.PipeScoringLevel.L4;
+                case L1, BARGE, PROCESSOR -> FieldConstants.PipeScoringLevel.L4;
+            };
+        }
     }
 
     public enum AlgaeIntakeLevel {
