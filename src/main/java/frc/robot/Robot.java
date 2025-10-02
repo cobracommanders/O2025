@@ -46,8 +46,9 @@ public class Robot extends TimedRobot {
 
     // Uncomment as needed
     public static RequestManager requestManager = new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
-    private RobotCommands robotCommands = RobotCommands.getInstance();
     public static DriveSubsystem swerve = DriveSubsystem.getInstance();
+    private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+    private final RobotCommands robotCommands = new RobotCommands(trailblazer);
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
 
     private final Controls controls = new Controls(requestManager, robotCommands);
@@ -56,7 +57,6 @@ public class Robot extends TimedRobot {
     //private SendableChooser<Command> autoChooser;
     private final Timer seedImuTimer = new Timer();
     public static LED lights;
-    private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
 
 
     //private final Autos autos = new Autos(trailblazer);

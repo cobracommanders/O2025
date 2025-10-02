@@ -75,12 +75,12 @@ public class TagAlign {
                     Map.entry(2.66, 2.943), Map.entry(0.0, 0.0), Map.entry(-11.0, -2.943));
 
     private static final DoubleSubscriber TRANSLATION_GOOD_THRESHOLD =
-            DogLog.tunable("AutoAlign/IsAlignedTranslation", Units.inchesToMeters(2));
+            DogLog.tunable("AutoAlign/IsAlignedTranslation", Units.inchesToMeters(1));
     private static final DoubleSubscriber ROTATION_GOOD_THRESHOLD =
-            DogLog.tunable("AutoAlign/IsAlignedRotation", 3.0);
+            DogLog.tunable("AutoAlign/IsAlignedRotation", 1.0);
 
     private static final DoubleSubscriber NEAR_ROTATION_GOAL =
-            DogLog.tunable("AutoAlign/IsAlignedRotation", 10.0);
+            DogLog.tunable("AutoAlign/IsAlignedRotation2", 10.0);
 
     private static final DoubleSubscriber NEED_TO_MOVE_TRANSLATION_THRESHOLD =
             DogLog.tunable("AutoAlign/NeedMoveTranslation", Units.inchesToMeters(1.5));

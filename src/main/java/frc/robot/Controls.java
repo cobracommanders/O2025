@@ -66,7 +66,7 @@ public class Controls {
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
 //        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
         driver.rightBumper().onTrue(robotCommands.reefAlignCommand().andThen(requestManager.executeCoralScoreAndAwaitIdleOrAuto()));
-        driver.X().onTrue(robotCommands.driveTeleopCommand());
+        driver.X().onTrue(runOnce(() -> driveSubsystem.getCurrentCommand().cancel()).andThen(robotCommands.driveTeleopCommand()));
         driver.Y().onTrue(robotCommands.algaeAlignCommand());
 
 

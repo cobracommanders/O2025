@@ -128,7 +128,7 @@ public class AutoBlocks {
                                                         AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L2,
                                                                                 scoringSide)))),
-                                RobotCommands.getInstance().autoReefAlignCommand(),
+//                                RobotCommands.getInstance().autoReefAlignCommand(),
                                 //Robot.robotCommands.waitForWaitL4(),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
@@ -151,7 +151,7 @@ public class AutoBlocks {
                                                         AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
                                                                                 scoringSide)))),
-                                RobotCommands.getInstance().autoReefAlignCommand(),
+//                                RobotCommands.getInstance().autoReefAlignCommand(),
                                 //Robot.robotCommands.waitForWaitL4(),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
@@ -175,7 +175,7 @@ public class AutoBlocks {
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
                                                                                 scoringSide)))),
                                 //Robot.robotCommands.waitForWaitL4(),
-                                RobotCommands.getInstance().autoReefAlignCommand(),
+//                                RobotCommands.getInstance().autoReefAlignCommand(),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 BASE_CONSTRAINTS,

@@ -16,7 +16,7 @@ import frc.robot.trailblazer.TrailblazerPathLogger;
 public abstract class BaseAuto implements NamedAuto {
   protected final RequestManager requestManager;
   protected final Trailblazer trailblazer;
-  protected final RobotCommands actions;
+//  protected final RobotCommands actions;
   protected final AutoBlocks blocks;
   protected final AutoTiming timing;
   private final String autoName;
@@ -25,7 +25,7 @@ public abstract class BaseAuto implements NamedAuto {
   protected BaseAuto(RequestManager robotManager, Trailblazer trailblazer) {
     this.requestManager = robotManager;
     this.trailblazer = trailblazer;
-    actions = RobotCommands.getInstance();
+//    actions = RobotCommands.getInstance();
     blocks = new AutoBlocks(requestManager, trailblazer);
 
     var className = this.getClass().getSimpleName();
