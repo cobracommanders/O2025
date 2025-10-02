@@ -91,7 +91,7 @@ public class TagAlign {
     private static final DoubleSubscriber IN_RANGE_TRANSLATION_THRESHOLD =
             DogLog.tunable("AutoAlign/InRangeTranslation", Units.inchesToMeters(1.5));
     private static final DoubleSubscriber IN_RANGE_ROTATION_THRESHOLD =
-            DogLog.tunable("AutoAlign/InRangeRotation", 3.0);
+            DogLog.tunable("AutoAlign/InRangeRotation", 1.0);
 
     private static final double IDEAL_L1_OFFSET = Units.inchesToMeters(0.5);
     private static final Transform2d LEFT_L1_TRANSFORM =
@@ -340,6 +340,10 @@ public class TagAlign {
                                     0, Units.inchesToMeters(coralL1Offset.orElse(0.0)), Rotation2d.fromDegrees(0)));
         }
         return pipe.getPose(pipeLevel, side, localization.getPose());
+    }
+
+    public void setScoringSide(RobotScoringSide side) {
+        this.robotScoringSide = side;
     }
 
     /**

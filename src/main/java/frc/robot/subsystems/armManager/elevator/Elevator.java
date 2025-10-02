@@ -39,7 +39,6 @@ public class Elevator extends StateMachine<ElevatorState> {
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
         motor_config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MotionMagicAcceleration;
-        motor_config.MotionMagic.MotionMagicJerk = ElevatorConstants.MotionMagicJerk;
 
         lMotor = new TalonFX(Ports.ElevatorPorts.LMOTOR);
         rMotor = new TalonFX(Ports.ElevatorPorts.RMOTOR);
@@ -50,7 +49,7 @@ public class Elevator extends StateMachine<ElevatorState> {
         lMotor.setPosition(0);
         rMotor.setPosition(0);
 
-        lMotor.setControl(new Follower(Ports.ElevatorPorts.LMOTOR, true));
+        rMotor.setControl(new Follower(Ports.ElevatorPorts.LMOTOR, true));
     }
 
     public boolean atGoal() {

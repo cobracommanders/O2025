@@ -150,6 +150,7 @@ public class RequestManager extends StateMachine<RequestManagerState> {
                 armManager.requestClimb();
             }
             case INDEPENDENT -> {
+                groundManager.setState(GroundManagerStates.IDLE);
             }
         }
     }

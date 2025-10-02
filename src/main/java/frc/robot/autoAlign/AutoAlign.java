@@ -28,7 +28,7 @@ import java.util.OptionalDouble;
 public class AutoAlign extends StateMachine<AutoAlignState> {
     private static final AutoConstraintOptions CONSTRAINTS =
             new AutoConstraintOptions(
-                    4.0, Units.rotationsToRadians(3.0), 6.0, Units.rotationsToRadians(3.0));
+                    4.0, Units.rotationsToRadians(3.0), 4.0, Units.rotationsToRadians(3.0));
     private static final AutoConstraintOptions L1_CONSTRAINTS =
             new AutoConstraintOptions(
                     3.0, Units.rotationsToRadians(2.0), 6.0, Units.rotationsToRadians(3.0));
@@ -107,7 +107,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
                 < thresholdMeters;
     }
 
-    private final Debouncer isAlignedDebouncer = new Debouncer(0.5, DebounceType.kRising);
+    private final Debouncer isAlignedDebouncer = new Debouncer(0.3, DebounceType.kRising);
     private final VisionSubsystem vision;
     private final LocalizationSubsystem localization;
     public final TagAlign tagAlign;
