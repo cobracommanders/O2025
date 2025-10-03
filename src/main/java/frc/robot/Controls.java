@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Ports.OIPorts;
 import frc.robot.commands.RobotCommands;
@@ -8,6 +9,7 @@ import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 
@@ -65,9 +67,33 @@ public class Controls {
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
 //        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
-        driver.rightBumper().onTrue(robotCommands.reefAlignCommand().andThen(requestManager.executeCoralScoreAndAwaitIdleOrAuto()));
-        driver.X().onTrue(runOnce(() -> driveSubsystem.getCurrentCommand().cancel()).andThen(robotCommands.driveTeleopCommand()));
-        driver.Y().onTrue(robotCommands.algaeAlignCommand());
+        driver.rightBumper().onTrue(
+                robotCommands.reefAlignCommand()
+                        .alongWith(
+                                Commands.waitUntil(() -> requestManager.getHandGamePiece().isCoral()),
+                                requestManager.prepareCoralScoreAndAwaitReady()
+                        )
+                        .andThen(requestManager.executeCoralScoreAndAwaitIdleOrAuto())
+                        .andThen(runOnce(() -> {
+                            Command currentCommand = driveSubsystem.getCurrentCommand();
+                            if (currentCommand != null) {
+                                currentCommand.cancel();
+                            }
+                        }))
+                        .finallyDo(() -> {
+                            Command currentCommand = driveSubsystem.getCurrentCommand();
+                            if (currentCommand != null) {
+                                currentCommand.cancel();
+                            }
+                        })
+        );
+        driver.X().onTrue(runOnce(() -> {
+            Command currentCommand = driveSubsystem.getCurrentCommand();
+            if (currentCommand != null) {
+                currentCommand.cancel();
+            }
+        }).andThen(robotCommands.driveTeleopCommand()));
+//        driver.Y().onTrue(robotCommands.algaeAlignCommand());
 
 
         /* ******** OPERATOR ******** */

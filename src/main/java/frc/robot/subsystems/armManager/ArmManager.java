@@ -259,6 +259,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         armScheduler.scheduleStates(armState, elevatorState, handState);
     }
 
+    public boolean isArmUp() {
+        return armScheduler.isArmUp();
+    }
+
     @Override
     protected void afterTransition(ArmManagerState newState) {
         switch (newState) {
@@ -266,35 +270,28 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case START_POSITION -> { /* N/A */ }
 
             /* ******** IDLE STATES ******** */
-            case PREPARE_IDLE_EMPTY, IDLE_EMPTY ->
+            case PREPARE_IDLE_EMPTY, IDLE_EMPTY, PREPARE_IDLE_CORAL, IDLE_CORAL ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
-            case PREPARE_IDLE_CORAL, IDLE_CORAL ->
-                    requestState(ArmState.IDLE_CORAL, ElevatorState.IDLE_CORAL, HandState.IDLE_CORAL);
+//            case PREPARE_IDLE_CORAL, IDLE_CORAL ->
+//                    requestState(ArmState.IDLE_CORAL, ElevatorState.IDLE_CORAL, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_ALGAE, IDLE_ALGAE ->
                     requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
             case IDLE_ALGAE_DROPPED -> requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
 
             /* ******** HANDOFF STATES ******** */
-            case PREPARE_HANDOFF_LEFT, PREEMPTIVE_HANDOFF_LEFT ->
-                    requestState(ArmState.HANDOFF_LEFT, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
-            case PREPARE_HANDOFF_MIDDLE, PREEMPTIVE_HANDOFF_MIDDLE ->
+            case PREPARE_HANDOFF_RIGHT, PREEMPTIVE_HANDOFF_RIGHT, PREPARE_HANDOFF_LEFT, PREEMPTIVE_HANDOFF_LEFT, PREPARE_HANDOFF_MIDDLE, PREEMPTIVE_HANDOFF_MIDDLE ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
-            case PREPARE_HANDOFF_RIGHT, PREEMPTIVE_HANDOFF_RIGHT ->
-                    requestState(ArmState.HANDOFF_RIGHT, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
 
-            case READY_HANDOFF_LEFT ->
-                    requestState(ArmState.HANDOFF_LEFT, ElevatorState.PREPARE_HANDOFF, HandState.HANDOFF);
-            case READY_HANDOFF_MIDDLE ->
+            case READY_HANDOFF_LEFT,
+            READY_HANDOFF_RIGHT,
+            READY_HANDOFF_MIDDLE ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.HANDOFF);
-            case READY_HANDOFF_RIGHT ->
-                    requestState(ArmState.HANDOFF_RIGHT, ElevatorState.PREPARE_HANDOFF, HandState.HANDOFF);
 
-            case EXECUTE_HANDOFF_LEFT -> requestState(ArmState.HANDOFF_LEFT, ElevatorState.HANDOFF, HandState.HANDOFF);
-            case EXECUTE_HANDOFF_MIDDLE ->
+            case EXECUTE_HANDOFF_LEFT ,
+            EXECUTE_HANDOFF_RIGHT,
+             EXECUTE_HANDOFF_MIDDLE ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.HANDOFF, HandState.HANDOFF);
-            case EXECUTE_HANDOFF_RIGHT ->
-                    requestState(ArmState.HANDOFF_RIGHT, ElevatorState.HANDOFF, HandState.HANDOFF);
 
 
             /* ******** INVERTED HANDOFF STATES ******** */

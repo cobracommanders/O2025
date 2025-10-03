@@ -17,10 +17,10 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.24;
         public static final double MotionMagicCruiseVelocity = 5.0;
-        public static final double MotionMagicAcceleration = 2.0;
+        public static final double MotionMagicAcceleration = 1.75;
         public static final double encoderOffset = -0.64111328125 + 0.005371;
         public static final double inchesFromCenter = 6.615;
-        public static final double Tolerance = 0.005;
+        public static final double Tolerance = 0.01;
     }
 
     public static final class ElevatorConstants {

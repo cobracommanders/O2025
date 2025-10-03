@@ -48,7 +48,7 @@ public class Robot extends TimedRobot {
     public static RequestManager requestManager = new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
     public static DriveSubsystem swerve = DriveSubsystem.getInstance();
     private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
-    private final RobotCommands robotCommands = new RobotCommands(trailblazer);
+    private final RobotCommands robotCommands = new RobotCommands(trailblazer, armManager);
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
 
     private final Controls controls = new Controls(requestManager, robotCommands);

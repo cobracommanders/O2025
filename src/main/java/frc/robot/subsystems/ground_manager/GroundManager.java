@@ -37,7 +37,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 }
             }
             case INTAKING -> {
-                if (coralDetector.hasCoral()) {
+                if (coralDetector.getState() == CoralDetectorState.MIDDLE) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                 } else if (Utils.isSimulation() && intakePivot.atGoal() && timeout(Math.random() + 0.5)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;

@@ -158,11 +158,12 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         boolean willSwingOutOfFrame = willArmSwingThroughOutsideFrame(arm.getNormalizedPosition(), state.getPosition());
 
         if (willSwingOutOfFrame) {
-            RobotScoringSide reefSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
-            return switch (reefSide) {
-                case RIGHT -> ArmState.TRANSITION_OUTSIDE_FRAME_LEFT;
-                case LEFT -> ArmState.TRANSITION_OUTSIDE_FRAME_RIGHT;
-            };
+//            RobotScoringSide reefSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
+//            return switch (reefSide) {
+//                case RIGHT -> ArmState.TRANSITION_OUTSIDE_FRAME_LEFT;
+//                case LEFT -> ArmState.TRANSITION_OUTSIDE_FRAME_RIGHT;
+//            };
+            return state;
         } else {
             return state;
         }
@@ -219,6 +220,10 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
                 coordinate2.x(),
                 coordinate2.y());
         visualization.drawIntake(intakeWidth, finalIntakeHeight);
+    }
+
+    public boolean isArmUp() {
+        return isArmUp(arm.getNormalizedPosition());
     }
 
     private boolean isArmUp(double armAngle) {

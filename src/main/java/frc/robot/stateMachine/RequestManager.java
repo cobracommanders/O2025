@@ -10,6 +10,7 @@ import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.config.FeatureFlags;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.subsystems.armManager.ArmManager;
+import frc.robot.subsystems.armManager.ArmManagerState;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.GroundManager;
@@ -45,6 +46,10 @@ public class RequestManager {
         } else {
             return OperatorOptions.getInstance().algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
         }
+    }
+
+    public ArmManagerState.HandGamePieceState getHandGamePiece() {
+        return armCommands.getCurrentGamePiece();
     }
 
     public Command resetArmGamePieceAndIdle() {
