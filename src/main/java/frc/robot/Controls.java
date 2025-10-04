@@ -74,18 +74,6 @@ public class Controls {
                                 requestManager.prepareCoralScoreAndAwaitReady()
                         )
                         .andThen(requestManager.executeCoralScoreAndAwaitIdleOrAuto())
-                        .andThen(runOnce(() -> {
-                            Command currentCommand = driveSubsystem.getCurrentCommand();
-                            if (currentCommand != null) {
-                                currentCommand.cancel();
-                            }
-                        }))
-                        .finallyDo(() -> {
-                            Command currentCommand = driveSubsystem.getCurrentCommand();
-                            if (currentCommand != null) {
-                                currentCommand.cancel();
-                            }
-                        })
         );
         driver.X().onTrue(runOnce(() -> {
             Command currentCommand = driveSubsystem.getCurrentCommand();

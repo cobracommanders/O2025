@@ -277,6 +277,13 @@ public enum ArmManagerState {
         };
     }
 
+    public boolean isCoralScoreState() {
+        return switch (this) {
+            case SCORE_L4_LEFT, SCORE_L3_LEFT, SCORE_L2_LEFT, SCORE_L4_RIGHT, SCORE_L3_RIGHT, SCORE_L2_RIGHT -> true;
+            default -> false;
+        };
+    }
+
     /**
      * Get the "PREPARE_XXX_XXX" state based on the given robot side and scoring level.
      */

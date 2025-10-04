@@ -123,7 +123,7 @@ public class Robot extends TimedRobot {
     public void teleopInit() {
         controls.configureDriveteamCommands();
         controls.configureDefaultCommands();
-        DriveSubsystem.getInstance().setState(DriveStates.TELEOP);
+        DriveSubsystem.getInstance().requestTeleop();
     }
 
     @Override

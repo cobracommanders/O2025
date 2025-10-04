@@ -102,7 +102,7 @@ public class RequestManager {
     }
 
     public Command executeCoralScoreAndAwaitIdleOrAuto() {
-        return armCommands.executeCoralScoreAndAwaitIdleOrAuto();
+        return armCommands.executeCoralScoreAndAwaitComplete();
     }
 
     /**

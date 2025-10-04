@@ -5,9 +5,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.autoAlign.AutoAlign;
-import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.ReefSideOffset;
-import frc.robot.autos.AutoBlocks;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
@@ -17,7 +15,6 @@ import frc.robot.trailblazer.Trailblazer;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.PoseErrorTolerance;
 
-import static edu.wpi.first.wpilibj2.command.Commands.print;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 
 public class RobotCommands {
@@ -40,53 +37,50 @@ public class RobotCommands {
     private final Transform2d INITIAL_DRIVE_OFFSET_LEFT = new Transform2d(0.0, -0.5, Rotation2d.kZero);
     private final Transform2d INITIAL_DRIVE_OFFSET_RIGHT = new Transform2d(0.0, 0.5, Rotation2d.kZero);
 
-    //TODO  let the driver get control of the robot back easily if it is auto aligning
     public Command reefAlignCommand() {
-        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP))
+        return runOnce(() -> DriveSubsystem.getInstance().requestReefAlign())
                 .andThen(
                         trailblazer.followSegment(
                                 new AutoSegment(
                                         AUTOALIGN_CORAL_CONSTRAINTS_DRIVEUP,
                                         AUTOALIGN_CORAL_TOLERANCE_DRIVEUP,
                                         new AutoPoint(() -> switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
-                                            case LEFT -> AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_LEFT);
-                                            case RIGHT -> AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_RIGHT);
+                                            case LEFT ->
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_LEFT);
+                                            case RIGHT ->
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_RIGHT);
                                         })
-                ))).andThen(
+                                )
+                        )
+                ).andThen(
+                        trailblazer.followSegment(
+                                        new AutoSegment(
+                                                AUTOALIGN_CORAL_CONSTRAINTS,
+                                                AUTOALIGN_CORAL_TOLERANCE,
+                                                new AutoPoint(() -> switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
+                                                    case LEFT ->
+                                                            AutoAlign.getInstance().usedScoringPose.transformBy(ARM_DOWN_OFFSET_LEFT);
+                                                    case RIGHT ->
+                                                            AutoAlign.getInstance().usedScoringPose.transformBy(ARM_DOWN_OFFSET_RIGHT);
+                                                })
+                                        )
+                                )
+                                .unless(armManager::isArmUp)
+                ).andThen(
                         trailblazer.followSegment(
                                 new AutoSegment(
                                         AUTOALIGN_CORAL_CONSTRAINTS,
                                         AUTOALIGN_CORAL_TOLERANCE,
-                                        new AutoPoint(() -> {
-
-                                                return switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
-                                                    case LEFT -> AutoAlign.getInstance().usedScoringPose.transformBy(ARM_DOWN_OFFSET_LEFT);
-                                                    case RIGHT -> AutoAlign.getInstance().usedScoringPose.transformBy(ARM_DOWN_OFFSET_RIGHT);
-                                                };
-                                        })))
-                                .until(armManager::isArmUp)
+                                        new AutoPoint(() -> AutoAlign.getInstance().usedScoringPose)))
                 )
-                .andThen(
-                        trailblazer.followSegment(
-                                new AutoSegment(
-                                        AUTOALIGN_CORAL_CONSTRAINTS,
-                                        AUTOALIGN_CORAL_TOLERANCE,
-                                        new AutoPoint(() -> {
-                                                return AutoAlign.getInstance().usedScoringPose;
-                                        })))
-                )
-                .andThen(runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP)));
-    }
-
-    public Command autoReefAlignCommand() {
-        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.AUTO)).withName("auto align");
+                .finallyDo(() -> DriveSubsystem.getInstance().requestTeleop());
     }
 
     public Command algaeAlignCommand() {
-        return runOnce(() -> AutoAlign.getInstance().setAlgaeIntakingOffset(ReefSideOffset.ALGAE_INTAKING)).andThen(runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.ALGAE_ALIGN_TELEOP)));
+        return runOnce(() -> AutoAlign.getInstance().setAlgaeIntakingOffset(ReefSideOffset.ALGAE_INTAKING)).andThen(runOnce(() -> DriveSubsystem.getInstance().requestAlgaeAlign()));
     }
 
     public Command driveTeleopCommand() {
-        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.TELEOP));
+        return runOnce(() -> DriveSubsystem.getInstance().requestTeleop());
     }
 }

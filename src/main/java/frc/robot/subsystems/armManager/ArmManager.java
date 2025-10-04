@@ -438,6 +438,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         setStateFromRequest(getState().getCoralReadyToScoreState());
     }
 
+    public boolean isCoralScoreComplete() {
+        return getState().isCoralScoreState() && atPosition();
+    }
+
     public void requestAlgaeNetScore(RobotScoringSide robotSide) {
         if (getState().handGamePieceState.isAlgae()) {
             setStateFromRequest(ArmManagerState.getNetPrepareScore(robotSide));
@@ -536,9 +540,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     .withName("requestCoralPrepareAndAwaitReady");
         }
 
-        public Command executeCoralScoreAndAwaitIdleOrAuto() {
+        public Command executeCoralScoreAndAwaitComplete() {
             return armManager.runOnce(armManager::requestCoralScoreExecution)
-                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_EMPTY).unless(DriverStation::isAutonomousEnabled))
+                    .andThen(Commands.waitUntil(armManager::isCoralScoreComplete))
                     .onlyIf(armManager::isReadyToScoreCoral)
                     .withName("executeCoralScoreAndAwaitIdle");
         }

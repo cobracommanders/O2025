@@ -183,8 +183,23 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         sendSwerveRequest(getState());
     }
 
-    public void setState(DriveStates newState) {
-        setStateFromRequest(newState);
+    public void requestTeleop() {
+        setStateFromRequest(DriveStates.TELEOP);
+    }
+
+    public void requestAuto() {
+        setStateFromRequest(DriveStates.AUTO);
+        setTeleopSpeeds(0.0, 0.0, 0.0);
+    }
+
+    public void requestReefAlign() {
+        setStateFromRequest(DriveStates.REEF_ALIGN_TELEOP);
+        setTeleopSpeeds(0.0, 0.0, 0.0);
+    }
+
+    public void requestAlgaeAlign() {
+        setStateFromRequest(DriveStates.ALGAE_ALIGN_TELEOP);
+        setTeleopSpeeds(0.0, 0.0, 0.0);
     }
 
     protected void sendSwerveRequest(DriveStates newState) {
