@@ -6,16 +6,13 @@ public class OperatorOptions {
 
     public ScoreLocation scoreLocation;
     public AlgaeIntakeLevel algaeIntakeLevel;
-    public CoralMode coralMode;
 
-    public OperatorOptions() {
+    private OperatorOptions() {
         this.scoreLocation = ScoreLocation.L4;
         this.algaeIntakeLevel = AlgaeIntakeLevel.LOW_REEF;
         DogLog.log("Robot/ScoreLocation", "L4");
-        this.coralMode = CoralMode.NORMAL_MODE;
         DogLog.log("Robot/CoralMode", "NORMAL");
         DogLog.log("Robot/AlgaeLocation", "GROUND");
-
     }
 
     public enum ScoreLocation {
@@ -26,14 +23,11 @@ public class OperatorOptions {
         BARGE,
         PROCESSOR
     }
+
     public enum AlgaeIntakeLevel {
         GROUND_ALGAE,
         LOW_REEF,
         HIGH_REEF
-    }
-    public enum CoralMode {
-        CORAL_MODE,
-        NORMAL_MODE
     }
 
     private static OperatorOptions instance;

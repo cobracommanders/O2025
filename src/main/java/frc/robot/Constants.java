@@ -16,11 +16,11 @@ public final class Constants {
         public static final double I = 0;
         public static final double D = 0;
         public static final double G = 0.24;
-        public static final double MotionMagicCruiseVelocity = 1.75;
-        public static final double MotionMagicAcceleration = 40;
-        public static final double MotionMagicJerk = 100;
+        public static final double MotionMagicCruiseVelocity = 5.0;
+        public static final double MotionMagicAcceleration = 2.0;
         public static final double encoderOffset = -0.64111328125 + 0.005371;
         public static final double inchesFromCenter = 6.615;
+        public static final double Tolerance = 0.005;
     }
 
     public static final class ElevatorConstants {
@@ -29,9 +29,9 @@ public final class Constants {
         public static final double I = 0;
         public static final double D = 0;
         public static final double G = 0.48;
-        public static final double MotionMagicCruiseVelocity = 3;
-        public static final double MotionMagicAcceleration = 60;
-        public static final double MotionMagicJerk = 200;
+        public static final double MotionMagicCruiseVelocity = 3.6;
+        public static final double MotionMagicAcceleration = 5;
+        public static final double Tolerance = 0.015;
     }
 
     public static final class IntakePivotConstants {

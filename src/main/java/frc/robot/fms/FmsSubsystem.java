@@ -15,9 +15,6 @@ public class FmsSubsystem extends SubsystemBase {
     private boolean isSimulation = false;
     private Alliance alliance = Alliance.Red;
 
-    public FmsSubsystem() {
-    }
-
     public boolean isDisabled() {
         return disabled;
     }

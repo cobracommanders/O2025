@@ -17,7 +17,7 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
 
     private CoralDetector coralDetector = CoralDetector.getInstance();
     
-    public IntakeRollers() {
+    private IntakeRollers() {
         super(IntakeRollersStates.IDLE);
         motor = new TalonFX(Ports.IntakeRollersPorts.INTAKE_ROLLER_MOTOR);
     }

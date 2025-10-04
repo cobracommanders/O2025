@@ -1,30 +1,25 @@
 package frc.robot.subsystems.ground_manager.coraldetection;
 
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
-
 import dev.doglog.DogLog;
 import frc.robot.Constants;
-
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorStates;
 
-public class CoralDetector extends StateMachine<CoralDetectorStates> {
-    public CANrange lCANRange;
-    public CANrange rCANRange;
+public class CoralDetector extends StateMachine<CoralDetectorState> {
+    private final CANrange lCANRange;
+    private final CANrange rCANRange;
     public boolean lDetected = false;
     public boolean rDetected = false;
     public double lDistance;
     public double rDistance;
     public final String name;
-    
-    public boolean hasSimCoral = false;
 
-    public CoralDetector() {
-        super(CoralDetectorStates.NONE);
+    public CoralDetectorState simCoralPosition = CoralDetectorState.NONE;
+
+    private CoralDetector() {
+        super(CoralDetectorState.NONE);
         lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
         rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
         this.name = getName();
@@ -33,7 +28,7 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     protected void collectInputs() {
         lDistance = lCANRange.getDistance().getValueAsDouble();
         rDistance = rCANRange.getDistance().getValueAsDouble();
-        
+
         //We can switch to using .isDetected() if we would like.
         lDetected = lDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
         rDetected = rDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
@@ -44,32 +39,28 @@ public class CoralDetector extends StateMachine<CoralDetectorStates> {
     }
 
     @Override
-    protected CoralDetectorStates getNextState(CoralDetectorStates currentState) {
-        if (Utils.isSimulation()){
-            if (hasSimCoral){
-                return CoralDetectorStates.MIDDLE;
-            } else {
-                return CoralDetectorStates.NONE;
-            }
+    protected CoralDetectorState getNextState(CoralDetectorState currentState) {
+        if (Utils.isSimulation()) {
+            return simCoralPosition;
         }
         if (lDetected && rDetected) {
-            return CoralDetectorStates.MIDDLE;
+            return CoralDetectorState.MIDDLE;
         } else if (!lDetected && !rDetected) {
-            return CoralDetectorStates.NONE;
+            return CoralDetectorState.NONE;
         } else if (lDetected && !rDetected) {
-            return CoralDetectorStates.LEFT;
+            return CoralDetectorState.LEFT;
         } else {
-            return CoralDetectorStates.RIGHT;
+            return CoralDetectorState.RIGHT;
         }
 
     }
 
-    public boolean hasCoral(){
-        return getState() != CoralDetectorStates.NONE;
+    public boolean hasCoral() {
+        return getState() != CoralDetectorState.NONE;
     }
 
-    public void setSimCoral(boolean hasCoral){
-        this.hasSimCoral = hasCoral;
+    public void setSimCoral(CoralDetectorState position) {
+        this.simCoralPosition = position;
     }
 
     private static CoralDetector instance;
