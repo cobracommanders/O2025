@@ -42,11 +42,12 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 } else if (Utils.isSimulation() && intakePivot.atGoal() && timeout(Math.random() + 0.5)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
                     CoralDetectorState simCoralPosition =
-                            switch ((int) (Math.random() * 3)) {
-                                case 1 -> CoralDetectorState.LEFT;
-                                case 2 -> CoralDetectorState.RIGHT;
-                                default -> CoralDetectorState.MIDDLE;
-                            };
+                            CoralDetectorState.RIGHT;
+                            // switch ((int) (Math.random() * 3)) {
+                            //     case 1 -> CoralDetectorState.LEFT;
+                            //     case 2 -> CoralDetectorState.RIGHT;
+                            //     default -> CoralDetectorState.MIDDLE;
+                            //};
                     coralDetector.setSimCoral(simCoralPosition);
                 }
             }

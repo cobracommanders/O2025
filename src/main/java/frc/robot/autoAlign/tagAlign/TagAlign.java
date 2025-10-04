@@ -274,18 +274,19 @@ public class TagAlign {
     }
 
     public boolean needToMove(Pose2d goal) {
-        var robotPose = localization.getPose();
-        var translationBad =
-                (robotPose.getTranslation().getDistance(goal.getTranslation())
-                        > NEED_TO_MOVE_TRANSLATION_THRESHOLD.get());
-        var rotationBad =
-                !MathUtil.isNear(
-                        goal.getRotation().getDegrees(),
-                        robotPose.getRotation().getDegrees(),
-                        NEED_TO_MOVE_ROTATION_THRESHOLD.get(),
-                        -180.0,
-                        180.0);
-        return translationBad || rotationBad;
+        // var robotPose = localization.getPose();
+        // var translationBad =
+        //         (robotPose.getTranslation().getDistance(goal.getTranslation())
+        //                 > NEED_TO_MOVE_TRANSLATION_THRESHOLD.get());
+        // var rotationBad =
+        //         !MathUtil.isNear(
+        //                 goal.getRotation().getDegrees(),
+        //                 robotPose.getRotation().getDegrees(),
+        //                 NEED_TO_MOVE_ROTATION_THRESHOLD.get(),
+        //                 -180.0,
+        //                 180.0);
+        // return translationBad || rotationBad;
+        return !inRange(goal);
     }
 
     public boolean inRange(Pose2d goal) {

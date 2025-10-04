@@ -27,22 +27,6 @@ public class AutoCommands {
 //   }
 
     public Command l4ApproachCommand(ReefPipe pipe, RobotScoringSide scoringSide) {
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
-        System.out.println("RUNNING L4 APPROACH COMMAND");
         return Commands.runOnce(
                         () -> {
                             autoAlign.setAutoReefPipeOverride(pipe);

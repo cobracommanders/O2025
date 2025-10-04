@@ -19,6 +19,8 @@ import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
+import java.util.Set;
+
 public class RobotCommands {
     private final RequestManager robotManager = RequestManager.getInstance();
     private final OperatorOptions operatorOptions = OperatorOptions.getInstance();
@@ -136,7 +138,8 @@ public class RobotCommands {
     }
 
     public Command reefAlignCommand() {
-        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.TELEOP).andThen(scoreCommand())).withName("teleop align");
+        //TODO  let the driver get control of the robot back easily if it is auto aligning
+        return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP)).andThen(DriveSubsystem.getInstance().waitForState(DriveStates.TELEOP)).andThen(scoreCommand()).withName("teleop align");
     }
 
     public Command autoReefAlignCommand() {
