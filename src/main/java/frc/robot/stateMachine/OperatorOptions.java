@@ -7,7 +7,7 @@ import frc.robot.FieldConstants;
 public class OperatorOptions {
     public CoralScoreLocation coralScoreLocation = CoralScoreLocation.L4;
     public AlgaeScoreLocation algaeScoreLocation = AlgaeScoreLocation.BARGE;
-    public AlgaeIntakeLevel algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE;
+    public AlgaeIntakeLevel algaeIntakeLevel = AlgaeIntakeLevel.LOW_REEF;
 
     private OperatorOptions() {}
 

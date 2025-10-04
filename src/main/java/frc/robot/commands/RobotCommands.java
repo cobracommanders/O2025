@@ -40,6 +40,7 @@ public class RobotCommands {
     private final Transform2d INITIAL_DRIVE_OFFSET_LEFT = new Transform2d(0.0, -0.5, Rotation2d.kZero);
     private final Transform2d INITIAL_DRIVE_OFFSET_RIGHT = new Transform2d(0.0, 0.5, Rotation2d.kZero);
 
+    //TODO  let the driver get control of the robot back easily if it is auto aligning
     public Command reefAlignCommand() {
         return runOnce(() -> DriveSubsystem.getInstance().setState(DriveStates.REEF_ALIGN_TELEOP))
                 .andThen(
