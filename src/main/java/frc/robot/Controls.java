@@ -9,7 +9,6 @@ import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
-import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 
@@ -58,7 +57,7 @@ public class Controls {
         ));
 
         driver.leftTrigger().onTrue(requestManager.coralIntakeUntilPiece());
-        driver.rightTrigger().onTrue(requestManager.executeCoralScoreAndAwaitIdleOrAuto());
+        driver.rightTrigger().onTrue(requestManager.executeCoralScoreAndAwaitComplete());
 //        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
         // driver.POV180().onTrue(runOnce(() -> Robot.armManager.elevatorTickDown()));
@@ -67,14 +66,7 @@ public class Controls {
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
 //        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
-        driver.rightBumper().onTrue(
-                robotCommands.reefAlignCommand()
-                        .alongWith(
-                                Commands.waitUntil(() -> requestManager.getHandGamePiece().isCoral()),
-                                requestManager.prepareCoralScoreAndAwaitReady()
-                        )
-                        .andThen(requestManager.executeCoralScoreAndAwaitIdleOrAuto())
-        );
+        driver.rightBumper().onTrue(robotCommands.teleopReefAlignAndScore());
         driver.X().onTrue(runOnce(() -> {
             Command currentCommand = driveSubsystem.getCurrentCommand();
             if (currentCommand != null) {

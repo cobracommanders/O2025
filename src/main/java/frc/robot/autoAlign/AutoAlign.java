@@ -149,6 +149,16 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         return bestAlgaeSide.getPose(reefSideOffset, robotScoringSide, robotPose);
     }
 
+
+    double reefMaxRadius = Units.inchesToMeters(76.0 / 2);
+
+    public double approximateDistanceToReef() {
+        Pose2d robotPose = LocalizationSubsystem.getInstance().getPose();
+        return getAllianceCenterOfReef(robotPose).getDistance(robotPose.getTranslation())
+                - Units.inchesToMeters(35.0 / 2.0) // Distance from center to edge of robot
+                - reefMaxRadius; // Distance from center to edge of reef
+    }
+
     @Override
     protected void collectInputs() {
         robotPose = localization.getPose();
@@ -205,6 +215,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         DogLog.log("AutoAlign/UsedScoringPose", usedScoringPose);
         DogLog.log("AutoAlign/IsAligned", isAligned);
         DogLog.log("AutoAlign/IsAlignedDebounced", isAlignedDebounced);
+        DogLog.log("AutoAlign/ApproximateDistanceToReef", approximateDistanceToReef());
     }
 
     public ObstructionKind getObstruction() {

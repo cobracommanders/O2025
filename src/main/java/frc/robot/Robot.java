@@ -27,7 +27,6 @@ import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
-import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.trailblazer.Trailblazer;
@@ -48,7 +47,7 @@ public class Robot extends TimedRobot {
     public static RequestManager requestManager = new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
     public static DriveSubsystem swerve = DriveSubsystem.getInstance();
     private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
-    private final RobotCommands robotCommands = new RobotCommands(trailblazer, armManager);
+    private final RobotCommands robotCommands = new RobotCommands(trailblazer, requestManager);
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
 
     private final Controls controls = new Controls(requestManager, robotCommands);

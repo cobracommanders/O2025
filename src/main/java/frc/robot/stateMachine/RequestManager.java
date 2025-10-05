@@ -87,6 +87,10 @@ public class RequestManager {
         return armCommands.requestCoralPrepareAndAwaitReady(scoringSide, scoringLevel);
     }
 
+    public boolean isArmReadyToScoreCoral() {
+        return armCommands.isArmReadyToScoreCoral();
+    }
+
     public Command prepareCoralScoreAndAwaitReady() {
         return prepareCoralScoreAndAwaitReady(
                 this::reefRobotSide,
@@ -101,7 +105,7 @@ public class RequestManager {
         );
     }
 
-    public Command executeCoralScoreAndAwaitIdleOrAuto() {
+    public Command executeCoralScoreAndAwaitComplete() {
         return armCommands.executeCoralScoreAndAwaitComplete();
     }
 

@@ -13,7 +13,6 @@ import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
-import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.AutoPoint;
@@ -138,7 +137,7 @@ public class AutoBlocks {
                                         // Moves the arm in parallel, the group won't move on until this command finishes and the arm is ready
                                         .alongWith(requestManager.prepareCoralScoreAndAwaitReady(FieldConstants.PipeScoringLevel.L2)),
 
-                                requestManager.executeCoralScoreAndAwaitIdleOrAuto());
+                                requestManager.executeCoralScoreAndAwaitComplete());
         }
 
 
@@ -162,7 +161,7 @@ public class AutoBlocks {
                                         // Moves the arm in parallel, the group won't move on until this command finishes and the arm is ready
                                         .alongWith(requestManager.prepareCoralScoreAndAwaitReady(FieldConstants.PipeScoringLevel.L4))
                         ,
-                                requestManager.executeCoralScoreAndAwaitIdleOrAuto());
+                                requestManager.executeCoralScoreAndAwaitComplete());
         }
 
         public Command scorePreloadL4(ReefPipe pipe, RobotScoringSide scoringSide) {
@@ -185,7 +184,7 @@ public class AutoBlocks {
                         // Moves the arm in parallel, the group won't move on until this command finishes and the arm is ready
                                         .alongWith(requestManager.prepareCoralScoreAndAwaitReady(FieldConstants.PipeScoringLevel.L4))
                         ,
-                                requestManager.executeCoralScoreAndAwaitIdleOrAuto());
+                                requestManager.executeCoralScoreAndAwaitComplete());
         }
 
         public Command driveToBackReefRedNonProcessor() {
