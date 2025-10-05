@@ -105,6 +105,9 @@ public class RequestManager {
         );
     }
 
+    /**
+     * Execute coral score and await movement completion.
+     */
     public Command executeCoralScoreAndAwaitComplete() {
         return armCommands.executeCoralScoreAndAwaitComplete();
     }

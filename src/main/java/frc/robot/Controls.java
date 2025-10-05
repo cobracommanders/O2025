@@ -51,34 +51,55 @@ public class Controls {
         var operatorOptions = OperatorOptions.getInstance();
 
         /* ******** DRIVER ******** */
-        driver.leftBumper().onTrue(Commands.either(
-                requestManager.groundAlgaeIntake(),
-                requestManager.reefAlgaeIntake(),
-                () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
-        ));
-
+        // Intake Coral
         driver.leftTrigger().onTrue(requestManager.coralIntakeUntilPiece());
-//        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
+
+        // Reset Gyro
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
-        // driver.POV180().onTrue(runOnce(() -> Robot.armManager.elevatorTickDown()));
-        // driver.POV0().onTrue(runOnce(() -> Robot.armManager.elevatorTickUp()));
-        driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));
-        driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
+
+        // Reset superstructure and clear game piece
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
-//        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
+
+        // Score Coral
         driver.rightBumper()
+                // whileTrue will cancel the command when the button is released
                 .whileTrue(
+                        // Wait until the hand has a coral
+                        // This lets the button be held while handoff is happening without causing issues
                         Commands.waitUntil(() -> requestManager.getHandGamePiece().isCoral())
-                                .andThen(robotCommands.teleopReefAlignAndScore(driver::isStickActive).asProxy())
+                                .andThen( // Then align and score
+                                        // The .asProxy() at the end means that this command won't require the subsystems of .teleopReefAlignAndScore() until it gets to this point
+                                        // This lets the earlier .waitUntil() command run without interrupting the handoff command by requiring the armManager subsystem
+                                        robotCommands.teleopReefAlignAndScore(driver::isStickActive).asProxy()
+                                )
                 )
-                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 1.0));
+                // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
+                .onFalse(
+                        // Resets arm only if the robot is far away from the reef and not likely to score again soon
+                        requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 1.0)
+                );
+
+        // Fix drivetrain state
         driver.X().onTrue(runOnce(() -> {
             Command currentCommand = driveSubsystem.getCurrentCommand();
             if (currentCommand != null) {
                 currentCommand.cancel();
             }
         }).andThen(robotCommands.driveTeleopCommand()));
-//        driver.Y().onTrue(robotCommands.algaeAlignCommand());
+
+        // Align to Reef Algae
+        // driver.Y().onTrue(robotCommands.algaeAlignCommand());
+
+        // Algae Intake
+        driver.leftBumper().onTrue(Commands.either(
+                requestManager.groundAlgaeIntake(),
+                requestManager.reefAlgaeIntake(),
+                () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
+        ));
+
+        // Tick Intake Pivot
+        driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));
+        driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
 
 
         /* ******** OPERATOR ******** */

@@ -545,11 +545,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     .withName("requestCoralPrepareAndAwaitReady");
         }
 
+        /**
+         * Execute coral score and await movement completion.
+         */
         public Command executeCoralScoreAndAwaitComplete() {
             return armManager.runOnce(armManager::requestCoralScoreExecution)
                     .andThen(Commands.waitUntil(armManager::isCoralScoreComplete))
                     .onlyIf(armManager::isReadyToScoreCoral)
-                    .withName("executeCoralScoreAndAwaitIdle");
+                    .withName("executeCoralScoreAndAwaitComplete");
         }
 
         /**
