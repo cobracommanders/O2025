@@ -15,6 +15,8 @@ import frc.robot.trailblazer.Trailblazer;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.PoseErrorTolerance;
 
+import java.util.function.BooleanSupplier;
+
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 
 public class RobotCommands {
@@ -37,7 +39,7 @@ public class RobotCommands {
     private final Transform2d AWAIT_ARM_UP_LEFT_OFFSET = new Transform2d(0.0, -0.2, Rotation2d.kZero);
     private final Transform2d AWAIT_ARM_UP_RIGHT_OFFSET = new Transform2d(0.0, 0.2, Rotation2d.kZero);
 
-    public Command teleopReefAlignAndScore() {
+    public Command teleopReefAlignAndScore(BooleanSupplier backupDriveInterrupt) {
         return Commands.parallel(
                         requestManager.prepareCoralScoreAndAwaitReady(),
                         trailblazer.followSegment(
@@ -66,19 +68,30 @@ public class RobotCommands {
                                                 )
                                         ).until(requestManager::isArmReadyToScoreCoral)
                                 )
-                )
-                .andThen(
+                ).andThen(
+                        trailblazer.followSegment(
+                                new AutoSegment(
+                                        CORAL_SCORE_CONSTRAINTS,
+                                        CORAL_SCORE_TOLERANCE,
+                                        new AutoPoint(() -> AutoAlign.getInstance().usedScoringPose)
+                                )
+                        ),
                         requestManager.executeCoralScoreAndAwaitComplete(),
                         trailblazer.followSegment(
                                 new AutoSegment(
                                         CORAL_SCORE_CONSTRAINTS,
                                         CORAL_SCORE_TOLERANCE,
-                                        new AutoPoint(() -> AutoAlign.getInstance().usedScoringPose)))
+                                        new AutoPoint(() -> switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
+                                            case LEFT ->
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_LEFT);
+                                            case RIGHT ->
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_RIGHT);
+                                        })
+                                )
+                        ).until(backupDriveInterrupt)
                 )
-                .andThen(requestManager.executeCoralScoreAndAwaitIdleOrAuto())
                 .beforeStarting(() -> DriveSubsystem.getInstance().requestReefAlign())
-                .finallyDo(() -> DriveSubsystem.getInstance().requestTeleop()
-                );
+                .finallyDo((i) -> DriveSubsystem.getInstance().requestTeleop());
     }
 
     public Command algaeAlignCommand() {

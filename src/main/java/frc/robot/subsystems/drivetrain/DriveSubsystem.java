@@ -95,13 +95,14 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 
     @Override
     protected DriveStates getNextState(DriveStates currentState) {
-        return switch (currentState) {
-            case AUTO, TELEOP -> FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
-            case REEF_ALIGN_TELEOP -> AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.REEF_ALIGN_TELEOP;
-            case ALGAE_ALIGN_TELEOP ->
-                    AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
-
+        DriveStates nextState = currentState;
+        switch (currentState) {
+            case AUTO, TELEOP -> nextState = FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
+            case REEF_ALIGN_TELEOP -> { /* Await Control */ }
+            case ALGAE_ALIGN_TELEOP -> nextState = AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
         };
+
+        return nextState;
     }
 
     public void setTeleopSpeeds(double x, double y, double theta) {
