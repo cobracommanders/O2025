@@ -39,7 +39,7 @@ public class RobotCommands {
     private static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, 360, 2.0, 720);
 
     // Position offsets
-    // These are setup as constants because they are called periodicaly while trailblazer runs, and doing this reduces objects created and therefore reduces garbage collection time
+    // These are set up as constants because they are called periodically while trailblazer runs, and doing this reduces objects created and therefore reduces garbage collection time
 
     // Offset that is used to wait for the arm and elevator to be in position to avoid hitting the reef
     // Just far enough back for the mechanisms to move freely
@@ -52,6 +52,15 @@ public class RobotCommands {
     private final Transform2d DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET = new Transform2d(0.0, 0.5, Rotation2d.kZero);
 
 
+    // .asProxy() means that the full command (.teleopReefAlignAndScore) won't require the subsystems used
+    // by the child command (eg .prepareCoralScoreAndAwaitReady) decorated with .asProxy() until it actually
+    // runs that command. This is used to start driving while allowing another command that is using the
+    // armManager (like the handoff) to still run without being interrupted.
+    //
+    // Note that this can be somewhat complicated, refer to the warnings in the wpilib docs before using it if possible.
+    // https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html#scheduling-other-commands
+
+
     // 1. Prepare the arm for scoring while driving close to the reef
     // 2. Drive up to the final scoring position
     // 3. Score coral
@@ -60,8 +69,14 @@ public class RobotCommands {
         return sequence(
                 // Start by driving up to the reef and preparing the arm for scoring in parallel
                 parallel(
-                        // Set arm and elevator to prepare score state
-                        requestManager.prepareCoralScoreAndAwaitReady(),
+                        sequence(
+                                // Wait until the hand has a coral
+                                // This lets the command run while the handoff is happening without causing issues
+                                waitUntil(() -> requestManager.getHandGamePiece().isCoral()),
+
+                                // Set arm and elevator to prepare score state
+                                requestManager.prepareCoralScoreAndAwaitReady().asProxy() // See note above for .asProxy()
+                        ),
                         // Drive up to the AWAIT_ARM_OFFSET position
                         // This ensures the robot doesn't get too close to the reef while the arm is still preparing
                         trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
@@ -81,7 +96,7 @@ public class RobotCommands {
                     return AutoAlign.getInstance().usedScoringPose;
                 }))),
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
-                requestManager.executeCoralScoreAndAwaitComplete(),
+                requestManager.executeCoralScoreAndAwaitComplete().asProxy(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                             // Switch between the offsets based on the side the robot is scoring on

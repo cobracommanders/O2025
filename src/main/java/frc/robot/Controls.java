@@ -63,21 +63,10 @@ public class Controls {
         // Score Coral
         driver.rightBumper()
                 // whileTrue will cancel the command when the button is released
-                .whileTrue(
-                        // Wait until the hand has a coral
-                        // This lets the button be held while handoff is happening without causing issues
-                        Commands.waitUntil(() -> requestManager.getHandGamePiece().isCoral())
-                                .andThen( // Then align and score
-                                        // The .asProxy() at the end means that this command won't require the subsystems of .teleopReefAlignAndScore() until it gets to this point
-                                        // This lets the earlier .waitUntil() command run without interrupting the handoff command by requiring the armManager subsystem
-                                        robotCommands.teleopReefAlignAndScore(driver::isStickActive).asProxy()
-                                )
-                )
+                .whileTrue(robotCommands.teleopReefAlignAndScore(driver::isStickActive))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
-                .onFalse(
-                        // Resets arm only if the robot is far away from the reef and not likely to score again soon
-                        requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 1.0)
-                );
+                // Only resets if the robot is far away from the reef and not likely to score again soon
+                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 1.0));
 
         // Fix drivetrain state
         driver.X().onTrue(runOnce(() -> {
