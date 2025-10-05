@@ -57,18 +57,21 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private ArmSchedulerState assessState() {
         boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());
         boolean canMoveArmInternally = !willArmHitIntakeOrDrivetrain(targetArmState.getPosition(), elevator.getHeight());
-        boolean willArmExtendOutOfFrame = willArmExtendOutOfFrame(targetArmState.getPosition());
-        boolean isArmExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
 
-        if (willArmExtendOutOfFrame && isArmExtendingOutOfFrame) {
-            return ArmSchedulerState.PARALLEL;
-        }
+        // Ideally no longer needed with new coral autoalign
 
-        if (willArmExtendOutOfFrame && !elevatorAtPosition() && canMoveElevatorInternally) {
-            return ArmSchedulerState.ELEVATOR_FIRST;
-        } else if (isArmExtendingOutOfFrame && !armAtPosition() && canMoveArmInternally) {
-            return ArmSchedulerState.ARM_FIRST;
-        }
+//        boolean willArmExtendOutOfFrame = willArmExtendOutOfFrame(targetArmState.getPosition());
+//        boolean isArmExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
+
+//        if (willArmExtendOutOfFrame && isArmExtendingOutOfFrame) {
+//            return ArmSchedulerState.PARALLEL;
+//        }
+//
+//        if (willArmExtendOutOfFrame && !elevatorAtPosition() && canMoveElevatorInternally) {
+//            return ArmSchedulerState.ELEVATOR_FIRST;
+//        } else if (isArmExtendingOutOfFrame && !armAtPosition() && canMoveArmInternally) {
+//            return ArmSchedulerState.ARM_FIRST;
+//        }
 
         if (canMoveElevatorInternally && canMoveArmInternally) {
             return ArmSchedulerState.PARALLEL;
