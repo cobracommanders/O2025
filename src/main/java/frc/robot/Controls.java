@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Ports.OIPorts;
+import frc.robot.autoAlign.AutoAlign;
 import frc.robot.commands.RobotCommands;
 import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
@@ -57,7 +58,6 @@ public class Controls {
         ));
 
         driver.leftTrigger().onTrue(requestManager.coralIntakeUntilPiece());
-        driver.rightTrigger().onTrue(requestManager.executeCoralScoreAndAwaitComplete());
 //        driver.rightBumper().onTrue(Robot.robotCommands.prepareScoreWithHandoffCheckCommand());
         driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
         // driver.POV180().onTrue(runOnce(() -> Robot.armManager.elevatorTickDown()));
@@ -66,7 +66,12 @@ public class Controls {
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
 //        driver.B().onTrue(Robot.robotCommands.reefAlignCommand());
-        driver.rightBumper().onTrue(robotCommands.teleopReefAlignAndScore());
+        driver.rightBumper()
+                .whileTrue(
+                        Commands.waitUntil(() -> requestManager.getHandGamePiece().isCoral())
+                                .andThen(robotCommands.teleopReefAlignAndScore(driver::isStickActive).asProxy())
+                )
+                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 1.0));
         driver.X().onTrue(runOnce(() -> {
             Command currentCommand = driveSubsystem.getCurrentCommand();
             if (currentCommand != null) {
