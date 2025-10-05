@@ -3,9 +3,7 @@ package frc.robot.subsystems.armManager.armScheduler;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.autoAlign.AutoAlign;
-import frc.robot.autoAlign.RobotScoringSide;
-import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.Constants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
@@ -40,8 +38,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     }
 
     private final double armLength = Units.inchesToMeters(24.5);
-    private final double armWidth = Units.inchesToMeters(5.0);
-    private final double handHeight = Units.inchesToMeters(5.0);
+    private final double armWidth = Units.inchesToMeters(5.0); // Left-right width of the arm when viewed from the front
+    private final double handHeight = Units.inchesToMeters(5.0); // Used for algae floor intake, the length of arm that can contact the intake when the arm is horizontal
 
     private final double driveWidth = Units.inchesToMeters(35.0);
     private final double driveHeight = Units.inchesToMeters(6.5);
@@ -189,6 +187,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
             }
             case ARM_FIRST -> {
                 arm.setState(getArmStateWithSwingDirection(targetArmState));
+                double elevatorPosition = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
+                elevator.setStateCustom(elevatorPosition);
             }
             case READY -> {
                 // Clear target state
@@ -203,6 +203,40 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         }
     }
 
+    /**
+     * Gets the elevator position that will be closest to the desired position while not hitting the intake or drivetrain with the arm.
+     */
+    public double getNearestElevatorHeightWithoutArmCollision(double armPosition, double targetElevatorPosition) {
+        // Make sure the elevator is actually blocked by the intake or drivetrain
+        boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(armPosition, targetElevatorPosition);
+        if (canMoveElevatorInternally) {
+            return targetElevatorPosition;
+        }
+
+        // Only handle moving down for now
+        if (targetElevatorState.getPosition() > elevator.getHeight()) {
+            return targetElevatorPosition;
+        }
+
+        // Because of the first check, we know the arm would hit the intake or drivetrain if the elevator moved all the way, so move just above the intake to be safe
+        double desiredHeight = finalIntakeHeight + (armWidth / 2.0) + Units.inchesToMeters(1.0);
+
+        double minElevatorPositionForArm = maximizeElevatorPositionForDesiredArmHeight(armPosition, desiredHeight);
+
+        // No need to go below the target position
+        return Math.max(targetElevatorPosition, minElevatorPositionForArm);
+    }
+
+    /**
+     * Gets the elevator position that will put the center of the arm at the desired y height from the floor.
+     */
+    public double maximizeElevatorPositionForDesiredArmHeight(double armPosition, double desiredArmHeight) {
+        double armPositionRadians = Units.rotationsToRadians(armPosition);
+        double currentArmHeight = Math.sin(armPositionRadians) * armLength;
+
+        return desiredArmHeight - currentArmHeight - elevatorBaseHeight;
+    }
+
     @Override
     protected void collectInputs() {
         DogLog.log("ArmScheduler/atPosition", atPosition());
@@ -214,6 +248,10 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         DogLog.log("ArmScheduler/armHittingDrivetrain", willArmHitDrivetrain(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
         Coordinate[] coordinates = getArmCoordinates(arm.getNormalizedPosition(), elevator.getHeight());
+
+        DogLog.log("ArmScheduler/sin", Math.sin(Units.rotationsToRadians(arm.getNormalizedPosition())));
+        DogLog.log("ArmScheduler/cos", Math.cos(Units.rotationsToRadians(arm.getNormalizedPosition())));
+
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
         visualization.drawArm(

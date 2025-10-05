@@ -1,5 +1,6 @@
 package frc.robot;
 
+import frc.robot.subsystems.armManager.elevator.ElevatorState;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 
 public final class Constants {
@@ -32,6 +33,7 @@ public final class Constants {
         public static final double MotionMagicCruiseVelocity = 3.6;
         public static final double MotionMagicAcceleration = 5;
         public static final double Tolerance = 0.015;
+        public static final double MaxHeight = ElevatorState.ALGAE_NET.getPosition();
     }
 
     public static final class IntakePivotConstants {
@@ -75,11 +77,12 @@ public final class Constants {
         public static final double coralStallCurrent = 40;
         public static final double algaeStallCurrent = 80;
     }
-    public static final class CoralDetectorConstants{
+
+    public static final class CoralDetectorConstants {
         public static final double DETECTION_THRESHOLD = 0.065;
     }
 
-    public static final class VisionConstants{
+    public static final class VisionConstants {
         public static final double xyStandardDeviation = 0.0;
         public static final double thetaStandardDeviation = 0.0;
     }
