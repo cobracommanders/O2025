@@ -4,7 +4,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefSideOffset;
 import frc.robot.stateMachine.RequestManager;
@@ -17,6 +16,7 @@ import frc.robot.util.PoseErrorTolerance;
 
 import java.util.function.BooleanSupplier;
 
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
 
 public class RobotCommands {
@@ -28,50 +28,33 @@ public class RobotCommands {
         this.trailblazer = trailblazer;
     }
 
-    private static final PoseErrorTolerance CORAL_SCORE_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(1.0), 1.0);
-    public static final AutoConstraintOptions CORAL_SCORE_CONSTRAINTS = new AutoConstraintOptions(5.0, 360, 2.0, 720);
+    private static final PoseErrorTolerance CORAL_SCORE_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
+    public static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, 360, 2.0, 720);
 
-    private static final PoseErrorTolerance INITIAL_DRIVE_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(15.0), 10.0);
-    public static final AutoConstraintOptions INITIAL_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, 360, 3.0, 720);
-
-    private final Transform2d INITIAL_DRIVE_OFFSET_LEFT = new Transform2d(0.0, -0.5, Rotation2d.kZero);
-    private final Transform2d INITIAL_DRIVE_OFFSET_RIGHT = new Transform2d(0.0, 0.5, Rotation2d.kZero);
     private final Transform2d AWAIT_ARM_UP_LEFT_OFFSET = new Transform2d(0.0, -0.2, Rotation2d.kZero);
     private final Transform2d AWAIT_ARM_UP_RIGHT_OFFSET = new Transform2d(0.0, 0.2, Rotation2d.kZero);
+    private final Transform2d DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET = new Transform2d(0.0, -0.5, Rotation2d.kZero);
+    private final Transform2d DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET = new Transform2d(0.0, 0.5, Rotation2d.kZero);
 
     public Command teleopReefAlignAndScore(BooleanSupplier backupDriveInterrupt) {
-        return Commands.parallel(
+        return parallel(
                         requestManager.prepareCoralScoreAndAwaitReady(),
                         trailblazer.followSegment(
-                                        new AutoSegment(
-                                                INITIAL_DRIVE_CONSTRAINTS,
-                                                INITIAL_DRIVE_TOLERANCE,
-                                                new AutoPoint(() -> switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
-                                                    case LEFT ->
-                                                            AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_LEFT);
-                                                    case RIGHT ->
-                                                            AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_RIGHT);
-                                                })
-                                        )
-                                ).onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.5)
-                                .andThen(
-                                        trailblazer.followSegment(
-                                                new AutoSegment(
-                                                        CORAL_SCORE_CONSTRAINTS,
-                                                        CORAL_SCORE_TOLERANCE,
-                                                        new AutoPoint(() -> switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
-                                                            case LEFT ->
-                                                                    AutoAlign.getInstance().usedScoringPose.transformBy(AWAIT_ARM_UP_LEFT_OFFSET);
-                                                            case RIGHT ->
-                                                                    AutoAlign.getInstance().usedScoringPose.transformBy(AWAIT_ARM_UP_RIGHT_OFFSET);
-                                                        })
-                                                )
-                                        ).until(requestManager::isArmReadyToScoreCoral)
+                                new AutoSegment(
+                                        EXTENDED_DRIVE_CONSTRAINTS,
+                                        CORAL_SCORE_TOLERANCE,
+                                        new AutoPoint(() -> switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
+                                            case LEFT ->
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(AWAIT_ARM_UP_LEFT_OFFSET);
+                                            case RIGHT ->
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(AWAIT_ARM_UP_RIGHT_OFFSET);
+                                        })
                                 )
+                        ).until(requestManager::isArmReadyToScoreCoral)
                 ).andThen(
                         trailblazer.followSegment(
                                 new AutoSegment(
-                                        CORAL_SCORE_CONSTRAINTS,
+                                        EXTENDED_DRIVE_CONSTRAINTS,
                                         CORAL_SCORE_TOLERANCE,
                                         new AutoPoint(() -> AutoAlign.getInstance().usedScoringPose)
                                 )
@@ -79,13 +62,13 @@ public class RobotCommands {
                         requestManager.executeCoralScoreAndAwaitComplete(),
                         trailblazer.followSegment(
                                 new AutoSegment(
-                                        CORAL_SCORE_CONSTRAINTS,
+                                        EXTENDED_DRIVE_CONSTRAINTS,
                                         CORAL_SCORE_TOLERANCE,
                                         new AutoPoint(() -> switch (AutoAlign.getScoringSideFromRobotPose(AutoAlign.getInstance().usedScoringPose)) {
                                             case LEFT ->
-                                                    AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_LEFT);
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET);
                                             case RIGHT ->
-                                                    AutoAlign.getInstance().usedScoringPose.transformBy(INITIAL_DRIVE_OFFSET_RIGHT);
+                                                    AutoAlign.getInstance().usedScoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET);
                                         })
                                 )
                         ).until(backupDriveInterrupt)
