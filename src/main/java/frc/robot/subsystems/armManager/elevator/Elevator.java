@@ -91,7 +91,7 @@ public class Elevator extends StateMachine<ElevatorState> {
         setStateFromRequest(state);
     }
 
-    public void setStateCustom(double targetHeight) {
+    public void setCustom(double targetHeight) {
         this.customStateHeight = targetHeight;
         setState(ElevatorState.CUSTOM);
     }

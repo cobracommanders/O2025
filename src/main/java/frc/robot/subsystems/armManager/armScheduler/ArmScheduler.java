@@ -1,9 +1,9 @@
 package frc.robot.subsystems.armManager.armScheduler;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
@@ -184,11 +184,13 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
             }
             case ELEVATOR_FIRST -> {
                 elevator.setState(targetElevatorState);
+                double armPosition = getNearestArmPositionWithoutCollision(elevator.getHeight(), targetArmState.getPosition(), arm.getNormalizedPosition());
+                arm.setCustom(armPosition);
             }
             case ARM_FIRST -> {
                 arm.setState(getArmStateWithSwingDirection(targetArmState));
                 double elevatorPosition = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
-                elevator.setStateCustom(elevatorPosition);
+                elevator.setCustom(elevatorPosition);
             }
             case READY -> {
                 // Clear target state
@@ -207,34 +209,47 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
      * Gets the elevator position that will be closest to the desired position while not hitting the intake or drivetrain with the arm.
      */
     public double getNearestElevatorHeightWithoutArmCollision(double armPosition, double targetElevatorPosition) {
-        // Make sure the elevator is actually blocked by the intake or drivetrain
-        boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(armPosition, targetElevatorPosition);
-        if (canMoveElevatorInternally) {
-            return targetElevatorPosition;
-        }
-
-        // Only handle moving down for now
-        if (targetElevatorState.getPosition() > elevator.getHeight()) {
-            return targetElevatorPosition;
-        }
-
-        // Because of the first check, we know the arm would hit the intake or drivetrain if the elevator moved all the way, so move just above the intake to be safe
+        // This method will only be called in ELEVATOR_FIRST mode, so we know the arm would hit the intake or drivetrain if the elevator moved all the way, therefore move just above the intake to be safe
         double desiredHeight = finalIntakeHeight + (armWidth / 2.0) + Units.inchesToMeters(1.0);
 
-        double minElevatorPositionForArm = maximizeElevatorPositionForDesiredArmHeight(armPosition, desiredHeight);
+        double minElevatorPositionForArm = getElevatorPositionForDesiredArmHeight(armPosition, desiredHeight);
 
         // No need to go below the target position
         return Math.max(targetElevatorPosition, minElevatorPositionForArm);
     }
 
     /**
-     * Gets the elevator position that will put the center of the arm at the desired y height from the floor.
+     * Gets the arm position that will be closest to the desired position while not hitting the intake or drivetrain.
      */
-    public double maximizeElevatorPositionForDesiredArmHeight(double armPosition, double desiredArmHeight) {
+    public double getNearestArmPositionWithoutCollision(double elevatorPosition, double targetArmPosition, double armPosition) {
+        // This method will only be called in ARM_FIRST mode, so we know the arm would hit the intake or drivetrain if it moved all the way, therefore move just above the intake to be safe
+        double desiredHeight = finalIntakeHeight + (armWidth / 2.0) + Units.inchesToMeters(1.0);
+
+        double solutionOne = Arm.normalizePosition(getArmPositionForDesiredArmHeight(elevatorPosition, desiredHeight));
+        double solutionTwo = Arm.normalizePosition(ArmState.invertPosition(solutionOne));
+
+        double solutionOneDiff = Math.abs(solutionOne - armPosition);
+        double solutionTwoDiff = Math.abs(solutionTwo - armPosition);
+
+        return solutionOneDiff < solutionTwoDiff ? solutionOne : solutionTwo;
+    }
+
+    /**
+     * Gets the elevator position that will put the center of the end of the arm at the desired height from the floor.
+     */
+    public double getElevatorPositionForDesiredArmHeight(double armPosition, double desiredArmHeight) {
         double armPositionRadians = Units.rotationsToRadians(armPosition);
         double currentArmHeight = Math.sin(armPositionRadians) * armLength;
 
         return desiredArmHeight - currentArmHeight - elevatorBaseHeight;
+    }
+
+    /**
+     * Gets an arm position that will put the center of the end of the arm at the desired height from the floor.
+     */
+    public double getArmPositionForDesiredArmHeight(double elevatorHeight, double desiredArmHeight) {
+        double neededArmHeight = desiredArmHeight - elevatorHeight - elevatorBaseHeight;
+        return Units.radiansToRotations(Math.asin(neededArmHeight / armLength));
     }
 
     @Override
@@ -249,8 +264,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
         Coordinate[] coordinates = getArmCoordinates(arm.getNormalizedPosition(), elevator.getHeight());
 
-        DogLog.log("ArmScheduler/sin", Math.sin(Units.rotationsToRadians(arm.getNormalizedPosition())));
-        DogLog.log("ArmScheduler/cos", Math.cos(Units.rotationsToRadians(arm.getNormalizedPosition())));
+        DogLog.log("ArmScheduler/armRight", isArmRight());
 
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
@@ -270,6 +284,10 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private boolean isArmUp(double armAngle) {
         double angle = armAngle % 1.0;
         return angle > 0.0;
+    }
+
+    private boolean isArmRight() {
+        return MathUtil.isNear(arm.getNormalizedPosition(), 0.0, 0.25);
     }
 
     public void scheduleStates(ArmState armState, ElevatorState elevatorState, HandState handState) {

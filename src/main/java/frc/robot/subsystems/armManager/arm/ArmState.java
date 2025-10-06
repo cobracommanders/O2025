@@ -35,7 +35,8 @@ public enum ArmState {
     SCORE_L3_RIGHT(0.0),
     SCORE_L3_LEFT(invertPosition(SCORE_L3_RIGHT)),
     SCORE_L2_RIGHT(0.0),
-    SCORE_L2_LEFT(invertPosition(SCORE_L2_RIGHT));
+    SCORE_L2_LEFT(invertPosition(SCORE_L2_RIGHT)),
+    CUSTOM(0.0); // Set in the arm class
 
     private final double defaultPosition;
     private final DoubleSubscriber tunablePosition;
@@ -50,6 +51,10 @@ public enum ArmState {
     }
 
     private static double invertPosition(ArmState position) {
-        return -position.defaultPosition + 0.5;
+        return invertPosition(position.defaultPosition);
+    }
+
+    public static double invertPosition(double position) {
+        return -position + 0.5;
     }
 }
