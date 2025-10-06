@@ -19,11 +19,13 @@ public enum ArmManagerState {
      */
     PREPARE_IDLE_EMPTY(NONE), // Transition state
     PREPARE_IDLE_ALGAE(ALGAE), // Transition state
-    PREPARE_IDLE_CORAL(CORAL), // Transition state
+    PREPARE_IDLE_CORAL_DOWN(CORAL), // Transition state
+    PREPARE_IDLE_CORAL_UP(CORAL), // Transition state
 
     IDLE_EMPTY(NONE), // Waiting for a coral in the ground intake
     IDLE_ALGAE(ALGAE), // Idle holding algae
-    IDLE_CORAL(CORAL), // Idle holding coral
+    IDLE_CORAL_DOWN(CORAL), // Idle holding coral with the arm downwards
+    IDLE_CORAL_UP(CORAL), // Idle holding coral with the arm upwards
 
     IDLE_ALGAE_DROPPED(NONE), // Algae missing according to sensors, spins wheels to make sure it's actually gone and not going to collide with anything
 
@@ -158,12 +160,15 @@ public enum ArmManagerState {
 
     public enum HandGamePieceState {
         CORAL, ALGAE, NONE;
+
         public boolean isCoral() {
             return this == CORAL;
         }
+
         public boolean isAlgae() {
             return this == ALGAE;
         }
+
         public boolean isNone() {
             return this == NONE;
         }
@@ -178,19 +183,10 @@ public enum ArmManagerState {
     /* ******** Idle Utilities ******** */
     public boolean isIdleState() {
         return switch (this) {
-            case IDLE_ALGAE, IDLE_CORAL, IDLE_EMPTY -> true;
+            case IDLE_ALGAE, IDLE_CORAL_UP, IDLE_CORAL_DOWN, IDLE_EMPTY -> true;
             default -> false;
         };
     }
-
-    public static ArmManagerState getIdleStateFor(HandGamePieceState handGamePieceState) {
-        return switch (handGamePieceState) {
-            case CORAL -> IDLE_CORAL;
-            case ALGAE -> IDLE_ALGAE;
-            case NONE -> IDLE_EMPTY;
-        };
-    }
-
 
     /* ******** Handoff Utilities ******** */
 
@@ -209,7 +205,8 @@ public enum ArmManagerState {
         return switch (this) {
             case PREPARE_IDLE_EMPTY -> IDLE_EMPTY;
             case PREPARE_IDLE_ALGAE -> IDLE_ALGAE;
-            case PREPARE_IDLE_CORAL -> IDLE_CORAL;
+            case PREPARE_IDLE_CORAL_UP -> IDLE_CORAL_UP;
+            case PREPARE_IDLE_CORAL_DOWN -> IDLE_CORAL_DOWN;
             default -> this;
         };
     }

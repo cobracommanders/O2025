@@ -66,7 +66,7 @@ public class Controls {
                 .whileTrue(robotCommands.teleopReefAlignAndScore(driver::isStickActive))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
                 // Only resets if the robot is far away from the reef and not likely to score again soon
-                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 1.0));
+                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
         // Fix drivetrain state
         driver.X().onTrue(runOnce(() -> {
