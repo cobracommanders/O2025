@@ -2,17 +2,15 @@ package frc.robot.vision;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.config.FeatureFlags;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.vision.limelight.Limelight;
 import frc.robot.vision.limelight.LimelightStates;
 import frc.robot.vision.results.OptionalTagResult;
-import java.util.OptionalDouble;
-
-import com.ctre.phoenix6.hardware.Pigeon2;
 
 public class VisionSubsystem extends StateMachine<VisionStates> {
   private static final double REEF_CLOSEUP_DISTANCE = 0.7;
@@ -52,7 +50,7 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
 
   @Override
   protected void collectInputs() {
-    angularVelocity = CommandSwerveDrivetrain.getInstance().getPigeon2().getAngularVelocityYWorld().getValueAsDouble();
+    angularVelocity = Units.radiansToDegrees(DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond);
 
     leftBackTagResult = leftBackLimelight.getTagResult();
     leftFrontTagResult = leftFrontLimelight.getTagResult();
