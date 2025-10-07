@@ -7,12 +7,9 @@ import frc.robot.util.PoseErrorTolerance;
 import java.util.List;
 
 /**
- * A segment is a path (a continuous set of {@link AutoPoint points}) that the roobt will follow.
+ * A segment is a path (a continuous set of {@link AutoPoint points}) that the robot will follow.
  */
 public class AutoSegment {
-    private static final PoseErrorTolerance DEFAULT_POSITION_TOLERANCE =
-            new PoseErrorTolerance(0.1, 5);
-
     public final List<AutoPoint> points;
 
     /**
@@ -37,18 +34,6 @@ public class AutoSegment {
             PoseErrorTolerance positionTolerance,
             AutoPoint... points) {
         this(defaultConstraints, positionTolerance, List.of(points));
-    }
-
-    public AutoSegment(AutoConstraintOptions defaultConstraints, AutoPoint... points) {
-        this(defaultConstraints, DEFAULT_POSITION_TOLERANCE, List.of(points));
-    }
-
-    public AutoSegment(AutoPoint... points) {
-        this(new AutoConstraintOptions(), DEFAULT_POSITION_TOLERANCE, points);
-    }
-
-    public AutoSegment(PoseErrorTolerance positionTolerance, AutoPoint... points) {
-        this(new AutoConstraintOptions(), positionTolerance, points);
     }
 
     public AutoSegment pathflipped() {

@@ -31,6 +31,9 @@ public class AutoBlocks {
                         20);
         public static final PoseErrorTolerance APPROACH_REEF_TOLERANCE = new PoseErrorTolerance(0.4, 10);
 
+        private static final PoseErrorTolerance DEFAULT_POSITION_TOLERANCE =
+            new PoseErrorTolerance(0.1, 5);
+
         public static final Transform2d INTAKE_CORAL_GROUND_LINEUP_OFFSET = new Transform2d(-0.6, -0.9,
                         Rotation2d.kZero);
 
@@ -178,6 +181,7 @@ public class AutoBlocks {
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 BASE_CONSTRAINTS,
+                                                                DEFAULT_POSITION_TOLERANCE,
                                                                 //AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
                                                                                 scoringSide))))
@@ -251,6 +255,7 @@ public class AutoBlocks {
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 LOLLIPOP_CONSTRAINTS,
+                                                                DEFAULT_POSITION_TOLERANCE,
                                                                 new AutoPoint(() -> getLolliIntake(lollipop.index)))));
         }
 
