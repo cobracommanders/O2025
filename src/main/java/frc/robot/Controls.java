@@ -9,7 +9,6 @@ import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
-import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 
@@ -55,7 +54,7 @@ public class Controls {
         driver.leftTrigger().onTrue(requestManager.coralIntakeUntilPiece());
 
         // Reset Gyro
-        driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
+        driver.A().onTrue(runOnce(() -> DriveSubsystem.getInstance().setYawFromFMS()));
 
         // Reset superstructure and clear game piece
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
