@@ -81,7 +81,7 @@ public class RobotCommands {
                         // This ensures the robot doesn't get too close to the reef while the arm is still preparing
                         trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                                     // Switch between the offsets based on the side the robot is scoring on
-                                    Pose2d scoringPose = AutoAlign.getInstance().usedScoringPose;
+                                    Pose2d scoringPose = AutoAlign.getInstance().getUsedScoringPose();
                                     return switch (AutoAlign.getScoringSideFromRobotPose(scoringPose)) {
                                         case LEFT -> scoringPose.transformBy(AWAIT_ARM_LEFT_OFFSET);
                                         case RIGHT -> scoringPose.transformBy(AWAIT_ARM_RIGHT_OFFSET);
@@ -93,14 +93,14 @@ public class RobotCommands {
 
                 // Drive to the final scoring position now that the arm is ready to score
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
-                    return AutoAlign.getInstance().usedScoringPose;
+                    return AutoAlign.getInstance().getUsedScoringPose();
                 }))),
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete().asProxy(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                             // Switch between the offsets based on the side the robot is scoring on
-                            Pose2d scoringPose = AutoAlign.getInstance().usedScoringPose;
+                            Pose2d scoringPose = AutoAlign.getInstance().getUsedScoringPose();
                             return switch (AutoAlign.getScoringSideFromRobotPose(scoringPose)) {
                                 case LEFT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET);
                                 case RIGHT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET);

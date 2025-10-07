@@ -5,7 +5,6 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import dev.doglog.DogLog;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -71,27 +70,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 
         timeSinceAutoSpeeds.start();
     }
-
-    public Translation2d getControllerValues() {
-        if (getState() != DriveStates.REEF_ALIGN_TELEOP || getState() != DriveStates.ALGAE_ALIGN_TELEOP) {
-            return Translation2d.kZero;
-        }
-
-        return new Translation2d(
-                ControllerHelpers.getJoystickMagnitude(
-                        rawControllerXValue, rawControllerYValue, 2),
-                new Rotation2d(rawControllerXValue, rawControllerYValue));
-    }
-
-    // public void scoringAlignmentRequest() {
-    //   if (DriverStation.isAutonomous()) {
-    //     normalDriveRequest();
-    //   } else {
-    //     setSnapToAngle(ReefPoses.getInstance().getNearestBranch().getRotation().getDegrees());
-    //     setAutoAlignSpeeds();
-    //     setStateFromRequest(DriveStates.REEF_ALIGN_TELEOP);
-    //   }
-    // }
 
     @Override
     protected DriveStates getNextState(DriveStates currentState) {
