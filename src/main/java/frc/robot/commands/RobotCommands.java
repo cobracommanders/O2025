@@ -36,7 +36,7 @@ public class RobotCommands {
     private static final PoseErrorTolerance CORAL_SCORE_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
     // Constraints for driving while mechanisms are extended
     // TODO consider using different constraints for different levels
-    private static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, 360, 2.0, 720);
+    private static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, Units.degreesToRadians(360.0), 2.0, Units.degreesToRadians(720.0));
 
     // Position offsets
     // These are set up as constants because they are called periodically while trailblazer runs, and doing this reduces objects created and therefore reduces garbage collection time

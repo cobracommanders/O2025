@@ -16,16 +16,6 @@ import frc.robot.trailblazer.trackers.pure_pursuit.PurePursuitPathTracker;
 import frc.robot.util.TimestampedChassisSpeeds;
 
 public class Trailblazer {
-    /**
-     * Given a point and the constraints for its parent segment, resolve the constraint options to use
-     * while following that point.
-     */
-    private static AutoConstraintOptions resolveConstraints(
-            AutoPoint point, AutoConstraintOptions segmentConstraints) {
-        var constraints = point.constraints.orElse(segmentConstraints);
-        return constraints;
-    }
-
     private final SwerveBase swerve;
     private final LocalizationBase localization;
 
@@ -115,39 +105,29 @@ public class Trailblazer {
             previousSpeeds = new TimestampedChassisSpeeds(Timer.getFPGATimestamp() - 0.02);
         }
 
-        var robotPose = localization.getPose();
-        var originalTargetPose = pathTracker.getTargetPose();
-        var originalVelocityGoal =
-                new TimestampedChassisSpeeds(pathFollower.calculateSpeeds(robotPose, originalTargetPose));
-        var originalConstraints = resolveConstraints(point, segmentConstraints);
+        Pose2d robotPose = localization.getPose();
+        Pose2d targetPose = pathTracker.getTargetPose();
+        var rawVelocityGoal = new TimestampedChassisSpeeds(pathFollower.calculateSpeeds(robotPose, targetPose));
 
-    /*
-    var newLinearVelocity =
-        AutoConstraintCalculator.getDynamicVelocityConstraint(
-            robotPose,
-            endPose,
-            swerve.getFieldRelativeSpeeds(),
-            originalConstraints.maxLinearVelocity(),
-            originalConstraints.maxLinearAcceleration());
-    */
-        var usedConstraints =
-                originalConstraints.withMaxLinearVelocity(originalConstraints.maxLinearVelocity());
+        // Get point-specific constraints if applicable, otherwise use the constraints of the full segment
+        var constraints = point.constraints.orElse(segmentConstraints);
 
-        DogLog.log(
-                "Autos/Trailblazer/Constraints/VelocityCalculation/CalculatedLinearVelocity",
-                usedConstraints.maxLinearVelocity());
-        DogLog.log(
-                "Autos/Trailblazer/Constraints/Acceleration/CalculatedLinearAcceleration",
-                usedConstraints.maxLinearAcceleration());
-        DogLog.log("Autos/Trailblazer/Tracker/RawOutput", originalTargetPose);
+        // Constrain the output of the path follower based on the current constraints
+        var constrainedVelocityGoal = AutoConstraintCalculator.constrainVelocityGoal(rawVelocityGoal, previousSpeeds, constraints, distanceToSegmentEnd);
 
-        DogLog.log("Autos/Trailblazer/Follower/RawOutput", originalVelocityGoal);
-        var constrainedVelocityGoal =
-                AutoConstraintCalculator.constrainVelocityGoal(
-                        originalVelocityGoal, previousSpeeds, usedConstraints, distanceToSegmentEnd);
-        DogLog.log("Autos/Trailblazer/Follower/UsedOutput", constrainedVelocityGoal);
-
+        // Update previous speeds for acceleration calculations
         previousSpeeds = constrainedVelocityGoal;
+
+        DogLog.log("Autos/Trailblazer/Constraints/Linear Velocity", constraints.maxLinearVelocity());
+        DogLog.log("Autos/Trailblazer/Constraints/Linear Acceleration", constraints.maxLinearAcceleration());
+
+        DogLog.log("Autos/Trailblazer/Constraints/Angular Velocity", constraints.maxAngularVelocity());
+        DogLog.log("Autos/Trailblazer/Constraints/Angular Acceleration", constraints.maxAngularAcceleration());
+
+        DogLog.log("Autos/Trailblazer/Tracker/TargetPose", targetPose);
+
+        DogLog.log("Autos/Trailblazer/Follower/Initial Goal", rawVelocityGoal);
+        DogLog.log("Autos/Trailblazer/Follower/Constrained Goal", constrainedVelocityGoal);
 
         return constrainedVelocityGoal;
     }
