@@ -99,7 +99,7 @@ public class Controls {
         operator.X().onTrue(operatorOptions.setL2Command());
         operator.A().onTrue(operatorOptions.setL1Command());
         operator.POV0().onTrue(operatorOptions.setHighReefAlgaeCommand());
-        operator.POVMinus90().onTrue(requestManager.prepareCoralScoreAndAwaitReady().andThen(robotCommands.driveTeleopCommand()));
+        //operator.POVMinus90().onTrue(requestManager.prepareCoralScoreAndAwaitReady().andThen(robotCommands.driveTeleopCommand()));
         operator.POV90().onTrue(operatorOptions.setGroundAlgaeCommand());
         operator.POV180().onTrue(operatorOptions.setLowReefAlgaeCommand());
         operator.back().onTrue(requestManager.invertedHandoffRequest());

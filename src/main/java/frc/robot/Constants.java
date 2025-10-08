@@ -74,8 +74,7 @@ public final class Constants {
     }
 
     public static final class HandConstants {
-        public static final double coralStallCurrent = 40;
-        public static final double algaeStallCurrent = 80;
+        public static final double algaeStallCurrent = 60;
     }
 
     public static final class CoralDetectorConstants {
