@@ -72,7 +72,7 @@ public class RobotCommands {
                         sequence(
                                 // Wait until the hand has a coral
                                 // This lets the command run while the handoff is happening without causing issues
-                                waitUntil(() -> requestManager.getHandGamePiece().isCoral()),
+                                waitUntil(() -> requestManager.getHandGamePiece().isCoral() && requestManager.isArmIdle()),
 
                                 // Set arm and elevator to prepare score state
                                 requestManager.prepareCoralScoreAndAwaitReady().asProxy() // See note above for .asProxy()

@@ -32,6 +32,10 @@ public class RequestManager {
         this.groundCommands = new GroundManager.CommandWrapper(groundManager);
     }
 
+    public boolean isArmIdle() {
+        return armCommands.isArmIdle();
+    }
+
     public RobotScoringSide reefRobotSide() {
         return AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
     }

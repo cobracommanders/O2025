@@ -495,6 +495,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             return armManager.isReadyToScoreCoral();
         }
 
+        public boolean isArmIdle() {
+            return armManager.isIdleState();
+        }
+
 
         /**
          * Request algae processor score and await ready state.
