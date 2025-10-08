@@ -11,7 +11,6 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.fms.FmsSubsystem;
@@ -205,6 +204,10 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 
     public Rotation2d getRawYaw() {
         return drivetrainState.RawHeading;
+    }
+
+    public double getAngularVelocityYWorld() {
+        return drivetrain.getPigeon2().getAngularVelocityYWorld().getValueAsDouble();
     }
 
     public void setYaw(Rotation2d rotation) {
