@@ -378,6 +378,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         return getState().isHandoffReadyState();
     }
 
+    public boolean isReadyForIntakeToExecuteHandoff() {
+        return getState().isHandoffExecuteState() && armScheduler.isReady();
+    }
+
     public void requestHandoffExecution() {
         if (isReadyToExecuteHandoff()) {
             setStateFromRequest(getState().getHandoffReadyToExecuteState());
@@ -448,8 +452,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         setStateFromRequest(getState().getCoralReadyToScoreState());
     }
 
+    private final Debouncer isScoreCompleteDebouncer = new Debouncer(0.1);
     public boolean isCoralScoreComplete() {
-        return getState().isCoralScoreState() && atPosition();
+        return isScoreCompleteDebouncer.calculate(getState().isCoralScoreState() && atPosition());
     }
 
     public void requestAlgaeNetScore(RobotScoringSide robotSide) {
@@ -644,8 +649,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     .withName("requestInvertedHandoffAndAwaitReady");
         }
 
-        public Command executeHandoff() {
+        public Command executeHandoffUntilIntakeWait() {
             return armManager.runOnce(armManager::requestHandoffExecution)
+                    .andThen(Commands.waitUntil(armManager::isReadyForIntakeToExecuteHandoff))
                     .withName("executeHandoff");
         }
 

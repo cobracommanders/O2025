@@ -163,14 +163,14 @@ public class RequestManager {
     }
 
     public Command handoffRequest() {
-        return groundCommands.requestHandoffAndAwaitReady()
-                .andThen(armCommands.requestHandoffAndAwaitReady())
+        return groundCommands.requestHandoffAndAwaitReady().alongWith(armCommands.requestHandoffAndAwaitReady())
                 // Request execution once both mechanisms are positioned
-                .andThen(Commands.parallel(
-                        groundCommands.executeHandoff(),
-                        armCommands.executeHandoff()))
+                .andThen(
+                        armCommands.executeHandoffUntilIntakeWait(),
+                        groundCommands.executeHandoff()
+                )
                 // Wait for handoff time
-                .andThen(waitSeconds(0.5)) // TODO Potentially incorporate canranges for extra speed
+                .andThen(waitSeconds(0.4)) // TODO Potentially incorporate canranges for extra speed
                 .andThen(idleAll())
                 .onlyIf(armCommands::currentGamePieceIsNone)
                 .withName("handoffRequest");

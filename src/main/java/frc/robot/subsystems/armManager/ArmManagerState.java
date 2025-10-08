@@ -197,6 +197,13 @@ public enum ArmManagerState {
         };
     }
 
+    public boolean isHandoffExecuteState() {
+        return switch (this) {
+            case EXECUTE_HANDOFF_LEFT, EXECUTE_HANDOFF_MIDDLE, EXECUTE_HANDOFF_RIGHT -> true;
+            default -> false;
+        };
+    }
+
     /**
      * Get the "IDLE_XXX" state based on the given "PREPARE_IDLE_XXX" state.
      * Returns the given state if this is not a idle state.
