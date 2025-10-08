@@ -9,7 +9,6 @@ import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
-import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 
@@ -55,7 +54,7 @@ public class Controls {
         driver.leftTrigger().onTrue(requestManager.coralIntakeUntilPiece());
 
         // Reset Gyro
-        driver.A().onTrue(runOnce(() -> CommandSwerveDrivetrain.getInstance().setYawFromFMS()));
+        driver.A().onTrue(runOnce(() -> DriveSubsystem.getInstance().setYawFromFMS()));
 
         // Reset superstructure and clear game piece
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
@@ -66,7 +65,7 @@ public class Controls {
                 .whileTrue(robotCommands.teleopReefAlignAndScore(driver::isStickActive))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
                 // Only resets if the robot is far away from the reef and not likely to score again soon
-                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 1.0));
+                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
         // Fix drivetrain state
         driver.X().onTrue(runOnce(() -> {

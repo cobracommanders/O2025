@@ -36,7 +36,7 @@ public class RobotCommands {
     private static final PoseErrorTolerance CORAL_SCORE_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
     // Constraints for driving while mechanisms are extended
     // TODO consider using different constraints for different levels
-    private static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, 360, 2.0, 720);
+    private static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, Units.degreesToRadians(360.0), 2.0, Units.degreesToRadians(720.0));
 
     // Position offsets
     // These are set up as constants because they are called periodically while trailblazer runs, and doing this reduces objects created and therefore reduces garbage collection time
@@ -72,7 +72,7 @@ public class RobotCommands {
                         sequence(
                                 // Wait until the hand has a coral
                                 // This lets the command run while the handoff is happening without causing issues
-                                waitUntil(() -> requestManager.getHandGamePiece().isCoral()),
+                                waitUntil(() -> requestManager.getHandGamePiece().isCoral() && requestManager.isArmIdle()),
 
                                 // Set arm and elevator to prepare score state
                                 requestManager.prepareCoralScoreAndAwaitReady().asProxy() // See note above for .asProxy()
@@ -81,7 +81,7 @@ public class RobotCommands {
                         // This ensures the robot doesn't get too close to the reef while the arm is still preparing
                         trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                                     // Switch between the offsets based on the side the robot is scoring on
-                                    Pose2d scoringPose = AutoAlign.getInstance().usedScoringPose;
+                                    Pose2d scoringPose = AutoAlign.getInstance().getUsedScoringPose();
                                     return switch (AutoAlign.getScoringSideFromRobotPose(scoringPose)) {
                                         case LEFT -> scoringPose.transformBy(AWAIT_ARM_LEFT_OFFSET);
                                         case RIGHT -> scoringPose.transformBy(AWAIT_ARM_RIGHT_OFFSET);
@@ -93,14 +93,14 @@ public class RobotCommands {
 
                 // Drive to the final scoring position now that the arm is ready to score
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
-                    return AutoAlign.getInstance().usedScoringPose;
+                    return AutoAlign.getInstance().getUsedScoringPose();
                 }))),
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete().asProxy(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                             // Switch between the offsets based on the side the robot is scoring on
-                            Pose2d scoringPose = AutoAlign.getInstance().usedScoringPose;
+                            Pose2d scoringPose = AutoAlign.getInstance().getUsedScoringPose();
                             return switch (AutoAlign.getScoringSideFromRobotPose(scoringPose)) {
                                 case LEFT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET);
                                 case RIGHT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET);

@@ -16,7 +16,6 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.trailblazer.LocalizationBase;
 import frc.robot.util.MathHelpers;
@@ -35,13 +34,13 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
             Double.MAX_VALUE);
     private final VisionSubsystem vision;
     private final DriveSubsystem swerve;
-    private final CommandSwerveDrivetrain drivetrain;
+    private final DriveSubsystem drivetrain;
     private Pose2d robotPose = Pose2d.kZero;
 
     private LocalizationSubsystem() {
         super(LocalizationStates.DEFAULT_STATE);
         this.swerve = DriveSubsystem.getInstance();
-        this.drivetrain = CommandSwerveDrivetrain.getInstance();
+        this.drivetrain = DriveSubsystem.getInstance();
         this.vision = VisionSubsystem.getInstance();
 
         if (FeatureFlags.FIELD_CALIBRATION.getAsBoolean()) {
@@ -106,7 +105,7 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
     }
 
     private void resetGyro(Rotation2d gyroAngle) {
-        drivetrain.getPigeon2().setYaw(gyroAngle.getDegrees());
+        drivetrain.setYaw(gyroAngle);
         swerve.drivetrain.resetRotation(gyroAngle);
     }
 
@@ -116,7 +115,7 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
         // correct heading
         if (DriverStation.isTeleop()
                 || !MathUtil.isNear(
-                estimatedPose.getRotation().getDegrees(), drivetrain.getPigeon2().getYaw().getValueAsDouble(), 1.5, -180,
+                estimatedPose.getRotation().getDegrees(), drivetrain.getRawYaw().getDegrees(), 1.5, -180,
                 180)) {
             drivetrain.setYaw(estimatedPose.getRotation());
         }

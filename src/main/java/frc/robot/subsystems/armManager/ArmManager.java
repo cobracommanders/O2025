@@ -51,7 +51,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         //TODO Does it do something else in auto?
         if (DriverStation.isAutonomous()) return false;
         //TODO Is this just measuring distance from the target scoring pose? If so, would being 0.25m to the left/right also allow the arm to move?
-        return timeout(0.5) && AutoAlign.getInstance().usedScoringPose.getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose().getTranslation()) >= 0.25;
+        return timeout(0.5) && AutoAlign.getInstance().getUsedScoringPose().getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose().getTranslation()) >= 0.25;
     }
 
     public boolean isReadyToReturnToIdleAfterIntakingAlgae() {
@@ -77,11 +77,11 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         switch (currentState) {
             /* ******** START POSITION ******** */
             case START_POSITION -> {
-                if (DriverStation.isEnabled()) nextState = ArmManagerState.PREPARE_IDLE_CORAL;
+                if (DriverStation.isEnabled()) nextState = ArmManagerState.PREPARE_IDLE_CORAL_UP;
             }
 
             /* ******** IDLE STATES ******** */
-            case PREPARE_IDLE_EMPTY, PREPARE_IDLE_CORAL, PREPARE_IDLE_ALGAE -> {
+            case PREPARE_IDLE_EMPTY, PREPARE_IDLE_CORAL_UP, PREPARE_IDLE_CORAL_DOWN, PREPARE_IDLE_ALGAE -> {
                 if (atPosition()) nextState = currentState.getPrepareToIdleState();
             }
 
@@ -101,7 +101,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                 }
             }
 
-            case IDLE_CORAL -> {/* Await Control */}
+            case IDLE_CORAL_UP, IDLE_CORAL_DOWN -> {/* Await Control */}
 
 
             /* ******** HANDOFF STATES ******** */
@@ -270,10 +270,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case START_POSITION -> { /* N/A */ }
 
             /* ******** IDLE STATES ******** */
-            case PREPARE_IDLE_EMPTY, IDLE_EMPTY, PREPARE_IDLE_CORAL, IDLE_CORAL ->
+            case PREPARE_IDLE_EMPTY, IDLE_EMPTY ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
-//            case PREPARE_IDLE_CORAL, IDLE_CORAL ->
-//                    requestState(ArmState.IDLE_CORAL, ElevatorState.IDLE_CORAL, HandState.IDLE_CORAL);
+
+            case PREPARE_IDLE_CORAL_UP, IDLE_CORAL_UP ->
+                    requestState(ArmState.IDLE_CORAL_UP, ElevatorState.IDLE_CORAL_UP, HandState.IDLE_CORAL);
+
+            case PREPARE_IDLE_CORAL_DOWN, IDLE_CORAL_DOWN ->
+                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_ALGAE, IDLE_ALGAE ->
                     requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
@@ -401,7 +405,12 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestIdle() {
-        setStateFromRequest(ArmManagerState.getIdleStateFor(getState().handGamePieceState));
+        ArmManagerState state = switch (getState().handGamePieceState) {
+            case CORAL -> armScheduler.isArmUp() ? ArmManagerState.IDLE_CORAL_UP : ArmManagerState.IDLE_CORAL_DOWN;
+            case ALGAE -> ArmManagerState.IDLE_ALGAE;
+            case NONE -> ArmManagerState.IDLE_EMPTY;
+        };
+        setStateFromRequest(state);
     }
 
     public void requestIdleClearGamePiece() {
@@ -484,6 +493,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
         public boolean isArmReadyToScoreCoral() {
             return armManager.isReadyToScoreCoral();
+        }
+
+        public boolean isArmIdle() {
+            return armManager.isIdleState();
         }
 
 

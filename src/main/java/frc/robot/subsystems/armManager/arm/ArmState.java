@@ -6,7 +6,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 public enum ArmState {
     START_POSITION(0.25),
     IDLE_ALGAE(0.18),
-    IDLE_CORAL(0.25),
+    IDLE_CORAL_UP(0.25),
     INTAKE_GROUND_ALGAE(-0.03),
     HANDOFF_RIGHT(-0.235),
     HANDOFF_LEFT(-0.265),

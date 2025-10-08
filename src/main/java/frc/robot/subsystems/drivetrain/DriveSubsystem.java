@@ -9,9 +9,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.fms.FmsSubsystem;
@@ -25,21 +24,21 @@ import java.util.Map;
 public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveBase {
     private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
     private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
-    private ChassisSpeeds fieldRelativeSpeeds = new ChassisSpeeds();
-    private ChassisSpeeds robotRelativeSpeeds = new ChassisSpeeds();
-    private ChassisSpeeds autoAlignSpeeds = new ChassisSpeeds();
     private ChassisSpeeds algaeAutoAlignSpeeds = new ChassisSpeeds();
 
-    public final CommandSwerveDrivetrain drivetrain;
-    private final SwerveDriveState drivetrainState = new SwerveDriveState();
-    private double teleopSlowModePercent = 1.0;
-    private double rawControllerXValue = 0.0;
-    private double rawControllerYValue = 0.0;
+    public final TunerConstants.TunerSwerveDrivetrain drivetrain = new TunerConstants.TunerSwerveDrivetrain(
+            TunerConstants.DrivetrainConstants,
+            TunerConstants.FrontLeft,
+            TunerConstants.FrontRight,
+            TunerConstants.BackLeft,
+            TunerConstants.BackRight
+    );
 
+    private final SwerveDriveState drivetrainState = drivetrain.getState();
+
+    private double teleopSlowModePercent = 1.0;
 
     private double elevatorHeight;
-
-    private final Timer timeSinceAutoSpeeds = new Timer();
 
     private static final double LEFT_X_DEADBAND = 0.05;
     private static final double LEFT_Y_DEADBAND = 0.05;
@@ -57,57 +56,31 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     private final SwerveRequest.FieldCentric autoDrive = new SwerveRequest.FieldCentric()
             .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withDeadband(0.05)
-            .withRotationalDeadband(Units.degreesToRadians(2.0));
+//            .withDeadband(0.05)
+//            .withRotationalDeadband(Units.degreesToRadians(2.0))
+            ;
 
-    public final SwerveRequest.RobotCentric driveRobotRelative = new SwerveRequest.RobotCentric()
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withDeadband(DrivetrainConstants.maxSpeed * 0.03)
-            .withRotationalDeadband(DrivetrainConstants.maxAngularRate * 0.03);
+    private boolean hasAppliedOperatorPerspective = false;
 
     private DriveSubsystem() {
         super(DriveStates.TELEOP);
-        drivetrain = CommandSwerveDrivetrain.getInstance();
-
-        timeSinceAutoSpeeds.start();
     }
-
-    public Translation2d getControllerValues() {
-        if (getState() != DriveStates.REEF_ALIGN_TELEOP || getState() != DriveStates.ALGAE_ALIGN_TELEOP) {
-            return Translation2d.kZero;
-        }
-
-        return new Translation2d(
-                ControllerHelpers.getJoystickMagnitude(
-                        rawControllerXValue, rawControllerYValue, 2),
-                new Rotation2d(rawControllerXValue, rawControllerYValue));
-    }
-
-    // public void scoringAlignmentRequest() {
-    //   if (DriverStation.isAutonomous()) {
-    //     normalDriveRequest();
-    //   } else {
-    //     setSnapToAngle(ReefPoses.getInstance().getNearestBranch().getRotation().getDegrees());
-    //     setAutoAlignSpeeds();
-    //     setStateFromRequest(DriveStates.REEF_ALIGN_TELEOP);
-    //   }
-    // }
 
     @Override
     protected DriveStates getNextState(DriveStates currentState) {
         DriveStates nextState = currentState;
         switch (currentState) {
-            case AUTO, TELEOP -> nextState = FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
+            case AUTO, TELEOP ->
+                    nextState = FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
             case REEF_ALIGN_TELEOP -> { /* Await Control */ }
-            case ALGAE_ALIGN_TELEOP -> nextState = AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
-        };
+            case ALGAE_ALIGN_TELEOP ->
+                    nextState = AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
+        }
 
         return nextState;
     }
 
     public void setTeleopSpeeds(double x, double y, double theta) {
-        rawControllerXValue = x;
-        rawControllerYValue = y;
         double leftY = -1.0
                 * MathHelpers.signedExp(ControllerHelpers.deadbandJoystickValue(y, LEFT_Y_DEADBAND), 2.0);
         double leftX = -1.0
@@ -118,15 +91,16 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         DogLog.log("Swerve/LeftX", leftX);
         DogLog.log("Swerve/LeftY", leftY);
         DogLog.log("Swerve/RightX", rightX);
-        Translation2d mappedpose = ControllerHelpers.fromCircularDiscCoordinates(leftX, leftY);
-        double mappedX = mappedpose.getX();
-        double mappedY = mappedpose.getY();
+
+        Translation2d mappedPose = ControllerHelpers.fromCircularDiscCoordinates(leftX, leftY);
+        double mappedX = mappedPose.getX();
+        double mappedY = mappedPose.getY();
 
         teleopSpeeds = new ChassisSpeeds(
-                // TODO if robot is driving backwards, get rid of the invert here
                 mappedY * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
                 mappedX * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
-                rightX * DrivetrainConstants.maxAngularRate * teleopSlowModePercent);
+                rightX * DrivetrainConstants.maxAngularRate * teleopSlowModePercent
+        );
     }
 
     public ChassisSpeeds getTeleopSpeeds() {
@@ -134,17 +108,12 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     }
 
     public ChassisSpeeds getFieldRelativeSpeeds() {
-        return fieldRelativeSpeeds;
+        return ChassisSpeeds.fromRobotRelativeSpeeds(drivetrainState.Speeds, drivetrainState.Pose.getRotation());
     }
 
     @Override
     public void setFieldRelativeAutoSpeeds(ChassisSpeeds speeds) {
         autoSpeeds = speeds;
-        timeSinceAutoSpeeds.reset();
-    }
-
-    private ChassisSpeeds calculateFieldRelativeSpeeds() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(robotRelativeSpeeds, drivetrainState.Pose.getRotation());
     }
 
     @Override
@@ -152,35 +121,33 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
     }
 
-    public ChassisSpeeds getTagAlignSpeedsForAlign() {
-        if (FmsSubsystem.getInstance().isAutonomous()) {
-            return AutoAlign.getInstance().getTagAlignSpeeds();
-        } else if (FmsSubsystem.getInstance().isRedAlliance()) {
-            return flipSpeeds(AutoAlign.getInstance().getTagAlignSpeeds());
-        } else {
-            return AutoAlign.getInstance().getTagAlignSpeeds();
-        }
-    }
-
     @Override
     protected void collectInputs() {
-        fieldRelativeSpeeds = calculateFieldRelativeSpeeds();
-        autoAlignSpeeds = getTagAlignSpeedsForAlign();
         algaeAutoAlignSpeeds = FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getAlgaeAlignSpeeds()) : AutoAlign.getInstance().getAlgaeAlignSpeeds();
         teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
+
+        DogLog.log("Swerve/AutoSpeeds", autoSpeeds);
+        DogLog.log("Swerve/TeleopSpeeds", teleopSpeeds);
+        DogLog.log("Swerve/FieldRelativeSpeeds", getFieldRelativeSpeeds());
         DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);
         DogLog.log("Swerve/Pose", drivetrain.getState().Pose);
     }
 
     public ChassisSpeeds flipSpeeds(ChassisSpeeds speeds) {
-        // speeds = AutoAlign.getInstance().getAlgaeAlignSpeeds();
         return new ChassisSpeeds(-speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
     }
 
     @Override
     public void periodic() {
         super.periodic();
-        drivetrain.update();
+
+        if (!hasAppliedOperatorPerspective || FmsSubsystem.getInstance().isDisabled()) {
+            DriverStation.getAlliance().ifPresent((allianceColor) -> {
+                drivetrain.setOperatorPerspectiveForward(allianceColor == DriverStation.Alliance.Red ? Rotation2d.k180deg : Rotation2d.kZero);
+                hasAppliedOperatorPerspective = true;
+            });
+        }
+
         sendSwerveRequest(getState());
     }
 
@@ -233,6 +200,22 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
                                 .withDriveRequestType(DriveRequestType.Velocity));
             }
         }
+    }
+
+    public Rotation2d getRawYaw() {
+        return drivetrainState.RawHeading;
+    }
+
+    public double getAngularVelocityYWorld() {
+        return drivetrain.getPigeon2().getAngularVelocityYWorld().getValueAsDouble();
+    }
+
+    public void setYaw(Rotation2d rotation) {
+        drivetrain.resetRotation(rotation);
+    }
+
+    public void setYawFromFMS() {
+        setYaw(FmsSubsystem.getInstance().isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero);
     }
 
     public void setElevatorHeight(double height) {
