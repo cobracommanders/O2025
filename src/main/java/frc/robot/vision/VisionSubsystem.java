@@ -2,7 +2,6 @@ package frc.robot.vision;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.config.FeatureFlags;
@@ -50,7 +49,8 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
 
   @Override
   protected void collectInputs() {
-    angularVelocity = Units.radiansToDegrees(DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond);
+//    angularVelocity = Units.radiansToDegrees(DriveSubsystem.getInstance().getFieldRelativeSpeeds().omegaRadiansPerSecond);
+    angularVelocity = DriveSubsystem.getInstance().getAngularVelocityYWorld();
 
     leftBackTagResult = leftBackLimelight.getTagResult();
     leftFrontTagResult = leftFrontLimelight.getTagResult();
