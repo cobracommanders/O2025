@@ -29,6 +29,7 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.trailblazer.Trailblazer;
 
 public class Robot extends TimedRobot {
@@ -43,9 +44,16 @@ public class Robot extends TimedRobot {
     );
     private Command autonomousCommand = Commands.none();
 
+    private final CoralDetector coralDetector = CoralDetector.getInstance();
+
     // Uncomment as needed
-    public static RequestManager requestManager = new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
-    public static DriveSubsystem swerve = DriveSubsystem.getInstance();
+    private final RequestManager requestManager = new RequestManager(
+            armManager,
+            GroundManager.getInstance(),
+            Climber.getInstance(),
+            coralDetector::getState
+    );
+    private final DriveSubsystem swerve = DriveSubsystem.getInstance();
     private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
     private final RobotCommands robotCommands = new RobotCommands(trailblazer, requestManager);
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();

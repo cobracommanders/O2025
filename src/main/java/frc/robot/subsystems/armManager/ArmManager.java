@@ -27,9 +27,6 @@ import java.util.function.Supplier;
 
 public class ArmManager extends StateMachine<ArmManagerState> {
     private final Hand hand;
-    private final Elevator elevator;
-    private final Arm arm;
-    private final CoralDetector coralDetector = CoralDetector.getInstance();
     private final ArmScheduler armScheduler;
 
     private final double ALGAE_DROP_TIME = 0.1;
@@ -41,8 +38,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             Arm arm) {
         super(ArmManagerState.START_POSITION);
         this.hand = hand;
-        this.elevator = elevator;
-        this.arm = arm;
 
         this.armScheduler = new ArmScheduler(arm, elevator, hand);
     }
@@ -95,47 +90,15 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                 if (timeout(ALGAE_DROP_TIME)) nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
             }
 
-            case IDLE_EMPTY -> {
-                if (coralDetector.hasCoral()) {
-                    nextState = ArmManagerState.getHandoffPreemptiveFromCoralPosition(coralDetector.getState());
-                }
-            }
-
-            case IDLE_CORAL_UP, IDLE_CORAL_DOWN -> {/* Await Control */}
-
-
-            /* ******** HANDOFF STATES ******** */
-            case PREEMPTIVE_HANDOFF_LEFT, PREEMPTIVE_HANDOFF_MIDDLE, PREEMPTIVE_HANDOFF_RIGHT -> {
-                CoralDetectorState coralPosition = coralDetector.getState();
-                boolean hasCoral = coralPosition != CoralDetectorState.NONE;
-                ArmManagerState targetPreemptiveState = ArmManagerState.getHandoffPreemptiveFromCoralPosition(coralPosition);
-
-                if (!hasCoral) {
-                    // If no coral, go back to idle empty
-                    nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
-                } else if (targetPreemptiveState != currentState) {
-                    // If the coral position has changed, prepare to move to the new position
-                    nextState = targetPreemptiveState;
-                } else {
-                    // The coral is present and the arm is in the correct state, do nothing
-                }
-            }
+            case IDLE_EMPTY, IDLE_CORAL_UP, IDLE_CORAL_DOWN -> {/* Await Control */}
 
             case PREPARE_HANDOFF_LEFT, PREPARE_HANDOFF_MIDDLE, PREPARE_HANDOFF_RIGHT -> {
                 if (atPosition()) {
-                    nextState = currentState.getHandoffPrepareToReadyState();
+                    nextState = currentState.getHandoffPrepareToCompleteState();
                 }
             }
 
-            case READY_HANDOFF_LEFT, READY_HANDOFF_MIDDLE, READY_HANDOFF_RIGHT -> {
-                boolean hasCoral = coralDetector.hasCoral();
-
-                if (!hasCoral) {
-                    nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
-                }
-            }
-
-            case EXECUTE_HANDOFF_LEFT, EXECUTE_HANDOFF_MIDDLE, EXECUTE_HANDOFF_RIGHT -> { /* Await Control */ }
+            case HANDOFF_LEFT, HANDOFF_MIDDLE, HANDOFF_RIGHT -> { /* Await Control */ }
 
             /* ******** INVERTED HANDOFF STATES ******** */
             case PREPARE_INVERTED_HANDOFF -> {
@@ -271,31 +234,21 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
             /* ******** IDLE STATES ******** */
             case PREPARE_IDLE_EMPTY, IDLE_EMPTY ->
-                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
+                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.IDLE_EMPTY, HandState.IDLE_EMPTY);
 
             case PREPARE_IDLE_CORAL_UP, IDLE_CORAL_UP ->
                     requestState(ArmState.IDLE_CORAL_UP, ElevatorState.IDLE_CORAL_UP, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_CORAL_DOWN, IDLE_CORAL_DOWN ->
-                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_CORAL);
+                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.IDLE_EMPTY, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_ALGAE, IDLE_ALGAE ->
                     requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
             case IDLE_ALGAE_DROPPED -> requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
 
             /* ******** HANDOFF STATES ******** */
-            case PREPARE_HANDOFF_RIGHT, PREEMPTIVE_HANDOFF_RIGHT, PREPARE_HANDOFF_LEFT, PREEMPTIVE_HANDOFF_LEFT,
-                 PREPARE_HANDOFF_MIDDLE, PREEMPTIVE_HANDOFF_MIDDLE ->
-                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.IDLE_EMPTY);
-
-            case READY_HANDOFF_LEFT,
-                 READY_HANDOFF_RIGHT,
-                 READY_HANDOFF_MIDDLE ->
-                    requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.PREPARE_HANDOFF, HandState.HANDOFF);
-
-            case EXECUTE_HANDOFF_LEFT,
-                 EXECUTE_HANDOFF_RIGHT,
-                 EXECUTE_HANDOFF_MIDDLE ->
+            case PREPARE_HANDOFF_LEFT, PREPARE_HANDOFF_MIDDLE, PREPARE_HANDOFF_RIGHT,
+                 HANDOFF_LEFT, HANDOFF_MIDDLE, HANDOFF_RIGHT ->
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.HANDOFF, HandState.HANDOFF);
 
 
@@ -368,24 +321,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         return getState().handGamePieceState;
     }
 
-    public void requestHandoff() {
+    public void requestHandoff(CoralDetectorState coralPosition) {
         if (getState().handGamePieceState.isNone()) {
-            setStateFromRequest(ArmManagerState.getHandoffPrepareFromCoralPosition(coralDetector.getState()));
+            setStateFromRequest(ArmManagerState.getHandoffPrepareFromCoralPosition(coralPosition));
         }
     }
 
-    public boolean isReadyToExecuteHandoff() {
+    public boolean isHandoffReady() {
         return getState().isHandoffReadyState();
-    }
-
-    public boolean isReadyForIntakeToExecuteHandoff() {
-        return getState().isHandoffExecuteState() && armScheduler.isReady();
-    }
-
-    public void requestHandoffExecution() {
-        if (isReadyToExecuteHandoff()) {
-            setStateFromRequest(getState().getHandoffReadyToExecuteState());
-        }
     }
 
     public void requestInvertedHandoff() {
@@ -453,6 +396,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     private final Debouncer isScoreCompleteDebouncer = new Debouncer(0.1);
+
     public boolean isCoralScoreComplete() {
         return isScoreCompleteDebouncer.calculate(getState().isCoralScoreState() && atPosition());
     }
@@ -626,12 +570,15 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         }
 
         /**
-         * Prepare for handoff and await ready state.
+         * Prepare for handoff and await ready state. Updates to the supplied position until a ready state is reached.
          */
-        public Command requestHandoffAndAwaitReady() {
+        public Command requestHandoffAndAwaitReady(Supplier<CoralDetectorState> position) {
             return armManager
-                    .runOnce(armManager::requestHandoff)
-                    .andThen(Commands.waitUntil(armManager::isReadyToExecuteHandoff))
+                    // .run() continually calls the given block until interrupted
+                    // this lets the position be constantly updated in case it changes for some reason
+                    .run(() -> armManager.requestHandoff(position.get()))
+                    // Interrupt when ready
+                    .until(armManager::isHandoffReady)
                     // Only let this run if the hand is not holding a game piece
                     .onlyIf(() -> armManager.getState().handGamePieceState.isNone())
                     .withName("requestHandoffAndAwaitReady");
@@ -647,12 +594,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     // Only let this run if the hand is holding a coral
                     .onlyIf(() -> armManager.getState().handGamePieceState.isCoral())
                     .withName("requestInvertedHandoffAndAwaitReady");
-        }
-
-        public Command executeHandoffUntilIntakeWait() {
-            return armManager.runOnce(armManager::requestHandoffExecution)
-                    .andThen(Commands.waitUntil(armManager::isReadyForIntakeToExecuteHandoff))
-                    .withName("executeHandoff");
         }
 
         public Command executeInvertedHandoff() {

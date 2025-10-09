@@ -40,22 +40,17 @@ public enum ArmManagerState {
      *
      * PREEMPTIVE_HANDOFF_<side> -> PREPARE_HANDOFF_<side> when External Signal
      *
-     * PREPARE_HANDOFF_<side> -> READY_HANDOFF_<side> when At Position
-     * READY_HANDOFF_<side> -> EXECUTE_HANDOFF_<side> when External Signal
+     * PREPARE_HANDOFF_<side> -> HANDOFF_<side> when At Position
+     * HANDOFF_<side> -> PREPARE_EXECUTE_HANDOFF_<side> when External Signal
+     * PREPARE_EXECUTE_HANDOFF_<side> -> EXECUTE_HANDOFF_<side> when At Position
      * EXECUTE_HANDOFF_<side> -> PREPARE_IDLE_CORAL when External Signal
      */
-    PREEMPTIVE_HANDOFF_LEFT(NONE), // Prepare above intake
-    PREEMPTIVE_HANDOFF_MIDDLE(NONE), // Prepare above intake
-    PREEMPTIVE_HANDOFF_RIGHT(NONE), // Prepare above intake
     PREPARE_HANDOFF_LEFT(NONE), // Transition state
     PREPARE_HANDOFF_MIDDLE(NONE), // Transition state
     PREPARE_HANDOFF_RIGHT(NONE), // Transition state
-    READY_HANDOFF_LEFT(NONE), // Wait for an external signal
-    READY_HANDOFF_MIDDLE(NONE), // Wait for an external signal
-    READY_HANDOFF_RIGHT(NONE), // Wait for an external signal
-    EXECUTE_HANDOFF_LEFT(CORAL), // Execute handoff
-    EXECUTE_HANDOFF_MIDDLE(CORAL), // Execute handoff
-    EXECUTE_HANDOFF_RIGHT(CORAL), // Execute handoff
+    HANDOFF_LEFT(NONE), // Wait for an external signal
+    HANDOFF_MIDDLE(NONE), // Wait for an external signal
+    HANDOFF_RIGHT(NONE), // Wait for an external signal
 
 
     /*
@@ -192,14 +187,7 @@ public enum ArmManagerState {
 
     public boolean isHandoffReadyState() {
         return switch (this) {
-            case READY_HANDOFF_LEFT, READY_HANDOFF_MIDDLE, READY_HANDOFF_RIGHT -> true;
-            default -> false;
-        };
-    }
-
-    public boolean isHandoffExecuteState() {
-        return switch (this) {
-            case EXECUTE_HANDOFF_LEFT, EXECUTE_HANDOFF_MIDDLE, EXECUTE_HANDOFF_RIGHT -> true;
+            case HANDOFF_LEFT, HANDOFF_MIDDLE, HANDOFF_RIGHT -> true;
             default -> false;
         };
     }
@@ -220,42 +208,15 @@ public enum ArmManagerState {
 
 
     /**
-     * Get the "READY_HANDOFF_XXX" state based on the given "PREPARE_HANDOFF_XXX" state.
+     * Get the "HANDOFF_XXX" state based on the given "PREPARE_HANDOFF_XXX" state.
      * Returns the given state if this is not a handoff state.
      */
-    public ArmManagerState getHandoffPrepareToReadyState() {
+    public ArmManagerState getHandoffPrepareToCompleteState() {
         return switch (this) {
-            case PREPARE_HANDOFF_LEFT -> READY_HANDOFF_LEFT;
-            case PREPARE_HANDOFF_MIDDLE -> READY_HANDOFF_MIDDLE;
-            case PREPARE_HANDOFF_RIGHT -> READY_HANDOFF_RIGHT;
+            case PREPARE_HANDOFF_LEFT -> HANDOFF_LEFT;
+            case PREPARE_HANDOFF_MIDDLE -> HANDOFF_MIDDLE;
+            case PREPARE_HANDOFF_RIGHT -> HANDOFF_RIGHT;
             default -> this;
-        };
-    }
-
-
-    /**
-     * Get the "EXECUTE_HANDOFF_XXX" state based on the given "READY_HANDOFF_XXX" state.
-     * Returns the given state if this is not a handoff state.
-     */
-    public ArmManagerState getHandoffReadyToExecuteState() {
-        return switch (this) {
-            case READY_HANDOFF_LEFT -> EXECUTE_HANDOFF_LEFT;
-            case READY_HANDOFF_MIDDLE -> EXECUTE_HANDOFF_MIDDLE;
-            case READY_HANDOFF_RIGHT -> EXECUTE_HANDOFF_RIGHT;
-            default -> this;
-        };
-    }
-
-    /**
-     * Get the "PREEMPTIVE_HANDOFF_XXX" state based on the given CoralDetectorState.
-     * Returns PREEMPTIVE_HANDOFF_MIDDLE if NONE is passed.
-     */
-    public static ArmManagerState getHandoffPreemptiveFromCoralPosition(CoralDetectorState coralPosition) {
-        return switch (coralPosition) {
-            case LEFT -> PREEMPTIVE_HANDOFF_LEFT;
-            case MIDDLE -> PREEMPTIVE_HANDOFF_MIDDLE;
-            case RIGHT -> PREEMPTIVE_HANDOFF_RIGHT;
-            default -> PREEMPTIVE_HANDOFF_MIDDLE;
         };
     }
 
