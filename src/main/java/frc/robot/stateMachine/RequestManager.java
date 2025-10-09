@@ -15,22 +15,24 @@ import frc.robot.subsystems.armManager.ArmManagerState;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.GroundManager;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
-import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
+import static edu.wpi.first.wpilibj2.command.Commands.*;
 
 public class RequestManager {
     private final Climber climber;
     public final ArmManager.CommandWrapper armCommands;
     private final GroundManager.CommandWrapper groundCommands;
+    private final Supplier<CoralDetectorState> coralPositionSupplier;
 
-    public RequestManager(ArmManager armManager, GroundManager groundManager, Climber climber) {
+    public RequestManager(ArmManager armManager, GroundManager groundManager, Climber climber, Supplier<CoralDetectorState> coralPositionSupplier) {
         this.climber = climber;
         this.armCommands = new ArmManager.CommandWrapper(armManager);
         this.groundCommands = new GroundManager.CommandWrapper(groundManager);
+        this.coralPositionSupplier = coralPositionSupplier;
     }
 
     public boolean isArmIdle() {
@@ -207,15 +209,15 @@ public class RequestManager {
     }
 
     public Command handoffRequest() {
-        return groundCommands.requestHandoffAndAwaitReady().alongWith(armCommands.requestHandoffAndAwaitReady())
-                // Request execution once both mechanisms are positioned
-                .andThen(
-                        armCommands.executeHandoffUntilIntakeWait(),
-                        groundCommands.executeHandoff()
-                )
-                // Wait for handoff time
-                .andThen(waitSeconds(0.4)) // TODO Potentially incorporate canranges for extra speed
-                .andThen(idleAll())
+        return sequence(
+                // Intake moves first to avoid collision
+                // TODO might be possible to run in parallel
+                groundCommands.requestHandoffAndAwaitReady(),
+                armCommands.requestHandoffAndAwaitReady(coralPositionSupplier),
+                groundCommands.executeHandoff(),
+                waitSeconds(0.4), // TODO Tune
+                idleAll()
+        )
                 .onlyIf(armCommands::currentGamePieceIsNone)
                 .withName("handoffRequest");
     }
