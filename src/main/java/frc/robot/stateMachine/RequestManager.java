@@ -9,6 +9,7 @@ import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.config.FeatureFlags;
 import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.stateMachine.OperatorOptions.AlgaeIntakeLevel;
 import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.ArmManagerState;
 import frc.robot.subsystems.climber.Climber;
@@ -23,7 +24,7 @@ import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 public class RequestManager {
     private final Climber climber;
-    private final ArmManager.CommandWrapper armCommands;
+    public final ArmManager.CommandWrapper armCommands;
     private final GroundManager.CommandWrapper groundCommands;
 
     public RequestManager(ArmManager armManager, GroundManager groundManager, Climber climber) {
@@ -44,11 +45,39 @@ public class RequestManager {
         return AutoAlign.getNetScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
     }
 
-    public boolean algaeIntakeHeightIsTop() {
-        if (FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()) {
-            return AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3;
+    // public boolean algaeIntakeHeightIsTop() {
+    //     if (FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()) {
+    //         return AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3;
+    //     } else {
+    //         return OperatorOptions.getInstance().algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
+    //     }
+    // }
+
+    public AlgaeIntakeLevel getAlgaeIntakeLevel(){
+        if(FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()){
+            if(AutoAlign.getInstance().approximateDistanceToReef() >= 2){
+                return AlgaeIntakeLevel.GROUND_ALGAE;
+            } else if(AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+                return AlgaeIntakeLevel.HIGH_REEF;
+            } else {
+                return AlgaeIntakeLevel.LOW_REEF;
+            }
         } else {
-            return OperatorOptions.getInstance().algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
+            return OperatorOptions.getInstance().algaeIntakeLevel;
+        }
+    }
+
+    public void setAlgaeIntakeLevel(){
+        switch (getAlgaeIntakeLevel()){
+            case GROUND_ALGAE -> {
+                groundAlgaeIntake();
+            } 
+            case HIGH_REEF -> {
+                highReefAlgaeIntake(this::reefRobotSide);
+            }
+            case LOW_REEF -> {
+                lowReefAlgaeIntake(this::reefRobotSide);
+            }
         }
     }
 
@@ -76,6 +105,10 @@ public class RequestManager {
         return armCommands.requestAlgaeNetPrepareAndAwaitReady(side)
                 .andThen(armCommands.doNothing().until(confirmation))
                 .andThen(armCommands.executeAlgaeNetScoreAndAwaitIdle());
+    }
+
+    public Command algaeNetScore(Supplier<RobotScoringSide> side) {
+        return armCommands.requestAlgaeNetPrepareAndAwaitReady(side);
     }
 
     public Command algaeProcessorScore(BooleanSupplier confirmation) {
@@ -132,11 +165,7 @@ public class RequestManager {
     }
 
     public Command reefAlgaeIntake() {
-        return Commands.either(
-                highReefAlgaeIntake(this::reefRobotSide),
-                lowReefAlgaeIntake(this::reefRobotSide),
-                this::algaeIntakeHeightIsTop
-        );
+        return Commands.runOnce(() -> setAlgaeIntakeLevel());
     }
 
     public Command prepareLollipopAndAwaitReady() {

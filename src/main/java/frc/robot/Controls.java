@@ -7,12 +7,19 @@ import frc.robot.autoAlign.AutoAlign;
 import frc.robot.commands.RobotCommands;
 import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
+import frc.robot.subsystems.armManager.ArmManager;
+import frc.robot.subsystems.armManager.arm.Arm;
+import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
+import frc.robot.vision.VisionSubsystem;
 
 import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class Controls {
     DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
@@ -67,6 +74,10 @@ public class Controls {
                 // Only resets if the robot is far away from the reef and not likely to score again soon
                 .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
+        driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
+
+        driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
+
         // Fix drivetrain state
         driver.X().onTrue(runOnce(() -> {
             Command currentCommand = driveSubsystem.getCurrentCommand();
@@ -79,11 +90,7 @@ public class Controls {
         // driver.Y().onTrue(robotCommands.algaeAlignCommand());
 
         // Algae Intake
-        driver.leftBumper().onTrue(Commands.either(
-                requestManager.groundAlgaeIntake(),
-                requestManager.reefAlgaeIntake(),
-                () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
-        ));
+        driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
 
         // Tick Intake Pivot
         driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));

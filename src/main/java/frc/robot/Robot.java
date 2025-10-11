@@ -8,6 +8,7 @@ import com.ctre.phoenix6.Utils;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -88,6 +89,17 @@ public class Robot extends TimedRobot {
         // FmsSubsystem.getInstance().updateSimulation();
 
         swerve.setElevatorHeight(elevator.getHeight());
+
+        if (FmsSubsystem.getInstance().isDisabled()){
+            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(200);
+            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(200);
+            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(200);
+        }
+        else {
+            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(0);
+            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(0);
+            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(0);
+        }
     }
 
     @Override

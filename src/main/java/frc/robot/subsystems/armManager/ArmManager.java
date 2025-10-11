@@ -25,6 +25,8 @@ import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
 
 import java.util.function.Supplier;
 
+import javax.net.ssl.SSLEngineResult.HandshakeStatus;
+
 public class ArmManager extends StateMachine<ArmManagerState> {
     private final Hand hand;
     private final Elevator elevator;
@@ -86,7 +88,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             }
 
             case IDLE_ALGAE -> {
-                if (algaeDroppedOrMissingDebouncer.calculate(!hand.hasAlgae()) && !Robot.isSimulation()) {
+                if (algaeDroppedOrMissingDebouncer.calculate(!hand.droppedAlgae()) && !Robot.isSimulation()) {
                     nextState = ArmManagerState.IDLE_ALGAE_DROPPED;
                 }
             }
@@ -200,7 +202,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             }
 
             case ACTIVE_INTAKE_GROUND_ALGAE -> {
-                if (hand.hasAlgae()) {
+                if (hand.hasAlgaeForIntake()) {
                     nextState = ArmManagerState.PREPARE_IDLE_ALGAE;
                 }
             }
@@ -329,15 +331,15 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
 
             /* ******** ALGAE INTAKE STATES ******** */
-            case PREPARE_INTAKE_HIGH_REEF_ALGAE_LEFT, ACTIVE_INTAKE_HIGH_REEF_ALGAE_LEFT ->
+            case PREPARE_INTAKE_HIGH_REEF_ALGAE_LEFT ->
                     requestState(ArmState.INTAKE_HIGH_REEF_ALGAE_LEFT, ElevatorState.HIGH_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_HIGH_REEF_ALGAE_RIGHT, ACTIVE_INTAKE_HIGH_REEF_ALGAE_RIGHT ->
+            case PREPARE_INTAKE_HIGH_REEF_ALGAE_RIGHT ->
                     requestState(ArmState.INTAKE_HIGH_REEF_ALGAE_RIGHT, ElevatorState.HIGH_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_LOW_REEF_ALGAE_LEFT, ACTIVE_INTAKE_LOW_REEF_ALGAE_LEFT ->
+            case PREPARE_INTAKE_LOW_REEF_ALGAE_LEFT ->
                     requestState(ArmState.INTAKE_LOW_REEF_ALGAE_LEFT, ElevatorState.LOW_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_LOW_REEF_ALGAE_RIGHT, ACTIVE_INTAKE_LOW_REEF_ALGAE_RIGHT ->
+            case PREPARE_INTAKE_LOW_REEF_ALGAE_RIGHT ->
                     requestState(ArmState.INTAKE_LOW_REEF_ALGAE_RIGHT, ElevatorState.LOW_REEF_ALGAE, HandState.INTAKE_REEF_ALGAE);
-            case PREPARE_INTAKE_GROUND_ALGAE, ACTIVE_INTAKE_GROUND_ALGAE ->
+            case PREPARE_INTAKE_GROUND_ALGAE ->
                     requestState(ArmState.INTAKE_GROUND_ALGAE, ElevatorState.GROUND_ALGAE, HandState.INTAKE_GROUND_ALGAE);
 
 
@@ -349,14 +351,16 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case PREPARE_SCORE_ALGAE_PROCESSOR, READY_SCORE_ALGAE_PROCESSOR ->
                     requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE);
             case SCORE_ALGAE_NET_LEFT ->
-                    requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.SCORE_ALGAE_NET);
+                    hand.setState(HandState.SCORE_ALGAE_NET);
             case SCORE_ALGAE_NET_RIGHT ->
-                    requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.SCORE_ALGAE_NET);
+                    hand.setState(HandState.SCORE_ALGAE_NET);
             case SCORE_ALGAE_PROCESSOR ->
                     requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR);
 
             /* ******** LOLLIPOP INTAKE STATES ******** */
-            case PREPARE_INTAKE_LOLLIPOP, ACTIVE_INTAKE_LOLLIPOP ->
+            case PREPARE_INTAKE_LOLLIPOP ->
+                    requestState(ArmState.PREPARE_LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
+            case ACTIVE_INTAKE_LOLLIPOP ->
                     requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
 
             /* ******** CLIMB STATES ******** */
