@@ -13,16 +13,16 @@ import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.Trailblazer;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 
-public class redL4 extends BaseAuto {
+public class redFourCoralProcessor extends BaseAuto {
     private static final AutoConstraintOptions CONSTRAINTS = new AutoConstraintOptions(2, 57, 1, 30);
 
-    public redL4(RequestManager robotManager, Trailblazer trailblazer) {
+    public redFourCoralProcessor(RequestManager robotManager, Trailblazer trailblazer) {
         super(robotManager, trailblazer);
     }
 
     @Override
     protected Pose2d getStartingPose() {
-        return Points.START_R1_AND_B1.redPose;
+        return Points.START_R6_AND_B6.redPose;
     }
 
     public Pose2d getStartingPosition() {
@@ -32,30 +32,31 @@ public class redL4 extends BaseAuto {
     @Override
     protected Command createAutoCommand() {
         return Commands.sequence(
-                blocks.scorePreloadL4(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+                blocks.driveToBackReefRedProcessor(),
+                blocks.scorePreloadL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
+                blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 requestManager.prepareLollipopAndAwaitReady(),
                 // Commands.parallel(
 
-                blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_J, RobotScoringSide.LEFT),
+                blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 // ),
-                blocks.scoreL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-      requestManager.prepareLollipopAndAwaitReady(),
+                blocks.scoreL2(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+                requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-      requestManager.prepareLollipopAndAwaitReady(),
+                blocks.scoreL2(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
+                blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
+                requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
-                blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                blocks.scoreL4(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
-      blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
+                blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+                blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
+                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT)
 
         );
     }

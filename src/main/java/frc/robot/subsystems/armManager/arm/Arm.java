@@ -1,7 +1,5 @@
 package frc.robot.subsystems.armManager.arm;
 
-import java.util.jar.Attributes.Name;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -14,47 +12,44 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.networktables.DoubleSubscriber;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.autoAlign.AutoAlign;
-import frc.robot.fms.FmsSubsystem;
-import frc.robot.localization.LocalizationSubsystem;
-import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
+import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.stateMachine.OperatorOptions.ScoreLocation;
-import frc.robot.subsystems.drivetrain.DriveSubsystem;
-import frc.robot.vision.VisionSubsystem;
 
-public class Arm extends StateMachine<ArmStates> {
-    public String name = getName();
-
-    public final DoubleSubscriber armSpeed = DogLog.tunable("Arm/Speed [-1, 1]", 0.0);
-    public static TalonFX motor;
+public class Arm extends StateMachine<ArmState> {
+    private static TalonFX motor;
     private final CANcoder encoder;
-    private final TalonFXConfiguration motor_config = new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(ArmConstants.P).withKI(ArmConstants.I)
-                    .withKD(ArmConstants.D).withKG(ArmConstants.G)
-                    .withGravityType(GravityTypeValue.Arm_Cosine))
-            .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ArmConstants.ArmGearRatio));
-    private CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     private double armPosition;
-    private final double tolerance;
     private double absolutePosition;
-    private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
+
+    private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
+
+    private double customStatePosition = 0.0;
 
     public Arm() {
-        super(ArmStates.IDLE);
+        super(ArmState.START_POSITION);
+        TalonFXConfiguration motor_config = new TalonFXConfiguration()
+                .withSlot0(
+                        new Slot0Configs()
+                                .withKP(ArmConstants.P)
+                                .withKI(ArmConstants.I)
+                                .withKD(ArmConstants.D)
+                                .withKG(ArmConstants.G)
+                                .withGravityType(GravityTypeValue.Arm_Cosine)
+                )
+                .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ArmConstants.ArmGearRatio));
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MotionMagicCruiseVelocity;
         motor_config.MotionMagic.MotionMagicAcceleration = ArmConstants.MotionMagicAcceleration;
-        motor_config.MotionMagic.MotionMagicJerk = ArmConstants.MotionMagicJerk;
+        motor_config.ClosedLoopGeneral.ContinuousWrap = true;
+
+        CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
         canCoderConfig.MagnetSensor.MagnetOffset = Constants.ArmConstants.encoderOffset;
         canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.7;
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
@@ -67,205 +62,92 @@ public class Arm extends StateMachine<ArmStates> {
 
         collectInputs();
         syncEncoder();
-
-        tolerance = 0.005;
     }
 
     public boolean atGoal() {
-        return switch (getState()) {
-            case LOLLIPOP ->
-                MathUtil.isNear(ArmPositions.LOLLIPOP, armPosition, tolerance);
-            case IDLE ->
-                MathUtil.isNear(ArmPositions.IDLE, armPosition, tolerance);
-            case INTAKE_GROUND_ALGAE ->
-                MathUtil.isNear(ArmPositions.INTAKE_GROUND_ALGAE, armPosition, tolerance);
-            case INTAKE_HIGH_REEF_ALGAE ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE, armPosition, tolerance);
-            case INTAKE_LOW_REEF_ALGAE ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE, armPosition, tolerance);
-            case ALGAE_NET ->
-                MathUtil.isNear(invertNet() ? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET, armPosition, tolerance);
-            case ALGAE_PROCESSOR ->
-                MathUtil.isNear(ArmPositions.ALGAE_PROCESSOR, armPosition, tolerance);
-            case L4 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L4) : ArmPositions.L4, armPosition, tolerance);
-            case SCORE_L4 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L4) : ArmPositions.SCORE_L4, armPosition, tolerance);
-            case L3 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L3) : ArmPositions.L3, armPosition, tolerance);
-            case SCORE_L3 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L3) : ArmPositions.SCORE_L3, armPosition, tolerance);
-            case L2 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.L2) : ArmPositions.L2, armPosition, tolerance);
-            case SCORE_L2 ->
-                MathUtil.isNear(invertArm() ? invertPosition(ArmPositions.SCORE_L2) : ArmPositions.SCORE_L2, armPosition, tolerance);
-            case HANDOFF_LEFT ->
-                MathUtil.isNear(ArmPositions.HANDOFF_LEFT, armPosition, tolerance);
-            case HANDOFF_MIDDLE ->
-                MathUtil.isNear(ArmPositions.HANDOFF_MIDDLE, armPosition, tolerance);
-            case HANDOFF_RIGHT ->
-                MathUtil.isNear(ArmPositions.HANDOFF_RIGHT, armPosition, tolerance);
-            case CLIMB ->
-                MathUtil.isNear(ArmPositions.CLIMB, armPosition, tolerance);
-        };
-
+        return MathUtil.isNear(getState().getPosition(), getNormalizedPosition(), ArmConstants.Tolerance);
     }
 
     public void syncEncoder() {
-        if(Utils.isSimulation()){
+        if (Utils.isSimulation()) {
             return;
         }
         motor.setPosition(absolutePosition);
     }
 
-    public boolean invertArm(){
-        switch (AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d(), true, true)) {
-            case LEFT:
-                return true;
-            case RIGHT:
-                return false;
-            default:
-                return false;
-        }
-    }
-
-    public double invertPosition(double position){
-        return -position + 0.5;
-    } 
-
-    public boolean invertNet(){
-        switch (AutoAlign.getNetScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose2d())) {
-            case LEFT:
-                return true;
-            case RIGHT:
-                return false;
-            default:
-                return false;
-        }
-    }
-
-
-    @Override 
-    public void collectInputs() {
+    @Override
+    protected void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
         armPosition = motor.getPosition().getValueAsDouble();
-        DogLog.log(getName() + "/Encoder position", absolutePosition);
-        DogLog.log(getName() + "/Motor position", armPosition);
-        DogLog.log(getName() + "/at goal", atGoal());
-        if (Utils.isSimulation())
-            SimArm.updateSimPosition(motor, encoder);
-        // updateSimPosition(setpoint);
+        DogLog.log("Arm/Absolute Encoder position", absolutePosition);
+        DogLog.log("Arm/Motor Encoder Position", armPosition);
+        DogLog.log("Arm/Code Position", getNormalizedPosition());
+        DogLog.log("Arm/At Goal", atGoal());
+        DogLog.log("Arm/CustomPosition", customStatePosition);
         MechanismVisualizer.setArmPosition(armPosition);
     }
 
-    //   @Override
-    // public void simulationPeriodic() {
-    //     SimArm.updateSimPosition(motor, encoder);
-    // }
-
     @Override
-    public void periodic(){
+    public void periodic() {
         super.periodic();
-        switch (getState()) {
-            case L2:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.L2) : ArmPositions.L2);
-                break;
-            case L3:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.L3) : ArmPositions.L3);
-                break;
-            case L4:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.L4) : ArmPositions.L4);
-                break;
-            case INTAKE_HIGH_REEF_ALGAE:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE);
-                break;
-            case INTAKE_LOW_REEF_ALGAE:
-                setArmPosition(invertArm()? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE);
-                break;
-            case ALGAE_NET:
-                setArmPosition(invertNet()? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET);
-                break;
-        
-            default:
-                break;
+
+        // Periodically update
+        // afterTransition doesn't work because it is only called once when CUSTOM is set for the first time
+        if (getState() == ArmState.CUSTOM) {
+            setMotorToTargetPosition(customStatePosition);
         }
     }
 
-    public void setArmSpeed() {
-        motor.set(armSpeed.get());
+    /**
+     * Returns the arm position normalized to the range [-0.5, 0.5].
+     */
+    public double getNormalizedPosition() {
+        return normalizePosition(armPosition);
     }
 
-    public void setState(ArmStates state) {
+    public static double normalizePosition(double armPosition) {
+        double position = armPosition % 1.0;
+        if (position > 0.5)
+            return position - 1.0;
+        if (position < -0.5)
+            return position + 1.0;
+        return position;
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        SimArm.updateSimPosition(motor, encoder);
+    }
+
+    public void setState(ArmState state) {
         setStateFromRequest(state);
     }
 
-    public void setArmPosition(double position) {
-        DogLog.log(name + "/Setpoint", position);
-        motor.setControl(motor_request.withPosition(position));
+    public void setCustom(double targetPosition) {
+        this.customStatePosition = targetPosition;
+        setState(ArmState.CUSTOM);
     }
 
     @Override
-    protected void afterTransition(ArmStates newState) {
+    public ArmState getState() {
+        return super.getState();
+    }
+
+    @Override
+    protected void afterTransition(ArmState newState) {
         switch (newState) {
-            case LOLLIPOP -> {
-                setArmPosition(ArmPositions.LOLLIPOP);
-            }
-            case IDLE -> {
-                setArmPosition(ArmPositions.IDLE);
-            }
-            case INTAKE_GROUND_ALGAE -> {
-                setArmPosition(ArmPositions.INTAKE_GROUND_ALGAE);
-            }
-            case INTAKE_HIGH_REEF_ALGAE -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.INTAKE_HIGH_REEF_ALGAE) : ArmPositions.INTAKE_HIGH_REEF_ALGAE);
-            }
-            case INTAKE_LOW_REEF_ALGAE -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.INTAKE_LOW_REEF_ALGAE) : ArmPositions.INTAKE_LOW_REEF_ALGAE);
-            }
-            case ALGAE_PROCESSOR -> {
-                setArmPosition(ArmPositions.ALGAE_PROCESSOR);
-            }
-            case ALGAE_NET -> {
-                setArmPosition(invertNet() ? invertPosition(ArmPositions.ALGAE_NET) : ArmPositions.ALGAE_NET);
-            }
-            case L4 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L4) : ArmPositions.L4);
-            }
-            case SCORE_L4 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L4) : ArmPositions.SCORE_L4);
-            }
-            case HANDOFF_LEFT -> {
-                setArmPosition(ArmPositions.HANDOFF_LEFT);
-            }
-            case HANDOFF_MIDDLE -> {
-                setArmPosition(ArmPositions.HANDOFF_MIDDLE);
-            }
-            case HANDOFF_RIGHT -> {
-                setArmPosition(ArmPositions.HANDOFF_RIGHT);
-            }
-            case L3 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L3) : ArmPositions.L3);
-            }
-            case SCORE_L3 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L3) : ArmPositions.SCORE_L3);
-            }
-            case L2 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.L2) : ArmPositions.L2);
-            }
-            case SCORE_L2 -> {
-                setArmPosition(invertArm() ? invertPosition(ArmPositions.SCORE_L2) : ArmPositions.SCORE_L2);
-            }
-            case CLIMB -> {
-                setArmPosition(ArmPositions.CLIMB);
+            case CUSTOM -> setMotorToTargetPosition(customStatePosition);
+        
+
+            // Custom cases can go here, default to standard position control
+            default -> {
+                setMotorToTargetPosition(newState.getPosition());
             }
         }
     }
 
-    private static Arm instance;
-
-    public static Arm getInstance() {
-        if (instance == null)
-            instance = new Arm(); // Make sure there is an instance (this will only run once)
-        return instance;
+    private void setMotorToTargetPosition(double position) {
+        DogLog.log("Arm/Setpoint", position);
+        motor.setControl(motionMagicVoltage.withPosition(position));
     }
 }

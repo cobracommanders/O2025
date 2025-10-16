@@ -47,7 +47,7 @@ public enum ReefPipeLevel {
           Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(270)),
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 - 1),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 - 1.5),
           -Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(90))),
 
