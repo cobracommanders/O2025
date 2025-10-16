@@ -19,15 +19,19 @@ public class ArmSchedulerVisualization {
     private final MechanismLigament2d armLine2;
     private final MechanismLigament2d intake;
 
-    public ArmSchedulerVisualization(double driveWidth, double driveHeight, double intakeWidth, double finalIntakeHeight) {
+    public ArmSchedulerVisualization(
+            double driveWidth, double driveHeight, double intakeWidth, double finalIntakeHeight) {
         this.mechanism2d = new Mechanism2d(windowSize, windowSize);
         this.armRoot = mechanism2d.getRoot("Arm", 0.0, 0.0);
         this.driveRoot = mechanism2d.getRoot("Drive", windowCenter - driveWidth / 2.0, driveHeight);
         this.intakeRoot = mechanism2d.getRoot("Intake", windowCenter - intakeWidth / 2.0, 0.0);
-        this.drivetrain = new MechanismLigament2d("Drivetrain", driveWidth, 0.0, 2.0, new Color8Bit(Color.kRed));
+        this.drivetrain =
+                new MechanismLigament2d(
+                        "Drivetrain", driveWidth, 0.0, 2.0, new Color8Bit(Color.kRed));
         this.armLine1 = new MechanismLigament2d("Arm1", 0.0, 0.0, 1, new Color8Bit(Color.kWhite));
         this.armLine2 = new MechanismLigament2d("Arm2", 0.0, 0.0, 1, new Color8Bit(Color.kWhite));
-        this.intake = new MechanismLigament2d("Intake", intakeWidth, 0.0, 1, new Color8Bit(Color.kRed));
+        this.intake =
+                new MechanismLigament2d("Intake", intakeWidth, 0.0, 1, new Color8Bit(Color.kRed));
 
         driveRoot.append(drivetrain);
         armRoot.append(armLine1);

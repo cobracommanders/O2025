@@ -1,15 +1,13 @@
 package frc.robot.fms;
 
 import com.ctre.phoenix6.Utils;
-
 import dev.doglog.DogLog;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.drivetrain.DriveSubsystem;
 
 public class FmsSubsystem extends SubsystemBase {
-    private boolean disabled= true;
+    private boolean disabled = true;
     private boolean teleopEnabled = false;
     private boolean autoEnabled = false;
     private boolean isSimulation = false;
@@ -19,7 +17,7 @@ public class FmsSubsystem extends SubsystemBase {
         return disabled;
     }
 
-    public boolean isSimulation(){
+    public boolean isSimulation() {
         return isSimulation;
     }
 
@@ -35,7 +33,7 @@ public class FmsSubsystem extends SubsystemBase {
         return alliance == Alliance.Red;
     }
 
-    public void updateSimulation(){
+    public void updateSimulation() {
         isSimulation = Utils.isSimulation();
     }
 
@@ -52,7 +50,8 @@ public class FmsSubsystem extends SubsystemBase {
 
     public static FmsSubsystem getInstance() {
         if (instance == null)
-            instance = new FmsSubsystem(); // Make sure there is an instance (this will only run once)
+            instance =
+                    new FmsSubsystem(); // Make sure there is an instance (this will only run once)
         return instance;
     }
 }

@@ -9,9 +9,7 @@ public class RotationUtil {
      */
     public static double toUnsignedDegrees(double degrees) {
         double x = degrees % 360;
-        return x < 0
-               ? x + 360
-               : x;
+        return x < 0 ? x + 360 : x;
     }
 
     /**
@@ -21,8 +19,6 @@ public class RotationUtil {
      */
     public static double toSignedDegrees(double degrees) {
         double x = toUnsignedDegrees(degrees);
-        return x > 180
-               ? x - 360
-               : x;
+        return x > 180 ? x - 360 : x;
     }
 }

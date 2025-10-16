@@ -22,16 +22,19 @@ import frc.robot.util.MathHelpers;
 import frc.robot.vision.VisionSubsystem;
 import frc.robot.vision.results.TagResult;
 
-public class LocalizationSubsystem extends StateMachine<LocalizationStates> implements LocalizationBase {
-    private static final Vector<N3> MT1_VISION_STD_DEVS = VecBuilder.fill(
-            VisionConstants.xyStandardDeviation, // xy standard deviation
-            VisionConstants.xyStandardDeviation, // xy standard deviation
-            VisionConstants.thetaStandardDeviation // theta standard deviation
-    );
-    private static final Vector<N3> MT2_VISION_STD_DEVS = VecBuilder.fill(
-            VisionConstants.xyStandardDeviation, //xy standard deviation
-            VisionConstants.thetaStandardDeviation, //xy standard deviation
-            Double.MAX_VALUE);
+public class LocalizationSubsystem extends StateMachine<LocalizationStates>
+        implements LocalizationBase {
+    private static final Vector<N3> MT1_VISION_STD_DEVS =
+            VecBuilder.fill(
+                    VisionConstants.xyStandardDeviation, // xy standard deviation
+                    VisionConstants.xyStandardDeviation, // xy standard deviation
+                    VisionConstants.thetaStandardDeviation // theta standard deviation
+                    );
+    private static final Vector<N3> MT2_VISION_STD_DEVS =
+            VecBuilder.fill(
+                    VisionConstants.xyStandardDeviation, // xy standard deviation
+                    VisionConstants.thetaStandardDeviation, // xy standard deviation
+                    Double.MAX_VALUE);
     private final VisionSubsystem vision;
     private final DriveSubsystem swerve;
     private final DriveSubsystem drivetrain;
@@ -46,23 +49,26 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
         if (FeatureFlags.FIELD_CALIBRATION.getAsBoolean()) {
             SmartDashboard.putData(
                     "FieldCalibration/ResetGyroTo180",
-                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(180))).ignoringDisable(true));
+                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(180)))
+                            .ignoringDisable(true));
             SmartDashboard.putData(
                     "FieldCalibration/ResetGyroTo0",
-                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(0))).ignoringDisable(true));
+                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(0)))
+                            .ignoringDisable(true));
             SmartDashboard.putData(
                     "FieldCalibration/ResetGyroTo90",
-                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(90))).ignoringDisable(true));
+                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(90)))
+                            .ignoringDisable(true));
             SmartDashboard.putData(
                     "FieldCalibration/ResetGyroTo270",
-                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(270))).ignoringDisable(true));
+                    Commands.runOnce(() -> resetGyro(Rotation2d.fromDegrees(270)))
+                            .ignoringDisable(true));
         }
     }
 
     @Override
     protected void collectInputs() {
-        vision
-                .getLeftFrontTagResult()
+        vision.getLeftFrontTagResult()
                 .or(vision::getLeftBackTagResult)
                 .ifPresent(this::ingestTagResult);
         vision.getRightTagResult().ifPresent(this::ingestTagResult);
@@ -115,8 +121,11 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
         // correct heading
         if (DriverStation.isTeleop()
                 || !MathUtil.isNear(
-                estimatedPose.getRotation().getDegrees(), drivetrain.getRawYaw().getDegrees(), 1.5, -180,
-                180)) {
+                        estimatedPose.getRotation().getDegrees(),
+                        drivetrain.getRawYaw().getDegrees(),
+                        1.5,
+                        -180,
+                        180)) {
             drivetrain.setYaw(estimatedPose.getRotation());
         }
 
@@ -125,14 +134,19 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
 
     public Command getZeroCommand() {
         return Commands.runOnce(
-                () -> resetGyro(Rotation2d.fromDegrees((FmsSubsystem.getInstance().isRedAlliance() ? 180 : 0))));
+                () ->
+                        resetGyro(
+                                Rotation2d.fromDegrees(
+                                        (FmsSubsystem.getInstance().isRedAlliance() ? 180 : 0))));
     }
 
     private static LocalizationSubsystem instance;
 
     public static LocalizationSubsystem getInstance() {
         if (instance == null)
-            instance = new LocalizationSubsystem(); // Make sure there is an instance (this will only run once)
+            instance =
+                    new LocalizationSubsystem(); // Make sure there is an instance (this will only
+        // run once)
         return instance;
     }
 }

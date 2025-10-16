@@ -18,7 +18,6 @@ import frc.robot.stateMachine.StateMachine;
 import frc.robot.trailblazer.SwerveBase;
 import frc.robot.util.ControllerHelpers;
 import frc.robot.util.MathHelpers;
-
 import java.util.Map;
 
 public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveBase {
@@ -26,13 +25,13 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
     private ChassisSpeeds algaeAutoAlignSpeeds = new ChassisSpeeds();
 
-    public final TunerConstants.TunerSwerveDrivetrain drivetrain = new TunerConstants.TunerSwerveDrivetrain(
-            TunerConstants.DrivetrainConstants,
-            TunerConstants.FrontLeft,
-            TunerConstants.FrontRight,
-            TunerConstants.BackLeft,
-            TunerConstants.BackRight
-    );
+    public final TunerConstants.TunerSwerveDrivetrain drivetrain =
+            new TunerConstants.TunerSwerveDrivetrain(
+                    TunerConstants.DrivetrainConstants,
+                    TunerConstants.FrontLeft,
+                    TunerConstants.FrontRight,
+                    TunerConstants.BackLeft,
+                    TunerConstants.BackRight);
 
     private final SwerveDriveState drivetrainState = drivetrain.getState();
 
@@ -44,20 +43,23 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     private static final double LEFT_Y_DEADBAND = 0.05;
     private static final double RIGHT_X_DEADBAND = 0.15;
 
-    private static final InterpolatingDoubleTreeMap ELEVATOR_HEIGHT_TO_SLOW_MODE = InterpolatingDoubleTreeMap
-            .ofEntries(Map.entry(0.0, 1.0), Map.entry(0.6, 1.0), Map.entry(1.4, 0.7));
+    private static final InterpolatingDoubleTreeMap ELEVATOR_HEIGHT_TO_SLOW_MODE =
+            InterpolatingDoubleTreeMap.ofEntries(
+                    Map.entry(0.0, 1.0), Map.entry(0.6, 1.0), Map.entry(1.4, 0.7));
 
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-            .withDeadband(DrivetrainConstants.maxSpeed * 0.03)
-            .withRotationalDeadband(DrivetrainConstants.maxAngularRate * 0.03);
+    private final SwerveRequest.FieldCentric drive =
+            new SwerveRequest.FieldCentric()
+                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
+                    .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+                    .withDeadband(DrivetrainConstants.maxSpeed * 0.03)
+                    .withRotationalDeadband(DrivetrainConstants.maxAngularRate * 0.03);
 
-    private final SwerveRequest.FieldCentric autoDrive = new SwerveRequest.FieldCentric()
-            .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-//            .withDeadband(0.05)
-//            .withRotationalDeadband(Units.degreesToRadians(2.0))
+    private final SwerveRequest.FieldCentric autoDrive =
+            new SwerveRequest.FieldCentric()
+                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
+                    .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+            //            .withDeadband(0.05)
+            //            .withRotationalDeadband(Units.degreesToRadians(2.0))
             ;
 
     private boolean hasAppliedOperatorPerspective = false;
@@ -71,22 +73,35 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         DriveStates nextState = currentState;
         switch (currentState) {
             case AUTO, TELEOP ->
-                    nextState = FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
-            case REEF_ALIGN_TELEOP -> { /* Await Control */ }
+                    nextState =
+                            FmsSubsystem.getInstance().isAutonomous()
+                                    ? DriveStates.AUTO
+                                    : DriveStates.TELEOP;
+            case REEF_ALIGN_TELEOP -> {
+                /* Await Control */
+            }
             case ALGAE_ALIGN_TELEOP ->
-                    nextState = AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
+                    nextState =
+                            AutoAlign.getInstance().isAlignedDebounced()
+                                    ? DriveStates.TELEOP
+                                    : DriveStates.ALGAE_ALIGN_TELEOP;
         }
 
         return nextState;
     }
 
     public void setTeleopSpeeds(double x, double y, double theta) {
-        double leftY = -1.0
-                * MathHelpers.signedExp(ControllerHelpers.deadbandJoystickValue(y, LEFT_Y_DEADBAND), 2.0);
-        double leftX = -1.0
-                * MathHelpers.signedExp(ControllerHelpers.deadbandJoystickValue(x, LEFT_X_DEADBAND), 2.0);
-        double rightX = MathHelpers.signedExp(
-                ControllerHelpers.deadbandJoystickValue(theta, RIGHT_X_DEADBAND), 1.3);
+        double leftY =
+                -1.0
+                        * MathHelpers.signedExp(
+                                ControllerHelpers.deadbandJoystickValue(y, LEFT_Y_DEADBAND), 2.0);
+        double leftX =
+                -1.0
+                        * MathHelpers.signedExp(
+                                ControllerHelpers.deadbandJoystickValue(x, LEFT_X_DEADBAND), 2.0);
+        double rightX =
+                MathHelpers.signedExp(
+                        ControllerHelpers.deadbandJoystickValue(theta, RIGHT_X_DEADBAND), 1.3);
 
         DogLog.log("Swerve/LeftX", leftX);
         DogLog.log("Swerve/LeftY", leftY);
@@ -96,11 +111,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         double mappedX = mappedPose.getX();
         double mappedY = mappedPose.getY();
 
-        teleopSpeeds = new ChassisSpeeds(
-                mappedY * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
-                mappedX * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
-                rightX * DrivetrainConstants.maxAngularRate * teleopSlowModePercent
-        );
+        teleopSpeeds =
+                new ChassisSpeeds(
+                        mappedY * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
+                        mappedX * DrivetrainConstants.maxSpeed * teleopSlowModePercent,
+                        rightX * DrivetrainConstants.maxAngularRate * teleopSlowModePercent);
     }
 
     public ChassisSpeeds getTeleopSpeeds() {
@@ -108,7 +123,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     }
 
     public ChassisSpeeds getFieldRelativeSpeeds() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(drivetrainState.Speeds, drivetrainState.Pose.getRotation());
+        return ChassisSpeeds.fromRobotRelativeSpeeds(
+                drivetrainState.Speeds, drivetrainState.Pose.getRotation());
     }
 
     @Override
@@ -123,7 +139,10 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 
     @Override
     protected void collectInputs() {
-        algaeAutoAlignSpeeds = FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getAlgaeAlignSpeeds()) : AutoAlign.getInstance().getAlgaeAlignSpeeds();
+        algaeAutoAlignSpeeds =
+                FmsSubsystem.getInstance().isRedAlliance()
+                        ? flipSpeeds(AutoAlign.getInstance().getAlgaeAlignSpeeds())
+                        : AutoAlign.getInstance().getAlgaeAlignSpeeds();
         teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
 
         DogLog.log("Swerve/AutoSpeeds", autoSpeeds);
@@ -134,7 +153,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     }
 
     public ChassisSpeeds flipSpeeds(ChassisSpeeds speeds) {
-        return new ChassisSpeeds(-speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
+        return new ChassisSpeeds(
+                -speeds.vxMetersPerSecond, -speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond);
     }
 
     @Override
@@ -142,10 +162,15 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         super.periodic();
 
         if (!hasAppliedOperatorPerspective || FmsSubsystem.getInstance().isDisabled()) {
-            DriverStation.getAlliance().ifPresent((allianceColor) -> {
-                drivetrain.setOperatorPerspectiveForward(allianceColor == DriverStation.Alliance.Red ? Rotation2d.k180deg : Rotation2d.kZero);
-                hasAppliedOperatorPerspective = true;
-            });
+            DriverStation.getAlliance()
+                    .ifPresent(
+                            (allianceColor) -> {
+                                drivetrain.setOperatorPerspectiveForward(
+                                        allianceColor == DriverStation.Alliance.Red
+                                                ? Rotation2d.k180deg
+                                                : Rotation2d.kZero);
+                                hasAppliedOperatorPerspective = true;
+                            });
         }
 
         sendSwerveRequest(getState());
@@ -174,8 +199,7 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         switch (newState) {
             case TELEOP -> {
                 drivetrain.setControl(
-                        drive
-                                .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
+                        drive.withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
                                 .withVelocityX(teleopSpeeds.vxMetersPerSecond)
                                 .withVelocityY(teleopSpeeds.vyMetersPerSecond)
                                 .withRotationalRate(teleopSpeeds.omegaRadiansPerSecond)
@@ -226,7 +250,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 
     public static DriveSubsystem getInstance() {
         if (instance == null)
-            instance = new DriveSubsystem(); // Make sure there is an instance (this will only run once)
+            instance = new DriveSubsystem(); // Make sure there is an instance (this will only run
+        // once)
         return instance;
     }
 }

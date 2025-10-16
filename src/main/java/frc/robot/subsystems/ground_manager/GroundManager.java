@@ -39,13 +39,16 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             case INTAKING -> {
                 if (coralDetector.getState() == CoralDetectorState.MIDDLE) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                } else if (Utils.isSimulation() && intakePivot.atGoal() && timeout(Math.random() + 0.5)) {
+                } else if (Utils.isSimulation()
+                        && intakePivot.atGoal()
+                        && timeout(Math.random() + 0.5)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                    CoralDetectorState simCoralPosition = switch ((int) (Math.random() * 3)) {
-                        case 1 -> CoralDetectorState.LEFT;
-                        case 2 -> CoralDetectorState.RIGHT;
-                        default -> CoralDetectorState.MIDDLE;
-                    };
+                    CoralDetectorState simCoralPosition =
+                            switch ((int) (Math.random() * 3)) {
+                                case 1 -> CoralDetectorState.LEFT;
+                                case 2 -> CoralDetectorState.RIGHT;
+                                default -> CoralDetectorState.MIDDLE;
+                            };
                     coralDetector.setSimCoral(simCoralPosition);
                 }
             }
@@ -143,11 +146,14 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         }
 
         private Command setState(GroundManagerStates state) {
-            return groundManager.runOnce(() -> groundManager.setStateFromRequest(state)).withName("setState/" + state.name());
+            return groundManager
+                    .runOnce(() -> groundManager.setStateFromRequest(state))
+                    .withName("setState/" + state.name());
         }
 
         public Command idleAndAwaitReady() {
-            return groundManager.runOnce(groundManager::requestIdle)
+            return groundManager
+                    .runOnce(groundManager::requestIdle)
                     .andThen(groundManager.waitForState(GroundManagerStates.IDLE))
                     .withName("idleAndAwaitReady");
         }
@@ -158,70 +164,54 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                     .withName("climbAndDoNothing");
         }
 
-        /**
-         * Prepare for handoff and await ready state.
-         */
+        /** Prepare for handoff and await ready state. */
         public Command requestHandoffAndAwaitReady() {
             return setState(GroundManagerStates.PREPARE_HANDOFF)
                     .andThen(groundManager.waitForState(GroundManagerStates.READY_HANDOFF))
                     .withName("requestHandoff");
         }
 
-        /**
-         * Prepare for inverted handoff and await ready state.
-         */
+        /** Prepare for inverted handoff and await ready state. */
         public Command requestInvertedHandoffAndAwaitReady() {
             return setState(GroundManagerStates.PREPARE_INVERTED_HANDOFF)
                     .andThen(groundManager.waitForState(GroundManagerStates.READY_INVERTED_HANDOFF))
                     .withName("requestInvertedHandoff");
         }
 
-        /**
-         * Intake until a piece is detected.
-         */
+        /** Intake until a piece is detected. */
         public Command intakeUntilPiece() {
             return setState(GroundManagerStates.INTAKING)
                     .andThen(awaitGamePieceFromIntaking())
                     .withName("requestIntakeUntilPiece");
         }
 
-        /**
-         * Await a game piece from intaking. Ends immediately if scheduled while not
-         * intaking.
-         */
+        /** Await a game piece from intaking. Ends immediately if scheduled while not intaking. */
         public Command awaitGamePieceFromIntaking() {
-            return groundManager.waitForState(GroundManagerStates.PREPARE_IDLE)
+            return groundManager
+                    .waitForState(GroundManagerStates.PREPARE_IDLE)
                     .onlyIf(() -> groundManager.getState() == GroundManagerStates.INTAKING);
         }
 
-        /**
-         * Prepare for L1 score and await ready state.
-         */
+        /** Prepare for L1 score and await ready state. */
         public Command prepareL1AndAwaitReady() {
             return setState(GroundManagerStates.PREPARE_SCORE_L1)
                     .andThen(groundManager.waitForState(GroundManagerStates.READY_SCORE_L1))
                     .withName("requestL1PrepareAndAwaitReady");
         }
 
-        /**
-         * Score L1 and await idle state.
-         */
+        /** Score L1 and await idle state. */
         public Command executeL1ScoreAndAwaitIdle() {
             return setState(GroundManagerStates.SCORE_L1)
                     .andThen(groundManager.waitForState(GroundManagerStates.PREPARE_IDLE))
                     .withName("requestL1ScoreAndAwaitIdle");
         }
 
-        /**
-         * Execute handoff.
-         */
+        /** Execute handoff. */
         public Command executeHandoff() {
             return setState(GroundManagerStates.HANDOFF);
         }
 
-        /**
-         * Execute inverted handoff.
-         */
+        /** Execute inverted handoff. */
         public Command executeInvertedHandoff() {
             return setState(GroundManagerStates.INVERTED_HANDOFF);
         }
@@ -235,8 +225,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
     private static GroundManager instance;
 
     public static GroundManager getInstance() {
-        if (instance == null)
-            instance = new GroundManager();
+        if (instance == null) instance = new GroundManager();
         return instance;
     }
 }

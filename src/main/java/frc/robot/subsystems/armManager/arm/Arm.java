@@ -33,16 +33,18 @@ public class Arm extends StateMachine<ArmState> {
 
     public Arm() {
         super(ArmState.START_POSITION);
-        TalonFXConfiguration motor_config = new TalonFXConfiguration()
-                .withSlot0(
-                        new Slot0Configs()
-                                .withKP(ArmConstants.P)
-                                .withKI(ArmConstants.I)
-                                .withKD(ArmConstants.D)
-                                .withKG(ArmConstants.G)
-                                .withGravityType(GravityTypeValue.Arm_Cosine)
-                )
-                .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ArmConstants.ArmGearRatio));
+        TalonFXConfiguration motor_config =
+                new TalonFXConfiguration()
+                        .withSlot0(
+                                new Slot0Configs()
+                                        .withKP(ArmConstants.P)
+                                        .withKI(ArmConstants.I)
+                                        .withKD(ArmConstants.D)
+                                        .withKG(ArmConstants.G)
+                                        .withGravityType(GravityTypeValue.Arm_Cosine))
+                        .withFeedback(
+                                new FeedbackConfigs()
+                                        .withSensorToMechanismRatio(ArmConstants.ArmGearRatio));
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MotionMagicCruiseVelocity;
@@ -65,7 +67,8 @@ public class Arm extends StateMachine<ArmState> {
     }
 
     public boolean atGoal() {
-        return MathUtil.isNear(getState().getPosition(), getNormalizedPosition(), ArmConstants.Tolerance);
+        return MathUtil.isNear(
+                getState().getPosition(), getNormalizedPosition(), ArmConstants.Tolerance);
     }
 
     public void syncEncoder() {
@@ -92,25 +95,22 @@ public class Arm extends StateMachine<ArmState> {
         super.periodic();
 
         // Periodically update
-        // afterTransition doesn't work because it is only called once when CUSTOM is set for the first time
+        // afterTransition doesn't work because it is only called once when CUSTOM is set for the
+        // first time
         if (getState() == ArmState.CUSTOM) {
             setMotorToTargetPosition(customStatePosition);
         }
     }
 
-    /**
-     * Returns the arm position normalized to the range [-0.5, 0.5].
-     */
+    /** Returns the arm position normalized to the range [-0.5, 0.5]. */
     public double getNormalizedPosition() {
         return normalizePosition(armPosition);
     }
 
     public static double normalizePosition(double armPosition) {
         double position = armPosition % 1.0;
-        if (position > 0.5)
-            return position - 1.0;
-        if (position < -0.5)
-            return position + 1.0;
+        if (position > 0.5) return position - 1.0;
+        if (position < -0.5) return position + 1.0;
         return position;
     }
 
@@ -137,7 +137,6 @@ public class Arm extends StateMachine<ArmState> {
     protected void afterTransition(ArmState newState) {
         switch (newState) {
             case CUSTOM -> setMotorToTargetPosition(customStatePosition);
-        
 
             // Custom cases can go here, default to standard position control
             default -> {

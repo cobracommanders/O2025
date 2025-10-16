@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.lang.management.OperatingSystemMXBean;
-
 import com.ctre.phoenix6.Utils;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,15 +38,12 @@ public class Robot extends TimedRobot {
     private static final Elevator elevator = new Elevator();
     private static final Hand hand = new Hand();
 
-    public static ArmManager armManager = new ArmManager(
-            hand,
-            elevator,
-            arm
-    );
+    public static ArmManager armManager = new ArmManager(hand, elevator, arm);
     private Command autonomousCommand = Commands.none();
 
     // Uncomment as needed
-    public static RequestManager requestManager = new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
+    public static RequestManager requestManager =
+            new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
     public static DriveSubsystem swerve = DriveSubsystem.getInstance();
     private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
     private final RobotCommands robotCommands = new RobotCommands(trailblazer, requestManager);
@@ -57,17 +52,15 @@ public class Robot extends TimedRobot {
     private final Controls controls = new Controls(requestManager, robotCommands);
 
     // public static final Controls controls = new Controls();
-    //private SendableChooser<Command> autoChooser;
+    // private SendableChooser<Command> autoChooser;
     private final Timer seedImuTimer = new Timer();
     public static LED lights;
 
-
-    //private final Autos autos = new Autos(trailblazer);
+    // private final Autos autos = new Autos(trailblazer);
     // public static OperatorOptions operatorOptions =
     // OperatorOptions.getInstance();
 
     private final Autos autos = new Autos(trailblazer, requestManager);
-
 
     public Robot() {
         // for (Command command : robotCommands.getPathplannerCommands()) {
@@ -93,23 +86,41 @@ public class Robot extends TimedRobot {
 
         swerve.setElevatorHeight(elevator.getHeight());
         DogLog.log("OperatorOptions/AlgaeLevel", OperatorOptions.getInstance().algaeIntakeLevel);
-        if (FmsSubsystem.getInstance().isDisabled()){
-            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(200);
-            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(200);
-            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(200);
-        }
-        else {
-            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(0);
-            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(0);
-            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(0);
+        if (FmsSubsystem.getInstance().isDisabled()) {
+            NetworkTableInstance.getDefault()
+                    .getTable("limelight-bl")
+                    .getEntry("throttle_set")
+                    .setInteger(200);
+            NetworkTableInstance.getDefault()
+                    .getTable("limelight-fl")
+                    .getEntry("throttle_set")
+                    .setInteger(200);
+            NetworkTableInstance.getDefault()
+                    .getTable("limelight-right")
+                    .getEntry("throttle_set")
+                    .setInteger(200);
+        } else {
+            NetworkTableInstance.getDefault()
+                    .getTable("limelight-bl")
+                    .getEntry("throttle_set")
+                    .setInteger(0);
+            NetworkTableInstance.getDefault()
+                    .getTable("limelight-fl")
+                    .getEntry("throttle_set")
+                    .setInteger(0);
+            NetworkTableInstance.getDefault()
+                    .getTable("limelight-right")
+                    .getEntry("throttle_set")
+                    .setInteger(0);
         }
     }
 
     @Override
     public void robotInit() {
-        // CommandScheduler.getInstance().onCommandInitialize((command)-> DogLog.log("CommandScheduler/Scheduled Commands", command.getName()));
+        // CommandScheduler.getInstance().onCommandInitialize((command)->
+        // DogLog.log("CommandScheduler/Scheduled Commands", command.getName()));
         FmsSubsystem.getInstance();
-        //SmartDashboard.putData(autoChooser);
+        // SmartDashboard.putData(autoChooser);
         lights = new LED();
         AutoAlign.getInstance();
     }
@@ -131,7 +142,7 @@ public class Robot extends TimedRobot {
     // if (autoChooser.getSelected() != null)
     //   autoChooser.getSelected().schedule();
     // DogLog.log("Selected Auto", autoChooser.getSelected().getName());
-//}
+    // }
 
     @Override
     public void teleopInit() {

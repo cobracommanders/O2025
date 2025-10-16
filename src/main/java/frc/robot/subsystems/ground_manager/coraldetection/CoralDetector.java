@@ -4,7 +4,6 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import dev.doglog.DogLog;
-import frc.robot.Constants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 
@@ -41,7 +40,7 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
         lDistance = lCANRange.getDistance().getValueAsDouble();
         rDistance = rCANRange.getDistance().getValueAsDouble();
 
-        //We can switch to using .isDetected() if we would like.
+        // We can switch to using .isDetected() if we would like.
         lDetected = lCANRange.getIsDetected().getValue();
         rDetected = rCANRange.getIsDetected().getValue();
 
@@ -68,7 +67,6 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
         } else {
             return CoralDetectorState.RIGHT;
         }
-
     }
 
     public boolean hasCoral() {
@@ -82,8 +80,7 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
     private static CoralDetector instance;
 
     public static CoralDetector getInstance() {
-        if (instance == null)
-            instance = new CoralDetector();
+        if (instance == null) instance = new CoralDetector();
         return instance;
     }
 }

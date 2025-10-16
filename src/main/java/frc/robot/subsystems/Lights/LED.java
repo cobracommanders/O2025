@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Lights;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.AddressableLEDBufferView;
@@ -12,10 +14,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Robot;
 import frc.robot.config.FeatureFlags;
 import frc.robot.stateMachine.OperatorOptions;
-import frc.robot.subsystems.armManager.ArmManagerState;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
-
-import static edu.wpi.first.units.Units.Seconds;
 
 public class LED {
     private final AddressableLED glowjack_horseman;
@@ -46,7 +45,7 @@ public class LED {
     Color c;
 
     public void periodic() {
-        //when the robot is blinking, the cage has been detected, robot is done for the match
+        // when the robot is blinking, the cage has been detected, robot is done for the match
         if (!isBlinking) {
             if (Robot.armManager.getCurrentGamePiece().isAlgae()) {
                 switch (OperatorOptions.getInstance().algaeScoreLocation) {
@@ -86,22 +85,22 @@ public class LED {
                 LEDPattern.solid(c).applyTo(m_middle);
             }
 
-//            //start blinking the LEDs .5 seconds before the climber starts pulling the robot up
-//            if (Climber.getInstance().getState() == ClimberStates.CONTINUE_SUCKING) {
-//                LEDPattern.solid(c).blink(Seconds.of(.2)).applyTo(m_ledBuffer);
-//                isBlinking = true;
-//            }
+            //            //start blinking the LEDs .5 seconds before the climber starts pulling the
+            // robot up
+            //            if (Climber.getInstance().getState() == ClimberStates.CONTINUE_SUCKING) {
+            //                LEDPattern.solid(c).blink(Seconds.of(.2)).applyTo(m_ledBuffer);
+            //                isBlinking = true;
+            //            }
 
-            //Can we periodically assign the blink pattern? Or does it need to only be assigned once?
+            // Can we periodically assign the blink pattern? Or does it need to only be assigned
+            // once?
             if (FeatureFlags.LED_INTAKE_BLINK.getAsBoolean()) {
                 if (CoralDetector.getInstance().hasCoral()) {
                     LEDPattern.solid(c).blink(Seconds.of(.2)).applyTo(m_ledBuffer);
                 }
-
             }
 
             glowjack_horseman.setData(m_ledBuffer);
         }
-
     }
 }

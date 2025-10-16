@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.MathHelpers;
-
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -20,7 +19,9 @@ public class AutoPoint {
     public final Command command;
 
     public AutoPoint(
-            Supplier<Pose2d> poseSupplier, Command command, Optional<AutoConstraintOptions> constraints) {
+            Supplier<Pose2d> poseSupplier,
+            Command command,
+            Optional<AutoConstraintOptions> constraints) {
         this.poseSupplier = poseSupplier;
         this.command = command;
         this.constraints = constraints;

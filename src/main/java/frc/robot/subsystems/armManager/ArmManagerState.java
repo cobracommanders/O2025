@@ -1,10 +1,10 @@
 package frc.robot.subsystems.armManager;
 
+import static frc.robot.subsystems.armManager.ArmManagerState.HandGamePieceState.*;
+
 import frc.robot.FieldConstants;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
-
-import static frc.robot.subsystems.armManager.ArmManagerState.HandGamePieceState.*;
 
 public enum ArmManagerState {
     // Start position
@@ -27,8 +27,9 @@ public enum ArmManagerState {
     IDLE_CORAL_DOWN(CORAL), // Idle holding coral with the arm downwards
     IDLE_CORAL_UP(CORAL), // Idle holding coral with the arm upwards
 
-    IDLE_ALGAE_DROPPED(NONE), // Algae missing according to sensors, spins wheels to make sure it's actually gone and not going to collide with anything
-
+    IDLE_ALGAE_DROPPED(
+            NONE), // Algae missing according to sensors, spins wheels to make sure it's actually
+    // gone and not going to collide with anything
 
     /*
      * HANDOFF STATES
@@ -57,7 +58,6 @@ public enum ArmManagerState {
     EXECUTE_HANDOFF_MIDDLE(CORAL), // Execute handoff
     EXECUTE_HANDOFF_RIGHT(CORAL), // Execute handoff
 
-
     /*
      * INVERTED HANDOFF STATES
      *
@@ -68,7 +68,6 @@ public enum ArmManagerState {
     PREPARE_INVERTED_HANDOFF(CORAL),
     READY_INVERTED_HANDOFF(CORAL),
     EXECUTE_INVERTED_HANDOFF(NONE),
-
 
     /*
      * CORAL SCORE STATES
@@ -96,7 +95,6 @@ public enum ArmManagerState {
     SCORE_L3_RIGHT(CORAL),
     SCORE_L2_RIGHT(CORAL),
 
-
     /*
      * ALGAE INTAKE STATES
      *
@@ -117,7 +115,6 @@ public enum ArmManagerState {
 
     PREPARE_INTAKE_GROUND_ALGAE(ALGAE),
     ACTIVE_INTAKE_GROUND_ALGAE(ALGAE),
-
 
     /*
      * ALGAE SCORE STATES
@@ -159,7 +156,9 @@ public enum ArmManagerState {
     READY_CLIMB(NONE);
 
     public enum HandGamePieceState {
-        CORAL, ALGAE, NONE;
+        CORAL,
+        ALGAE,
+        NONE;
 
         public boolean isCoral() {
             return this == CORAL;
@@ -205,8 +204,8 @@ public enum ArmManagerState {
     }
 
     /**
-     * Get the "IDLE_XXX" state based on the given "PREPARE_IDLE_XXX" state.
-     * Returns the given state if this is not a idle state.
+     * Get the "IDLE_XXX" state based on the given "PREPARE_IDLE_XXX" state. Returns the given state
+     * if this is not a idle state.
      */
     public ArmManagerState getPrepareToIdleState() {
         return switch (this) {
@@ -218,10 +217,9 @@ public enum ArmManagerState {
         };
     }
 
-
     /**
-     * Get the "READY_HANDOFF_XXX" state based on the given "PREPARE_HANDOFF_XXX" state.
-     * Returns the given state if this is not a handoff state.
+     * Get the "READY_HANDOFF_XXX" state based on the given "PREPARE_HANDOFF_XXX" state. Returns the
+     * given state if this is not a handoff state.
      */
     public ArmManagerState getHandoffPrepareToReadyState() {
         return switch (this) {
@@ -232,10 +230,9 @@ public enum ArmManagerState {
         };
     }
 
-
     /**
-     * Get the "EXECUTE_HANDOFF_XXX" state based on the given "READY_HANDOFF_XXX" state.
-     * Returns the given state if this is not a handoff state.
+     * Get the "EXECUTE_HANDOFF_XXX" state based on the given "READY_HANDOFF_XXX" state. Returns the
+     * given state if this is not a handoff state.
      */
     public ArmManagerState getHandoffReadyToExecuteState() {
         return switch (this) {
@@ -247,10 +244,11 @@ public enum ArmManagerState {
     }
 
     /**
-     * Get the "PREEMPTIVE_HANDOFF_XXX" state based on the given CoralDetectorState.
-     * Returns PREEMPTIVE_HANDOFF_MIDDLE if NONE is passed.
+     * Get the "PREEMPTIVE_HANDOFF_XXX" state based on the given CoralDetectorState. Returns
+     * PREEMPTIVE_HANDOFF_MIDDLE if NONE is passed.
      */
-    public static ArmManagerState getHandoffPreemptiveFromCoralPosition(CoralDetectorState coralPosition) {
+    public static ArmManagerState getHandoffPreemptiveFromCoralPosition(
+            CoralDetectorState coralPosition) {
         return switch (coralPosition) {
             case LEFT -> PREEMPTIVE_HANDOFF_LEFT;
             case MIDDLE -> PREEMPTIVE_HANDOFF_MIDDLE;
@@ -260,10 +258,11 @@ public enum ArmManagerState {
     }
 
     /**
-     * Get the "PREPARE_HANDOFF_XXX" state based on the given CoralDetectorState.
-     * Returns PREPARE_HANDOFF_MIDDLE if NONE is passed.
+     * Get the "PREPARE_HANDOFF_XXX" state based on the given CoralDetectorState. Returns
+     * PREPARE_HANDOFF_MIDDLE if NONE is passed.
      */
-    public static ArmManagerState getHandoffPrepareFromCoralPosition(CoralDetectorState coralPosition) {
+    public static ArmManagerState getHandoffPrepareFromCoralPosition(
+            CoralDetectorState coralPosition) {
         return switch (coralPosition) {
             case LEFT -> PREPARE_HANDOFF_LEFT;
             case MIDDLE -> PREPARE_HANDOFF_MIDDLE;
@@ -272,26 +271,36 @@ public enum ArmManagerState {
         };
     }
 
-
     /* ******** Coral Score Utilities ******** */
     public boolean isCoralReadyToScoreState() {
         return switch (this) {
-            case READY_L4_LEFT, READY_L3_LEFT, READY_L2_LEFT, READY_L4_RIGHT, READY_L3_RIGHT, READY_L2_RIGHT -> true;
+            case READY_L4_LEFT,
+                    READY_L3_LEFT,
+                    READY_L2_LEFT,
+                    READY_L4_RIGHT,
+                    READY_L3_RIGHT,
+                    READY_L2_RIGHT ->
+                    true;
             default -> false;
         };
     }
 
     public boolean isCoralScoreState() {
         return switch (this) {
-            case SCORE_L4_LEFT, SCORE_L3_LEFT, SCORE_L2_LEFT, SCORE_L4_RIGHT, SCORE_L3_RIGHT, SCORE_L2_RIGHT -> true;
+            case SCORE_L4_LEFT,
+                    SCORE_L3_LEFT,
+                    SCORE_L2_LEFT,
+                    SCORE_L4_RIGHT,
+                    SCORE_L3_RIGHT,
+                    SCORE_L2_RIGHT ->
+                    true;
             default -> false;
         };
     }
 
-    /**
-     * Get the "PREPARE_XXX_XXX" state based on the given robot side and scoring level.
-     */
-    public static ArmManagerState getCoralPrepareScore(RobotScoringSide robotSide, FieldConstants.PipeScoringLevel scoringLevel) {
+    /** Get the "PREPARE_XXX_XXX" state based on the given robot side and scoring level. */
+    public static ArmManagerState getCoralPrepareScore(
+            RobotScoringSide robotSide, FieldConstants.PipeScoringLevel scoringLevel) {
         return switch (scoringLevel) {
             case L4 -> robotSide == RobotScoringSide.LEFT ? PREPARE_L4_LEFT : PREPARE_L4_RIGHT;
             case L3 -> robotSide == RobotScoringSide.LEFT ? PREPARE_L3_LEFT : PREPARE_L3_RIGHT;
@@ -300,8 +309,8 @@ public enum ArmManagerState {
     }
 
     /**
-     * Get the "READY_XXX_XXX" state based on the given "PREPARE_XXX_XXX" state.
-     * Returns the given state if this is not a coral prepare state.
+     * Get the "READY_XXX_XXX" state based on the given "PREPARE_XXX_XXX" state. Returns the given
+     * state if this is not a coral prepare state.
      */
     public ArmManagerState getCoralPrepareToReadyState() {
         return switch (this) {
@@ -316,8 +325,8 @@ public enum ArmManagerState {
     }
 
     /**
-     * Get the "SCORE_XXX_XXX" state based on the given "READY_XXX_XXX" state.
-     * Returns the given state if this is not a coral ready state.
+     * Get the "SCORE_XXX_XXX" state based on the given "READY_XXX_XXX" state. Returns the given
+     * state if this is not a coral ready state.
      */
     public ArmManagerState getCoralReadyToScoreState() {
         return switch (this) {
@@ -331,12 +340,11 @@ public enum ArmManagerState {
         };
     }
 
-
     /* ******** Algae Intake Utilities ******** */
 
     /**
-     * Get the "ACTIVE_INTAKE_XXX" state based on the given "PREPARE_INTAKE_XXX" state.
-     * Returns the given state if this is not a algae intake prepare state.
+     * Get the "ACTIVE_INTAKE_XXX" state based on the given "PREPARE_INTAKE_XXX" state. Returns the
+     * given state if this is not a algae intake prepare state.
      */
     public ArmManagerState getAlgaeIntakePrepareToActiveState() {
         return switch (this) {
@@ -349,16 +357,17 @@ public enum ArmManagerState {
         };
     }
 
-    /**
-     * Get the "PREPARE_INTAKE_XXX_XXX" state based on the given robot side and level.
-     */
+    /** Get the "PREPARE_INTAKE_XXX_XXX" state based on the given robot side and level. */
     public static ArmManagerState getAlgaeIntakePrepare(RobotScoringSide robotSide, boolean top) {
         return switch (robotSide) {
-            case LEFT -> top ? PREPARE_INTAKE_HIGH_REEF_ALGAE_LEFT : PREPARE_INTAKE_LOW_REEF_ALGAE_LEFT;
-            case RIGHT -> top ? PREPARE_INTAKE_HIGH_REEF_ALGAE_RIGHT : PREPARE_INTAKE_LOW_REEF_ALGAE_RIGHT;
+            case LEFT ->
+                    top ? PREPARE_INTAKE_HIGH_REEF_ALGAE_LEFT : PREPARE_INTAKE_LOW_REEF_ALGAE_LEFT;
+            case RIGHT ->
+                    top
+                            ? PREPARE_INTAKE_HIGH_REEF_ALGAE_RIGHT
+                            : PREPARE_INTAKE_LOW_REEF_ALGAE_RIGHT;
         };
     }
-
 
     /* ******** Algae Score Utilities ******** */
     public boolean isNetReadyState() {
@@ -381,8 +390,8 @@ public enum ArmManagerState {
     }
 
     /**
-     * Get the "SCORE_ALGAE_XXX" state based on the given "READY_SCORE_ALGAE_XXX" state.
-     * Returns the given state if this is not a algae score ready state.
+     * Get the "SCORE_ALGAE_XXX" state based on the given "READY_SCORE_ALGAE_XXX" state. Returns the
+     * given state if this is not a algae score ready state.
      */
     public ArmManagerState getAlgaeNetReadyToScoreState() {
         return switch (this) {
@@ -392,10 +401,10 @@ public enum ArmManagerState {
         };
     }
 
-    /**
-     * Get the "PREPARE_SCORE_ALGAE_NET_XXX" state based on the given robot side.
-     */
+    /** Get the "PREPARE_SCORE_ALGAE_NET_XXX" state based on the given robot side. */
     public static ArmManagerState getNetPrepareScore(RobotScoringSide robotSide) {
-        return robotSide == RobotScoringSide.LEFT ? PREPARE_SCORE_ALGAE_NET_LEFT : PREPARE_SCORE_ALGAE_NET_RIGHT;
+        return robotSide == RobotScoringSide.LEFT
+                ? PREPARE_SCORE_ALGAE_NET_LEFT
+                : PREPARE_SCORE_ALGAE_NET_RIGHT;
     }
 }

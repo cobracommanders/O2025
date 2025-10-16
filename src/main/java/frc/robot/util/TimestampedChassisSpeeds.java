@@ -5,9 +5,7 @@ import edu.wpi.first.math.kinematics.struct.ChassisSpeedsStruct;
 import edu.wpi.first.wpilibj.Timer;
 
 public class TimestampedChassisSpeeds extends ChassisSpeeds {
-    /**
-     * ChassisSpeeds struct for serialization.
-     */
+    /** ChassisSpeeds struct for serialization. */
     public static final ChassisSpeedsStruct struct = new ChassisSpeedsStruct();
 
     public final double timestampSeconds;

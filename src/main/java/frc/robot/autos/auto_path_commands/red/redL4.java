@@ -8,13 +8,13 @@ import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.autos.AutoBlocks.Lollipop;
 import frc.robot.autos.BaseAuto;
 import frc.robot.autos.Points;
-import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.Trailblazer;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 
 public class redL4 extends BaseAuto {
-    private static final AutoConstraintOptions CONSTRAINTS = new AutoConstraintOptions(2, 57, 1, 30);
+    private static final AutoConstraintOptions CONSTRAINTS =
+            new AutoConstraintOptions(2, 57, 1, 30);
 
     public redL4(RequestManager robotManager, Trailblazer trailblazer) {
         super(robotManager, trailblazer);
@@ -41,22 +41,20 @@ public class redL4 extends BaseAuto {
                 // ),
                 blocks.scoreL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-      requestManager.prepareLollipopAndAwaitReady(),
+                requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-      requestManager.prepareLollipopAndAwaitReady(),
+                requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.scoreL4(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT),
-      blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT)
-
-        );
+                blocks.backUpFromReef(ReefPipe.PIPE_C, RobotScoringSide.LEFT));
     }
 }

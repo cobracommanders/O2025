@@ -24,10 +24,17 @@ public class PidPathFollower implements PathFollower {
 
     @Override
     public ChassisSpeeds calculateSpeeds(Pose2d currentPose, Pose2d targetPose) {
-        double rotationSpeed = thetaController.calculate(currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
+        double rotationSpeed =
+                thetaController.calculate(
+                        currentPose.getRotation().getRadians(),
+                        targetPose.getRotation().getRadians());
 
-        if (!MathUtil.isNear(targetPose.getRotation().getDegrees(), currentPose.getRotation().getDegrees(), 1.0)) {
-            rotationSpeed += Math.copySign(Units.rotationsToRadians(ROTATION_FEED_FORWARD), rotationSpeed);
+        if (!MathUtil.isNear(
+                targetPose.getRotation().getDegrees(),
+                currentPose.getRotation().getDegrees(),
+                1.0)) {
+            rotationSpeed +=
+                    Math.copySign(Units.rotationsToRadians(ROTATION_FEED_FORWARD), rotationSpeed);
         }
 
         double xError = targetPose.getX() - currentPose.getX();
@@ -35,6 +42,7 @@ public class PidPathFollower implements PathFollower {
         double distance = Math.hypot(xError, yError);
         Rotation2d direction = new Rotation2d(xError, yError);
 
-        return new PolarChassisSpeeds(-linearController.calculate(distance, 0.0), direction, rotationSpeed);
+        return new PolarChassisSpeeds(
+                -linearController.calculate(distance, 0.0), direction, rotationSpeed);
     }
 }

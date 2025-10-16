@@ -62,15 +62,32 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
 
     public static Rotation2d angleToReef(Translation2d robotPose, boolean isRed) {
         var centerOfReef = getAllianceCenterOfReef(isRed);
-        return Rotation2d.fromRadians(MathUtil.angleModulus(Math.atan2(centerOfReef.getY() - robotPose.getY(), centerOfReef.getX() - robotPose.getX())));
+        return Rotation2d.fromRadians(
+                MathUtil.angleModulus(
+                        Math.atan2(
+                                centerOfReef.getY() - robotPose.getY(),
+                                centerOfReef.getX() - robotPose.getX())));
     }
 
-    public static RobotScoringSide getScoringSideFromRobotPose(
-            Pose2d robotPose) {
+    public static RobotScoringSide getScoringSideFromRobotPose(Pose2d robotPose) {
         var centerOfReef = getAllianceCenterOfReef(robotPose.getX() > (17.5 / 2));
-        var angleToAim = MathUtil.angleModulus(Math.atan2(centerOfReef.getY() - robotPose.getY(), centerOfReef.getX() - robotPose.getX()));
-        var errorRight = Math.abs(MathUtil.angleModulus(angleToAim - (robotPose.getRotation().getRadians() - (Math.PI / 2.0))));
-        var errorLeft = Math.abs(MathUtil.angleModulus(angleToAim - (robotPose.getRotation().getRadians() + (Math.PI / 2.0))));
+        var angleToAim =
+                MathUtil.angleModulus(
+                        Math.atan2(
+                                centerOfReef.getY() - robotPose.getY(),
+                                centerOfReef.getX() - robotPose.getX()));
+        var errorRight =
+                Math.abs(
+                        MathUtil.angleModulus(
+                                angleToAim
+                                        - (robotPose.getRotation().getRadians()
+                                                - (Math.PI / 2.0))));
+        var errorLeft =
+                Math.abs(
+                        MathUtil.angleModulus(
+                                angleToAim
+                                        - (robotPose.getRotation().getRadians()
+                                                + (Math.PI / 2.0))));
         DogLog.log("AutoAlign/errorRight", errorRight);
         DogLog.log("AutoAlign/errorLeft", errorLeft);
 
@@ -148,7 +165,8 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
                         robotPose,
                         L1_CONSTRAINTS,
                         new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
-        tagAlign.setLevel(ReefPipeLevel.L3, ReefPipeLevel.L3, getScoringSideFromRobotPose(robotPose));
+        tagAlign.setLevel(
+                ReefPipeLevel.L3, ReefPipeLevel.L3, getScoringSideFromRobotPose(robotPose));
     }
 
     @Override

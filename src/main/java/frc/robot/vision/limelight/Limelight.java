@@ -7,19 +7,15 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.config.FeatureFlags;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.util.ReusableOptional;
 import frc.robot.vision.results.OptionalTagResult;
 
-import java.util.OptionalDouble;
-
-import com.pathplanner.lib.config.RobotConfig;
-
 public class Limelight extends StateMachine<LimelightStates> {
-    private static final int[] VALID_APRILTAGS = new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 }; //TODO: Remove two
+    private static final int[] VALID_APRILTAGS =
+            new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22}; // TODO: Remove two
 
     private static final double IS_OFFLINE_TIMEOUT = 3;
     private static final double USE_MT1_DISTANCE_THRESHOLD = Units.inchesToMeters(40.0);
@@ -37,12 +33,9 @@ public class Limelight extends StateMachine<LimelightStates> {
 
     private double angularVelocity = 0.0;
 
-    private final int[] closestScoringReefTag = { 0 };
+    private final int[] closestScoringReefTag = {0};
 
-    public Limelight(
-            String name,
-            LimelightStates initialState,
-            boolean mt1Compatible) {
+    public Limelight(String name, LimelightStates initialState, boolean mt1Compatible) {
         // not just
         // singleton
         super(initialState);
@@ -60,7 +53,13 @@ public class Limelight extends StateMachine<LimelightStates> {
             double roll,
             double rollRate) {
         LimelightHelpers.SetRobotOrientation(
-                limelightTableName, robotHeading, angularVelocity, pitch, pitchRate, roll, rollRate);
+                limelightTableName,
+                robotHeading,
+                angularVelocity,
+                pitch,
+                pitchRate,
+                roll,
+                rollRate);
         this.angularVelocity = angularVelocity;
     }
 
@@ -73,7 +72,8 @@ public class Limelight extends StateMachine<LimelightStates> {
             return tagResult.empty();
         }
 
-        // var mT2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightTableName);
+        // var mT2Estimate =
+        // LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightTableName);
         var mT2Estimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
         if (mT2Estimate == null) {
             return tagResult.empty();
@@ -129,7 +129,10 @@ public class Limelight extends StateMachine<LimelightStates> {
                 if (mT1Result != null
                         && mT1Result.tagCount != 0
                         && mT1Result.pose.getRotation().getDegrees() != 0.0) {
-                    mt2Pose = new Pose2d(mT2Estimate.pose.getTranslation(), mT1Result.pose.getRotation());
+                    mt2Pose =
+                            new Pose2d(
+                                    mT2Estimate.pose.getTranslation(),
+                                    mT1Result.pose.getRotation());
                 }
             }
         }
@@ -155,13 +158,15 @@ public class Limelight extends StateMachine<LimelightStates> {
         super.periodic();
         DogLog.log("Vision/" + name + "/State", getState());
 
-        var lastTagTimestamp = lastGoodTagResult.isPresent()
-                ? lastGoodTagResult.orElseThrow().timestamp()
-                : Double.MIN_VALUE;
+        var lastTagTimestamp =
+                lastGoodTagResult.isPresent()
+                        ? lastGoodTagResult.orElseThrow().timestamp()
+                        : Double.MIN_VALUE;
 
         if (Timer.getTimestamp() - lastTagTimestamp > 30) {
             DogLog.logFault(
-                    limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
+                    limelightTableName + " has not seen a tag in the last 30 seconds",
+                    AlertType.kWarning);
         }
 
         LimelightHelpers.setPipelineIndex(limelightTableName, getState().pipelineIndex);
@@ -171,7 +176,8 @@ public class Limelight extends StateMachine<LimelightStates> {
                 updateHealth(tagResult);
             }
             case CLOSEST_REEF_TAG -> {
-                LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, closestScoringReefTag);
+                LimelightHelpers.SetFiducialIDFiltersOverride(
+                        limelightTableName, closestScoringReefTag);
                 updateHealth(tagResult);
             }
         }
@@ -187,12 +193,17 @@ public class Limelight extends StateMachine<LimelightStates> {
     }
 
     public void logCameraPositionCalibrationValues() {
-        var cameraPoseTargetSpace = LimelightHelpers.getCameraPose3d_TargetSpace(limelightTableName);
-        var robotPoseTargetSpace = new Pose3d() ; //TODO: Find Robot pose relative to to calibration
-        var cameraRobotRelativePose = getRobotRelativeCameraPosition(robotPoseTargetSpace, cameraPoseTargetSpace);
-        DogLog.log("CameraPositionCalibration/" + name + "/LL Right", cameraRobotRelativePose.getX());
+        var cameraPoseTargetSpace =
+                LimelightHelpers.getCameraPose3d_TargetSpace(limelightTableName);
+        var robotPoseTargetSpace = new Pose3d(); // TODO: Find Robot pose relative to to calibration
+        var cameraRobotRelativePose =
+                getRobotRelativeCameraPosition(robotPoseTargetSpace, cameraPoseTargetSpace);
+        DogLog.log(
+                "CameraPositionCalibration/" + name + "/LL Right", cameraRobotRelativePose.getX());
         DogLog.log("CameraPositionCalibration/" + name + "/LL Up", cameraRobotRelativePose.getY());
-        DogLog.log("CameraPositionCalibration/" + name + "/LL Forward", cameraRobotRelativePose.getZ());
+        DogLog.log(
+                "CameraPositionCalibration/" + name + "/LL Forward",
+                cameraRobotRelativePose.getZ());
         DogLog.log(
                 "CameraPositionCalibration/" + name + "/LL Roll",
                 Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getX()));

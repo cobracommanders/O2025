@@ -8,13 +8,13 @@ import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.autos.AutoBlocks.Lollipop;
 import frc.robot.autos.BaseAuto;
 import frc.robot.autos.Points;
-import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.Trailblazer;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 
 public class redFourCoralNonProcessor extends BaseAuto {
-    private static final AutoConstraintOptions CONSTRAINTS = new AutoConstraintOptions(2, 57, 1, 30);
+    private static final AutoConstraintOptions CONSTRAINTS =
+            new AutoConstraintOptions(2, 57, 1, 30);
 
     public redFourCoralNonProcessor(RequestManager robotManager, Trailblazer trailblazer) {
         super(robotManager, trailblazer);
@@ -56,8 +56,6 @@ public class redFourCoralNonProcessor extends BaseAuto {
                 blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT)
-
-        );
+                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT));
     }
 }

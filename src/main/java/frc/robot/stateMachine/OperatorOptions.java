@@ -3,7 +3,6 @@ package frc.robot.stateMachine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants;
-import frc.robot.autoAlign.ReefPipe;
 
 public class OperatorOptions {
     public CoralScoreLocation coralScoreLocation = CoralScoreLocation.L4;
@@ -13,7 +12,8 @@ public class OperatorOptions {
     private OperatorOptions() {}
 
     public enum AlgaeScoreLocation {
-        BARGE, PROCESSOR;
+        BARGE,
+        PROCESSOR;
     }
 
     public enum CoralScoreLocation {
@@ -36,14 +36,16 @@ public class OperatorOptions {
         GROUND_ALGAE,
         LOW_REEF,
         HIGH_REEF
-        }
+    }
 
     public Command setProcessorCommand() {
-        return Commands.runOnce(() -> algaeScoreLocation = AlgaeScoreLocation.PROCESSOR).withName("setProcessor");
+        return Commands.runOnce(() -> algaeScoreLocation = AlgaeScoreLocation.PROCESSOR)
+                .withName("setProcessor");
     }
 
     public Command setBargeCommand() {
-        return Commands.runOnce(() -> algaeScoreLocation = AlgaeScoreLocation.BARGE).withName("setBarge");
+        return Commands.runOnce(() -> algaeScoreLocation = AlgaeScoreLocation.BARGE)
+                .withName("setBarge");
     }
 
     public Command setL1Command() {
@@ -63,15 +65,18 @@ public class OperatorOptions {
     }
 
     public Command setHighReefAlgaeCommand() {
-        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.HIGH_REEF).withName("setHighReefAlgae");
+        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.HIGH_REEF)
+                .withName("setHighReefAlgae");
     }
 
     public Command setLowReefAlgaeCommand() {
-        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.LOW_REEF).withName("setLowReefAlgae");
+        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.LOW_REEF)
+                .withName("setLowReefAlgae");
     }
 
     public Command setGroundAlgaeCommand() {
-        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE).withName("setGroundAlgae");
+        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE)
+                .withName("setGroundAlgae");
     }
 
     public boolean isCoralScoringL1() {
@@ -82,7 +87,7 @@ public class OperatorOptions {
         return coralScoreLocation.toPipeScoringLevelOrL4();
     }
 
-    public AlgaeIntakeLevel getAlgaeIntakeLevel(){
+    public AlgaeIntakeLevel getAlgaeIntakeLevel() {
         return algaeIntakeLevel;
     }
 
@@ -90,7 +95,8 @@ public class OperatorOptions {
 
     public static OperatorOptions getInstance() {
         if (instance == null)
-            instance = new OperatorOptions(); // Make sure there is an instance (this will only run once)
+            instance = new OperatorOptions(); // Make sure there is an instance (this will only run
+        // once)
         return instance;
     }
 }

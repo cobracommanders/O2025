@@ -7,7 +7,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.trailblazer.AutoPoint;
 import frc.robot.trailblazer.trackers.PathTracker;
-
 import java.util.List;
 
 public class PurePursuitPathTracker implements PathTracker {
@@ -47,7 +46,8 @@ public class PurePursuitPathTracker implements PathTracker {
     }
 
     @Override
-    public void updateRobotState(Pose2d currentPose, ChassisSpeeds currentFieldRelativeRobotSpeeds) {
+    public void updateRobotState(
+            Pose2d currentPose, ChassisSpeeds currentFieldRelativeRobotSpeeds) {
         this.currentRobotPose = currentPose;
 
         if (!startingRobotPoseUpdated) {
@@ -71,13 +71,16 @@ public class PurePursuitPathTracker implements PathTracker {
         var perpendicularPoint =
                 PurePursuitUtils.getPerpendicularPoint(
                         lastTargetWaypoint, currentTargetWaypoint, currentRobotPose);
-        if (PurePursuitUtils.isBetween(lastTargetWaypoint, currentTargetWaypoint, perpendicularPoint)) {
+        if (PurePursuitUtils.isBetween(
+                lastTargetWaypoint, currentTargetWaypoint, perpendicularPoint)) {
             currentRobotFollowedPointIndex = getCurrentLookaheadPointIndex();
         }
 
         var robotToSegmentDistanceClamped =
                 MathUtil.clamp(
-                        perpendicularPoint.getTranslation().getDistance(currentRobotPose.getTranslation()),
+                        perpendicularPoint
+                                .getTranslation()
+                                .getDistance(currentRobotPose.getTranslation()),
                         0.0,
                         lookaheadDistance);
         updateRotation();
@@ -92,7 +95,8 @@ public class PurePursuitPathTracker implements PathTracker {
                         currentInterpolatedRotation);
 
         var lookaheadInside =
-                PurePursuitUtils.isBetween(lastTargetWaypoint, currentTargetWaypoint, lookaheadPoint);
+                PurePursuitUtils.isBetween(
+                        lastTargetWaypoint, currentTargetWaypoint, lookaheadPoint);
         var lookaheadToStartDistance =
                 lookaheadPoint.getTranslation().getDistance(lastTargetWaypoint.getTranslation());
         var lookaheadToEndDistance =
@@ -102,29 +106,36 @@ public class PurePursuitPathTracker implements PathTracker {
                 return new Pose2d(lastTargetWaypoint.getTranslation(), currentInterpolatedRotation);
             }
             if (getCurrentLookaheadPointIndex() < points.size() - 1) {
-                var futurePoint = points.get(getCurrentLookaheadPointIndex() + 1).poseSupplier.get();
+                var futurePoint =
+                        points.get(getCurrentLookaheadPointIndex() + 1).poseSupplier.get();
                 var perpendicularToCurrentEndDistance =
-                        perpendicularPoint.getTranslation().getDistance(currentTargetWaypoint.getTranslation());
+                        perpendicularPoint
+                                .getTranslation()
+                                .getDistance(currentTargetWaypoint.getTranslation());
                 var newLookaheadPoint =
                         new Pose2d(
                                 PurePursuitUtils.getLookaheadPoint(
                                                 currentTargetWaypoint,
                                                 futurePoint,
                                                 currentTargetWaypoint,
-                                                lookaheadDistance - perpendicularToCurrentEndDistance)
+                                                lookaheadDistance
+                                                        - perpendicularToCurrentEndDistance)
                                         .getTranslation(),
                                 currentInterpolatedRotation);
 
                 currentLookaheadPointIndex++;
                 var newLookaheadInside =
-                        PurePursuitUtils.isBetween(currentTargetWaypoint, futurePoint, newLookaheadPoint);
+                        PurePursuitUtils.isBetween(
+                                currentTargetWaypoint, futurePoint, newLookaheadPoint);
                 if (!newLookaheadInside) {
-                    return new Pose2d(currentTargetWaypoint.getTranslation(), currentInterpolatedRotation);
+                    return new Pose2d(
+                            currentTargetWaypoint.getTranslation(), currentInterpolatedRotation);
                 }
 
                 return newLookaheadPoint;
             } else {
-                return new Pose2d(currentTargetWaypoint.getTranslation(), currentInterpolatedRotation);
+                return new Pose2d(
+                        currentTargetWaypoint.getTranslation(), currentInterpolatedRotation);
             }
         }
         return lookaheadPoint;
@@ -165,8 +176,8 @@ public class PurePursuitPathTracker implements PathTracker {
         if (useDynamicLookahead && points.size() > 1) {
             if (points.size() == 2) {
                 if (startingRobotPose
-                        .getTranslation()
-                        .getDistance(points.get(0).poseSupplier.get().getTranslation())
+                                .getTranslation()
+                                .getDistance(points.get(0).poseSupplier.get().getTranslation())
                         > STARTING_ROBOT_POSE_FAR_FROM_PATH_THRESHOLD) {
 
                     requestNewLookaheadDistance(
@@ -207,10 +218,12 @@ public class PurePursuitPathTracker implements PathTracker {
         if ((currentTime < transitionStartTime + DYNAMIC_LOOKAHEAD_TRANSITION_TIME)
                 && !immediateChnage) {
             // Calculate the progress of the transition
-            double progress = (currentTime - transitionStartTime) / DYNAMIC_LOOKAHEAD_TRANSITION_TIME;
+            double progress =
+                    (currentTime - transitionStartTime) / DYNAMIC_LOOKAHEAD_TRANSITION_TIME;
 
             // Linear interpolation (you can use other easing functions here)
-            double smoothLookahead = lookaheadDistance + (targetLookahead - lookaheadDistance) * progress;
+            double smoothLookahead =
+                    lookaheadDistance + (targetLookahead - lookaheadDistance) * progress;
             lastRequestedLookaheadDistance = targetLookahead;
             lastStartTime = transitionStartTime;
             lookaheadDistance = smoothLookahead;

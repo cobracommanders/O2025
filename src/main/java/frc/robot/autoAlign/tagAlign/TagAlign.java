@@ -22,7 +22,6 @@ import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.MathHelpersDog;
 import frc.robot.util.PolarChassisSpeeds;
-
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -97,8 +96,8 @@ public class TagAlign {
     private boolean resetAlgaeNextLoop = false;
     private boolean resetL1NextLoop = false;
 
-    private static final DoubleSubscriber FEED_FORWARD = DogLog.tunable("AutoAlign/FeedForward", 0.0);
-
+    private static final DoubleSubscriber FEED_FORWARD =
+            DogLog.tunable("AutoAlign/FeedForward", 0.0);
 
     public TagAlign(DriveSubsystem swerve, LocalizationSubsystem localization) {
         this.localization = localization;
@@ -125,12 +124,13 @@ public class TagAlign {
         translationGood =
                 (robotPose.getTranslation().getDistance(targetPose.getTranslation())
                         <= TRANSLATION_GOOD_THRESHOLD.get());
-        boolean rotationGood = MathUtil.isNear(
-                targetPose.getRotation().getDegrees(),
-                robotPose.getRotation().getDegrees(),
-                ROTATION_GOOD_THRESHOLD.get(),
-                -180.0,
-                180.0);
+        boolean rotationGood =
+                MathUtil.isNear(
+                        targetPose.getRotation().getDegrees(),
+                        robotPose.getRotation().getDegrees(),
+                        ROTATION_GOOD_THRESHOLD.get(),
+                        -180.0,
+                        180.0);
 
         DogLog.log("AutoAlign/TranslationGood", translationGood);
         DogLog.log("AutoAlign/RotationGood", rotationGood);
@@ -184,9 +184,7 @@ public class TagAlign {
         return pipe.getPose(pipeLevel, side, localization.getPose());
     }
 
-    /**
-     * Returns the best reef pipe for scoring, based on the robot's current state.
-     */
+    /** Returns the best reef pipe for scoring, based on the robot's current state. */
     public ReefPipe getBestPipe() {
         var level = pipeLevel;
         var robotPose = localization.getPose();
@@ -201,7 +199,10 @@ public class TagAlign {
                                             robotPose
                                                     .getTranslation()
                                                     .getDistance(
-                                                            pipe.getPose(ReefPipeLevel.BACK_AWAY, robotScoringSide, robotPose)
+                                                            pipe.getPose(
+                                                                            ReefPipeLevel.BACK_AWAY,
+                                                                            robotScoringSide,
+                                                                            robotPose)
                                                                     .getTranslation())))
                     .orElseThrow();
         }
@@ -222,7 +223,11 @@ public class TagAlign {
                                         robotPose
                                                 .getTranslation()
                                                 .getDistance(
-                                                        pipe.getPose(pipeLevel, robotScoringSide, robotPose).getTranslation())))
+                                                        pipe.getPose(
+                                                                        pipeLevel,
+                                                                        robotScoringSide,
+                                                                        robotPose)
+                                                                .getTranslation())))
                 .orElseThrow();
     }
 
@@ -315,7 +320,9 @@ public class TagAlign {
                     distanceToGoalMeters,
                     Math.min(
                             0.0,
-                            -new Translation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond)
+                            -new Translation2d(
+                                            currentSpeeds.vxMetersPerSecond,
+                                            currentSpeeds.vyMetersPerSecond)
                                     .rotateBy(
                                             targetPose
                                                     .getTranslation()
@@ -330,7 +337,9 @@ public class TagAlign {
                 translationController.calculate(
                         distanceToGoalMeters,
                         new State(0, 0),
-                        new Constraints(constraints.maxLinearVelocity(), constraints.maxLinearAcceleration()));
+                        new Constraints(
+                                constraints.maxLinearVelocity(),
+                                constraints.maxLinearAcceleration()));
 
         if (!translationGood) {
             driveVelocityMagnitude += Math.copySign(FEED_FORWARD.get(), driveVelocityMagnitude);
