@@ -90,7 +90,12 @@ public class Controls {
         // driver.Y().onTrue(robotCommands.algaeAlignCommand());
 
         // Algae Intake
-        driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
+        //driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
+        driver.leftBumper().onTrue(Commands.either(
+                requestManager.groundAlgaeIntake(),
+                requestManager.reefAlgaeIntake(),
+                () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
+        ));
 
         // Tick Intake Pivot
         driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));

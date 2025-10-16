@@ -223,9 +223,9 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         // This method will only be called in ELEVATOR_FIRST mode, so we know the arm would hit the intake or drivetrain if the elevator moved all the way, therefore move just above the intake to be safe
 
         boolean useIntakeHeight = true;
-        if (armPosition >= -0.05){
-            useIntakeHeight = false;
-        }
+        // if (armPosition >= -0.05){
+        //     useIntakeHeight = false;
+        // }
 
         if(useIntakeHeight == true){
             double desiredHeight = finalIntakeHeight + (armWidth / 2.0) + Units.inchesToMeters(1.0);

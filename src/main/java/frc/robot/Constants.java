@@ -32,7 +32,7 @@ public final class Constants {
         public static final double G = 0.48;
         public static final double MotionMagicCruiseVelocity = 4.5;
         public static final double MotionMagicAcceleration = 6;
-        public static final double Tolerance = 0.015;
+        public static final double Tolerance = 0.025;
         public static final double MaxHeight = ElevatorState.ALGAE_NET.getPosition();
     }
 

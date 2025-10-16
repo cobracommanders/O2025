@@ -54,21 +54,21 @@ public class RequestManager {
     // }
 
     public AlgaeIntakeLevel getAlgaeIntakeLevel(){
-        if(FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()){
-            if(AutoAlign.getInstance().approximateDistanceToReef() >= 2){
-                return AlgaeIntakeLevel.GROUND_ALGAE;
-            } else if(AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
-                return AlgaeIntakeLevel.HIGH_REEF;
-            } else {
-                return AlgaeIntakeLevel.LOW_REEF;
-            }
-        } else {
+        // if(FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()){
+        //     if(AutoAlign.getInstance().approximateDistanceToReef() >= 2){
+        //         return AlgaeIntakeLevel.GROUND_ALGAE;
+        //     } else if(AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+        //         return AlgaeIntakeLevel.HIGH_REEF;
+        //     } else {
+        //         return AlgaeIntakeLevel.LOW_REEF;
+        //     }
+        // } else {
             return OperatorOptions.getInstance().algaeIntakeLevel;
-        }
+        // }
     }
 
     public Command setAlgaeIntakeLevel(){
-        switch (getAlgaeIntakeLevel()){
+        switch (OperatorOptions.getInstance().getAlgaeIntakeLevel()){
             case GROUND_ALGAE -> {
                 return groundAlgaeIntake();
             } 
@@ -166,8 +166,21 @@ public class RequestManager {
         return armCommands.requestAlgaeReefIntakeAndAwaitIdle(side, false);
     }
 
+     public boolean algaeIntakeHeightIsTop() {
+        if (FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()) {
+            return AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3;
+        } else {
+            return OperatorOptions.getInstance().algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
+        }
+    }
+
     public Command reefAlgaeIntake() {
-        return setAlgaeIntakeLevel();
+        //return setAlgaeIntakeLevel();
+        return Commands.either(
+                highReefAlgaeIntake(this::reefRobotSide),
+                lowReefAlgaeIntake(this::reefRobotSide),
+                this::algaeIntakeHeightIsTop
+        );
     }
 
     public Command prepareLollipopAndAwaitReady() {

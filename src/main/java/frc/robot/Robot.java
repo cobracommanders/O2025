@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.lang.management.OperatingSystemMXBean;
+
 import com.ctre.phoenix6.Utils;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,6 +22,7 @@ import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
+import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.Lights.LED;
 import frc.robot.subsystems.armManager.ArmManager;
@@ -89,7 +92,7 @@ public class Robot extends TimedRobot {
         // FmsSubsystem.getInstance().updateSimulation();
 
         swerve.setElevatorHeight(elevator.getHeight());
-
+        DogLog.log("OperatorOptions/AlgaeLevel", OperatorOptions.getInstance().algaeIntakeLevel);
         if (FmsSubsystem.getInstance().isDisabled()){
             NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(200);
             NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(200);
