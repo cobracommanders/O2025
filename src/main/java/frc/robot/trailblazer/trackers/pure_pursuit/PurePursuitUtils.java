@@ -4,14 +4,14 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.trailblazer.AutoPoint;
-
 import java.util.List;
 
 public class PurePursuitUtils {
     public static final double DYNAMIC_LOOKAHEAD_MAX = 1.5;
     private static final double DYNAMIC_LOOKAHEAD_SCALE = 0.4;
 
-    public static Pose2d getPerpendicularPoint(Pose2d startPoint, Pose2d endPoint, Pose2d robotPose) {
+    public static Pose2d getPerpendicularPoint(
+            Pose2d startPoint, Pose2d endPoint, Pose2d robotPose) {
         var x1 = startPoint.getX();
         var y1 = startPoint.getY();
 
@@ -80,17 +80,21 @@ public class PurePursuitUtils {
         var xLookahead =
                 x
                         + lookaheadDistance
-                        * ((x2 - x1) / Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+                                * ((x2 - x1)
+                                        / Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
         var yLookahead =
                 y
                         + lookaheadDistance
-                        * ((y2 - y1) / Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
+                                * ((y2 - y1)
+                                        / Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
         var lookahead = new Pose2d(xLookahead, yLookahead, Rotation2d.kZero);
         var distanceToStart = lookahead.getTranslation().getDistance(startPoint.getTranslation());
         var distanceToEnd = lookahead.getTranslation().getDistance(endPoint.getTranslation());
         var lookaheadOutside =
                 !((lookahead.getX() - startPoint.getX()) * (lookahead.getX() - endPoint.getX()) <= 0
-                        && (lookahead.getY() - startPoint.getY()) * (lookahead.getY() - endPoint.getY()) <= 0);
+                        && (lookahead.getY() - startPoint.getY())
+                                        * (lookahead.getY() - endPoint.getY())
+                                <= 0);
         if (lookaheadOutside) {
             if (distanceToEnd > distanceToStart) {
                 return startPoint;
@@ -136,7 +140,9 @@ public class PurePursuitUtils {
                         currentTargetWaypoint,
                         perpendicularPoint,
                         lookaheadDistance
-                                - currentPose.getTranslation().getDistance(perpendicularPoint.getTranslation()));
+                                - currentPose
+                                        .getTranslation()
+                                        .getDistance(perpendicularPoint.getTranslation()));
         var lookaheadInside = isBetween(lastTargetWaypoint, currentTargetWaypoint, lookaheadPoint);
         var lookaheadToStartDistance =
                 lookaheadPoint.getTranslation().getDistance(lastTargetWaypoint.getTranslation());
@@ -149,12 +155,15 @@ public class PurePursuitUtils {
                         getPointToPointInterpolatedRotation(
                                 lastTargetWaypoint,
                                 currentTargetWaypoint,
-                                getPerpendicularPoint(lastTargetWaypoint, currentTargetWaypoint, currentPose)));
+                                getPerpendicularPoint(
+                                        lastTargetWaypoint, currentTargetWaypoint, currentPose)));
             }
             if (currentPointIndex < points.size() - 1) {
                 var futurePoint = points.get(currentPointIndex + 1).poseSupplier.get();
                 var perpendicularToCurrentEndDistance =
-                        perpendicularPoint.getTranslation().getDistance(currentTargetWaypoint.getTranslation());
+                        perpendicularPoint
+                                .getTranslation()
+                                .getDistance(currentTargetWaypoint.getTranslation());
                 var newLookaheadPoint =
                         getLookaheadPoint(
                                 currentTargetWaypoint,
@@ -163,14 +172,16 @@ public class PurePursuitUtils {
                                 lookaheadDistance - perpendicularToCurrentEndDistance);
 
                 currentPointIndex++;
-                var newLookaheadInside = isBetween(currentTargetWaypoint, futurePoint, newLookaheadPoint);
+                var newLookaheadInside =
+                        isBetween(currentTargetWaypoint, futurePoint, newLookaheadPoint);
                 if (!newLookaheadInside) {
                     return new Pose2d(
                             currentTargetWaypoint.getTranslation(),
                             getPointToPointInterpolatedRotation(
                                     currentPose,
                                     futurePoint,
-                                    getPerpendicularPoint(currentTargetWaypoint, futurePoint, currentPose)));
+                                    getPerpendicularPoint(
+                                            currentTargetWaypoint, futurePoint, currentPose)));
                 }
                 return newLookaheadPoint;
             } else {
@@ -179,7 +190,8 @@ public class PurePursuitUtils {
                         getPointToPointInterpolatedRotation(
                                 lastTargetWaypoint,
                                 currentTargetWaypoint,
-                                getPerpendicularPoint(lastTargetWaypoint, currentTargetWaypoint, currentPose)));
+                                getPerpendicularPoint(
+                                        lastTargetWaypoint, currentTargetWaypoint, currentPose)));
             }
         }
         return lookaheadPoint;
@@ -196,7 +208,7 @@ public class PurePursuitUtils {
 
         if (!((pointOnPath.getX() - startPoint.getX()) * (pointOnPath.getX() - endPoint.getX()) <= 0
                 && (pointOnPath.getY() - startPoint.getY()) * (pointOnPath.getY() - endPoint.getY())
-                <= 0)) {
+                        <= 0)) {
             if (pointToEnd > pointToStart) {
                 return startPoint.getRotation();
             } else {
@@ -214,8 +226,8 @@ public class PurePursuitUtils {
     /**
      * Checks if a Pose2d lies between two other Pose2ds.
      *
-     * @param startPose  The starting Pose2d.
-     * @param endPose    The ending Pose2d.
+     * @param startPose The starting Pose2d.
+     * @param endPose The ending Pose2d.
      * @param poseOnPath The Pose2d to check if it lies between startPose and endPose.
      * @return True if poseOnPath lies between startPose and endPose
      */
@@ -232,16 +244,16 @@ public class PurePursuitUtils {
         // Check if poseOnPath is within the bounds of startPose and endPose along both axes
         // with tolerance
         return ((startX - tolerance <= poseX && poseX <= endX + tolerance)
-                || (endX - tolerance <= poseX && poseX <= startX + tolerance))
+                        || (endX - tolerance <= poseX && poseX <= startX + tolerance))
                 && ((startY - tolerance <= poseY && poseY <= endY + tolerance)
-                || (endY - tolerance <= poseY && poseY <= startY + tolerance));
+                        || (endY - tolerance <= poseY && poseY <= startY + tolerance));
     }
 
     /**
      * Checks if a Pose2d is collinear with two other Pose2ds.
      *
-     * @param startPose  The starting Pose2d.
-     * @param endPose    The ending Pose2d.
+     * @param startPose The starting Pose2d.
+     * @param endPose The ending Pose2d.
      * @param poseOnPath The Pose2d to check if it lies collinear with startPose and endPose.
      * @return True if poseOnPath lies collinear with startPose and endPose
      */
@@ -304,6 +316,5 @@ public class PurePursuitUtils {
         return false;
     }
 
-    private PurePursuitUtils() {
-    }
+    private PurePursuitUtils() {}
 }

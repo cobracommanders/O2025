@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Ports.OIPorts;
@@ -7,19 +9,10 @@ import frc.robot.autoAlign.AutoAlign;
 import frc.robot.commands.RobotCommands;
 import frc.robot.drivers.Xbox;
 import frc.robot.fms.FmsSubsystem;
-import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
-import frc.robot.subsystems.armManager.ArmManager;
-import frc.robot.subsystems.armManager.arm.Arm;
-import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
-import frc.robot.vision.VisionSubsystem;
-
-import static edu.wpi.first.wpilibj2.command.Commands.runOnce;
-
-import edu.wpi.first.wpilibj.DriverStation;
 
 public class Controls {
     DriveSubsystem driveSubsystem = DriveSubsystem.getInstance();
@@ -46,9 +39,7 @@ public class Controls {
                         () -> {
                             if (FmsSubsystem.getInstance().isTeleop()) {
                                 driveSubsystem.setTeleopSpeeds(
-                                        driver.leftX(),
-                                        driver.leftY(),
-                                        driver.rightX());
+                                        driver.leftX(), driver.leftY(), driver.rightX());
                             }
                         }));
     }
@@ -70,37 +61,52 @@ public class Controls {
         driver.rightBumper()
                 // whileTrue will cancel the command when the button is released
                 .whileTrue(robotCommands.teleopReefAlignAndScore(driver::isStickActive))
-                // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
-                // Only resets if the robot is far away from the reef and not likely to score again soon
-                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
+                // onFalse will reset the superstructure if the button is released (likely means the
+                // command is cancelled)
+                // Only resets if the robot is far away from the reef and not likely to score again
+                // soon
+                .onFalse(
+                        requestManager
+                                .idleArm()
+                                .onlyIf(
+                                        () ->
+                                                AutoAlign.getInstance().approximateDistanceToReef()
+                                                        > 0.125));
 
         driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
 
         driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
 
         // Fix drivetrain state
-        driver.X().onTrue(runOnce(() -> {
-            Command currentCommand = driveSubsystem.getCurrentCommand();
-            if (currentCommand != null) {
-                currentCommand.cancel();
-            }
-        }).andThen(robotCommands.driveTeleopCommand()));
+        driver.X()
+                .onTrue(
+                        runOnce(
+                                        () -> {
+                                            Command currentCommand =
+                                                    driveSubsystem.getCurrentCommand();
+                                            if (currentCommand != null) {
+                                                currentCommand.cancel();
+                                            }
+                                        })
+                                .andThen(robotCommands.driveTeleopCommand()));
 
         // Align to Reef Algae
         // driver.Y().onTrue(robotCommands.algaeAlignCommand());
 
         // Algae Intake
-        //driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
-        driver.leftBumper().onTrue(Commands.either(
-                requestManager.groundAlgaeIntake(),
-                requestManager.reefAlgaeIntake(),
-                () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
-        ));
+        // driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
+        driver.leftBumper()
+                .onTrue(
+                        Commands.either(
+                                requestManager.groundAlgaeIntake(),
+                                requestManager.reefAlgaeIntake(),
+                                () ->
+                                        operatorOptions.algaeIntakeLevel
+                                                == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE));
 
         // Tick Intake Pivot
         driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));
         driver.POV90().onTrue(runOnce(() -> IntakePivot.getInstance().tickDown()));
-
 
         /* ******** OPERATOR ******** */
         operator.leftBumper().onTrue(operatorOptions.setProcessorCommand());
@@ -111,7 +117,7 @@ public class Controls {
         operator.X().onTrue(operatorOptions.setL2Command());
         operator.A().onTrue(operatorOptions.setL1Command());
         operator.POV0().onTrue(operatorOptions.setHighReefAlgaeCommand());
-        //operator.POVMinus90().onTrue(requestManager.prepareCoralScoreAndAwaitReady().andThen(robotCommands.driveTeleopCommand()));
+        // operator.POVMinus90().onTrue(requestManager.prepareCoralScoreAndAwaitReady().andThen(robotCommands.driveTeleopCommand()));
         operator.POV90().onTrue(operatorOptions.setGroundAlgaeCommand());
         operator.POV180().onTrue(operatorOptions.setLowReefAlgaeCommand());
         operator.back().onTrue(requestManager.invertedHandoffRequest());

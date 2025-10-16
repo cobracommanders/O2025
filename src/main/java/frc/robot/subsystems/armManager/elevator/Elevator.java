@@ -27,20 +27,25 @@ public class Elevator extends StateMachine<ElevatorState> {
 
     public Elevator() {
         super(ElevatorState.IDLE);
-        TalonFXConfiguration motor_config = new TalonFXConfiguration()
-                .withSlot0(
-                        new Slot0Configs()
-                                .withKP(ElevatorConstants.P)
-                                .withKI(ElevatorConstants.I)
-                                .withKD(ElevatorConstants.D)
-                                .withKG(ElevatorConstants.G)
-                                .withGravityType(GravityTypeValue.Elevator_Static)
-                )
-                .withFeedback(new FeedbackConfigs().withSensorToMechanismRatio(ElevatorConstants.ElevatorGearRatio));
+        TalonFXConfiguration motor_config =
+                new TalonFXConfiguration()
+                        .withSlot0(
+                                new Slot0Configs()
+                                        .withKP(ElevatorConstants.P)
+                                        .withKI(ElevatorConstants.I)
+                                        .withKD(ElevatorConstants.D)
+                                        .withKG(ElevatorConstants.G)
+                                        .withGravityType(GravityTypeValue.Elevator_Static))
+                        .withFeedback(
+                                new FeedbackConfigs()
+                                        .withSensorToMechanismRatio(
+                                                ElevatorConstants.ElevatorGearRatio));
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        motor_config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
-        motor_config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MotionMagicAcceleration;
+        motor_config.MotionMagic.MotionMagicCruiseVelocity =
+                ElevatorConstants.MotionMagicCruiseVelocity;
+        motor_config.MotionMagic.MotionMagicAcceleration =
+                ElevatorConstants.MotionMagicAcceleration;
 
         lMotor = new TalonFX(Ports.ElevatorPorts.LMOTOR);
         rMotor = new TalonFX(Ports.ElevatorPorts.RMOTOR);
@@ -55,7 +60,8 @@ public class Elevator extends StateMachine<ElevatorState> {
     }
 
     public boolean atGoal() {
-        return MathUtil.isNear(getState().getPosition(), elevatorPosition, ElevatorConstants.Tolerance);
+        return MathUtil.isNear(
+                getState().getPosition(), elevatorPosition, ElevatorConstants.Tolerance);
     }
 
     @Override
@@ -72,7 +78,8 @@ public class Elevator extends StateMachine<ElevatorState> {
         super.periodic();
 
         // Periodically update
-        // afterTransition doesn't work because it is only called once when CUSTOM is set for the first time
+        // afterTransition doesn't work because it is only called once when CUSTOM is set for the
+        // first time
         if (getState() == ElevatorState.CUSTOM) {
             setMotorsToTargetHeight(customStateHeight);
         }

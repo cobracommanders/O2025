@@ -3,7 +3,6 @@ package frc.robot.trailblazer.trackers;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.trailblazer.AutoPoint;
-
 import java.util.List;
 
 /**
@@ -22,7 +21,7 @@ public interface PathTracker {
     /**
      * Runs once per loop cycle to update the tracker with the current robot state.
      *
-     * @param currentPose                     The current pose of the robot.
+     * @param currentPose The current pose of the robot.
      * @param currentFieldRelativeRobotSpeeds The current field relative speeds of the robot.
      */
     void updateRobotState(Pose2d currentPose, ChassisSpeeds currentFieldRelativeRobotSpeeds);

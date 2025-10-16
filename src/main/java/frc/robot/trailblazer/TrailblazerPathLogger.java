@@ -3,7 +3,6 @@ package frc.robot.trailblazer;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.autos.NamedAuto;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +28,5 @@ public class TrailblazerPathLogger {
         DogLog.log("Autos/Paths/" + currentAuto, currentPath.toArray(Pose2d[]::new));
     }
 
-    private TrailblazerPathLogger() {
-    }
+    private TrailblazerPathLogger() {}
 }

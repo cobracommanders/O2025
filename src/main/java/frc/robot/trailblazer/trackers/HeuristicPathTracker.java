@@ -4,7 +4,6 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.trailblazer.AutoPoint;
-
 import java.util.List;
 
 public class HeuristicPathTracker implements PathTracker {
@@ -19,7 +18,8 @@ public class HeuristicPathTracker implements PathTracker {
     }
 
     @Override
-    public void updateRobotState(Pose2d currentPose, ChassisSpeeds currentFieldRelativeRobotSpeeds) {
+    public void updateRobotState(
+            Pose2d currentPose, ChassisSpeeds currentFieldRelativeRobotSpeeds) {
         this.currentPose = currentPose;
     }
 

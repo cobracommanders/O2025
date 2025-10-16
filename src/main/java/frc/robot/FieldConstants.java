@@ -14,12 +14,15 @@ public class FieldConstants {
             for (int i = 0; i < 3; i++) {
                 iceCreams[i] =
                         new Translation2d(
-                                Units.inchesToMeters(48), fieldWidth / 2.0 - separation + separation * i);
+                                Units.inchesToMeters(48),
+                                fieldWidth / 2.0 - separation + separation * i);
             }
         }
     }
 
     public enum PipeScoringLevel {
-        L2, L3, L4
+        L2,
+        L3,
+        L4
     }
 }

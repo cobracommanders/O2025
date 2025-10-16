@@ -1,5 +1,8 @@
 package frc.robot.stateMachine;
 
+import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
+import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -15,12 +18,8 @@ import frc.robot.subsystems.armManager.ArmManagerState;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.GroundManager;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-
-import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
-import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 public class RequestManager {
     private final Climber climber;
@@ -42,36 +41,39 @@ public class RequestManager {
     }
 
     public RobotScoringSide netRobotSide() {
-        return AutoAlign.getNetScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
+        return AutoAlign.getNetScoringSideFromRobotPose(
+                LocalizationSubsystem.getInstance().getPose());
     }
 
     // public boolean algaeIntakeHeightIsTop() {
     //     if (FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()) {
     //         return AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3;
     //     } else {
-    //         return OperatorOptions.getInstance().algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
+    //         return OperatorOptions.getInstance().algaeIntakeLevel ==
+    // OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
     //     }
     // }
 
-    public AlgaeIntakeLevel getAlgaeIntakeLevel(){
+    public AlgaeIntakeLevel getAlgaeIntakeLevel() {
         // if(FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()){
         //     if(AutoAlign.getInstance().approximateDistanceToReef() >= 2){
         //         return AlgaeIntakeLevel.GROUND_ALGAE;
-        //     } else if(AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3){
+        //     } else if(AutoAlign.getInstance().getClosestReefSide().algaeHeight ==
+        // ReefPipeLevel.L3){
         //         return AlgaeIntakeLevel.HIGH_REEF;
         //     } else {
         //         return AlgaeIntakeLevel.LOW_REEF;
         //     }
         // } else {
-            return OperatorOptions.getInstance().algaeIntakeLevel;
+        return OperatorOptions.getInstance().algaeIntakeLevel;
         // }
     }
 
-    public Command setAlgaeIntakeLevel(){
-        switch (OperatorOptions.getInstance().getAlgaeIntakeLevel()){
+    public Command setAlgaeIntakeLevel() {
+        switch (OperatorOptions.getInstance().getAlgaeIntakeLevel()) {
             case GROUND_ALGAE -> {
                 return groundAlgaeIntake();
-            } 
+            }
             case HIGH_REEF -> {
                 return highReefAlgaeIntake(this::reefRobotSide);
             }
@@ -104,7 +106,8 @@ public class RequestManager {
     }
 
     public Command algaeNetScore(Supplier<RobotScoringSide> side, BooleanSupplier confirmation) {
-        return armCommands.requestAlgaeNetPrepareAndAwaitReady(side)
+        return armCommands
+                .requestAlgaeNetPrepareAndAwaitReady(side)
                 .andThen(armCommands.doNothing().until(confirmation))
                 .andThen(armCommands.executeAlgaeNetScoreAndAwaitIdle());
     }
@@ -114,15 +117,15 @@ public class RequestManager {
     }
 
     public Command algaeProcessorScore(BooleanSupplier confirmation) {
-        return armCommands.requestAlgaeProcessorPrepareAndAwaitReady()
+        return armCommands
+                .requestAlgaeProcessorPrepareAndAwaitReady()
                 .andThen(armCommands.doNothing().until(confirmation))
                 .andThen(armCommands.executeAlgaeProcessorScoreAndAwaitIdle());
     }
 
     public Command prepareCoralScoreAndAwaitReady(
             Supplier<RobotScoringSide> scoringSide,
-            Supplier<FieldConstants.PipeScoringLevel> scoringLevel
-    ) {
+            Supplier<FieldConstants.PipeScoringLevel> scoringLevel) {
         return armCommands.requestCoralPrepareAndAwaitReady(scoringSide, scoringLevel);
     }
 
@@ -132,28 +135,19 @@ public class RequestManager {
 
     public Command prepareCoralScoreAndAwaitReady() {
         return prepareCoralScoreAndAwaitReady(
-                this::reefRobotSide,
-                () -> OperatorOptions.getInstance().getPipeScoringLevelOrL4()
-        );
+                this::reefRobotSide, () -> OperatorOptions.getInstance().getPipeScoringLevelOrL4());
     }
 
     public Command prepareCoralScoreAndAwaitReady(FieldConstants.PipeScoringLevel scoringLevel) {
-        return prepareCoralScoreAndAwaitReady(
-                this::reefRobotSide,
-                () -> scoringLevel
-        );
+        return prepareCoralScoreAndAwaitReady(this::reefRobotSide, () -> scoringLevel);
     }
 
-    /**
-     * Execute coral score and await movement completion.
-     */
+    /** Execute coral score and await movement completion. */
     public Command executeCoralScoreAndAwaitComplete() {
         return armCommands.executeCoralScoreAndAwaitComplete();
     }
 
-    /**
-     * Request ground algae intake and await game piece.
-     */
+    /** Request ground algae intake and await game piece. */
     public Command groundAlgaeIntake() {
         return armCommands.requestGroundAlgaeIntakeAndAwaitGamePiece();
     }
@@ -166,53 +160,55 @@ public class RequestManager {
         return armCommands.requestAlgaeReefIntakeAndAwaitIdle(side, false);
     }
 
-     public boolean algaeIntakeHeightIsTop() {
+    public boolean algaeIntakeHeightIsTop() {
         if (FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()) {
             return AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3;
         } else {
-            return OperatorOptions.getInstance().algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
+            return OperatorOptions.getInstance().algaeIntakeLevel
+                    == OperatorOptions.AlgaeIntakeLevel.HIGH_REEF;
         }
     }
 
     public Command reefAlgaeIntake() {
-        //return setAlgaeIntakeLevel();
+        // return setAlgaeIntakeLevel();
         return Commands.either(
                 highReefAlgaeIntake(this::reefRobotSide),
                 lowReefAlgaeIntake(this::reefRobotSide),
-                this::algaeIntakeHeightIsTop
-        );
+                this::algaeIntakeHeightIsTop);
     }
 
     public Command prepareLollipopAndAwaitReady() {
-        return armCommands
-                .requestLollipopIntakeAndAwaitReady()
-                .onlyIf(DriverStation::isAutonomous);
+        return armCommands.requestLollipopIntakeAndAwaitReady().onlyIf(DriverStation::isAutonomous);
     }
 
     public Command scoreL1(BooleanSupplier confirmation) {
-        return groundCommands.prepareL1AndAwaitReady()
+        return groundCommands
+                .prepareL1AndAwaitReady()
                 .andThen(waitUntil(confirmation))
                 .andThen(groundCommands.executeL1ScoreAndAwaitIdle());
     }
 
     public Command coralIntakeUntilPiece() {
-        return groundCommands.intakeUntilPiece()
+        return groundCommands
+                .intakeUntilPiece()
                 .andThen(handoffRequest())
                 .withName("coralIntakeRequest");
     }
 
     public Command climbRequest() {
-        return Commands.parallel(groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing())
+        return Commands.parallel(
+                        groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing())
                 .andThen(climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
     }
 
     public Command handoffRequest() {
-        return groundCommands.requestHandoffAndAwaitReady().alongWith(armCommands.requestHandoffAndAwaitReady())
+        return groundCommands
+                .requestHandoffAndAwaitReady()
+                .alongWith(armCommands.requestHandoffAndAwaitReady())
                 // Request execution once both mechanisms are positioned
                 .andThen(
                         armCommands.executeHandoffUntilIntakeWait(),
-                        groundCommands.executeHandoff()
-                )
+                        groundCommands.executeHandoff())
                 // Wait for handoff time
                 .andThen(waitSeconds(0.4)) // TODO Potentially incorporate canranges for extra speed
                 .andThen(idleAll())
@@ -221,12 +217,14 @@ public class RequestManager {
     }
 
     public Command invertedHandoffRequest() {
-        return groundCommands.requestInvertedHandoffAndAwaitReady()
+        return groundCommands
+                .requestInvertedHandoffAndAwaitReady()
                 .andThen(armCommands.requestInvertedHandoffAndAwaitReady())
                 // Request execution once both mechanisms are positioned
-                .andThen(Commands.parallel(
-                        groundCommands.executeInvertedHandoff(),
-                        armCommands.executeInvertedHandoff()))
+                .andThen(
+                        Commands.parallel(
+                                groundCommands.executeInvertedHandoff(),
+                                armCommands.executeInvertedHandoff()))
                 // Wait for handoff time
                 .andThen(waitSeconds(0.5).withDeadline(groundCommands.awaitGamePieceFromIntaking()))
                 .andThen(idleAll())

@@ -1,12 +1,12 @@
 package frc.robot.trailblazer.constraints;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.hypot;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import frc.robot.util.PolarChassisSpeeds;
 import frc.robot.util.TimestampedChassisSpeeds;
-
-import static java.lang.Math.abs;
-import static java.lang.Math.hypot;
 
 public class AutoConstraintCalculator {
     public static TimestampedChassisSpeeds constrainVelocityGoal(
@@ -14,17 +14,17 @@ public class AutoConstraintCalculator {
             TimestampedChassisSpeeds previousSpeeds,
             AutoConstraintOptions options,
             double distanceToSegmentEnd) {
-        ChassisSpeeds constrainedSpeeds = constrainVelocityGoal(inputSpeeds, previousSpeeds, options);
+        ChassisSpeeds constrainedSpeeds =
+                constrainVelocityGoal(inputSpeeds, previousSpeeds, options);
 
         double newLinearVelocityForSafeDeceleration =
                 getAccelerationBasedVelocityConstraint(
-                        constrainedSpeeds,
-                        distanceToSegmentEnd,
-                        options);
+                        constrainedSpeeds, distanceToSegmentEnd, options);
 
         constrainedSpeeds =
                 constrainLinearVelocity(
-                        constrainedSpeeds, options.withMaxLinearVelocity(newLinearVelocityForSafeDeceleration));
+                        constrainedSpeeds,
+                        options.withMaxLinearVelocity(newLinearVelocityForSafeDeceleration));
 
         return new TimestampedChassisSpeeds(constrainedSpeeds, inputSpeeds.timestampSeconds);
     }
@@ -66,21 +66,23 @@ public class AutoConstraintCalculator {
         return limitedSpeeds;
     }
 
-    public static ChassisSpeeds constrainLinearVelocity(ChassisSpeeds inputSpeeds, AutoConstraintOptions options) {
-        double currentLinearVelocity = hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
+    public static ChassisSpeeds constrainLinearVelocity(
+            ChassisSpeeds inputSpeeds, AutoConstraintOptions options) {
+        double currentLinearVelocity =
+                hypot(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond);
 
         if (currentLinearVelocity > options.maxLinearVelocity()) {
             return new PolarChassisSpeeds(
                     options.maxLinearVelocity(),
                     new Rotation2d(inputSpeeds.vxMetersPerSecond, inputSpeeds.vyMetersPerSecond),
-                    inputSpeeds.omegaRadiansPerSecond
-            );
+                    inputSpeeds.omegaRadiansPerSecond);
         } else {
             return inputSpeeds;
         }
     }
 
-    private static ChassisSpeeds constrainRotationalVelocity(ChassisSpeeds inputSpeeds, AutoConstraintOptions options) {
+    private static ChassisSpeeds constrainRotationalVelocity(
+            ChassisSpeeds inputSpeeds, AutoConstraintOptions options) {
         double currentAngularVelocity = inputSpeeds.omegaRadiansPerSecond;
 
         if (currentAngularVelocity > options.maxAngularVelocity()) {
@@ -98,19 +100,29 @@ public class AutoConstraintCalculator {
             TimestampedChassisSpeeds previousSpeeds,
             AutoConstraintOptions options) {
 
-        double inputTotalSpeed = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-        double previousTotalSpeed = hypot(previousSpeeds.vxMetersPerSecond, previousSpeeds.vyMetersPerSecond);
+        double inputTotalSpeed =
+                hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+        double previousTotalSpeed =
+                hypot(previousSpeeds.vxMetersPerSecond, previousSpeeds.vyMetersPerSecond);
 
-        double currentLinearAcceleration = abs(inputTotalSpeed - previousTotalSpeed) / currentSpeeds.timestampDifference(previousSpeeds);
+        double currentLinearAcceleration =
+                abs(inputTotalSpeed - previousTotalSpeed)
+                        / currentSpeeds.timestampDifference(previousSpeeds);
 
         if (currentLinearAcceleration > options.maxLinearAcceleration()) {
-            double distanceAtMaxAcceleration = options.maxLinearAcceleration() * currentSpeeds.timestampDifference(previousSpeeds);
-            double limitedLinearSpeed = previousTotalSpeed + Math.copySign(distanceAtMaxAcceleration, inputTotalSpeed - previousTotalSpeed);
+            double distanceAtMaxAcceleration =
+                    options.maxLinearAcceleration()
+                            * currentSpeeds.timestampDifference(previousSpeeds);
+            double limitedLinearSpeed =
+                    previousTotalSpeed
+                            + Math.copySign(
+                                    distanceAtMaxAcceleration,
+                                    inputTotalSpeed - previousTotalSpeed);
             return new PolarChassisSpeeds(
                     limitedLinearSpeed,
-                    new Rotation2d(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
-                    currentSpeeds.omegaRadiansPerSecond
-            );
+                    new Rotation2d(
+                            currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond),
+                    currentSpeeds.omegaRadiansPerSecond);
         } else {
             return currentSpeeds;
         }
@@ -124,11 +136,19 @@ public class AutoConstraintCalculator {
         double currentAngularSpeed = currentSpeeds.omegaRadiansPerSecond;
         double previousAngularSpeed = previousSpeeds.omegaRadiansPerSecond;
 
-        double currentAngularAcceleration = abs(currentAngularSpeed - previousAngularSpeed) / currentSpeeds.timestampDifference(previousSpeeds);
+        double currentAngularAcceleration =
+                abs(currentAngularSpeed - previousAngularSpeed)
+                        / currentSpeeds.timestampDifference(previousSpeeds);
 
         if (currentAngularAcceleration > options.maxAngularAcceleration()) {
-            double deltaAtMaxAcceleration = options.maxAngularAcceleration() * currentSpeeds.timestampDifference(previousSpeeds);
-            double limitedAngularSpeed = previousAngularSpeed + Math.copySign(deltaAtMaxAcceleration, currentAngularSpeed - previousAngularSpeed);
+            double deltaAtMaxAcceleration =
+                    options.maxAngularAcceleration()
+                            * currentSpeeds.timestampDifference(previousSpeeds);
+            double limitedAngularSpeed =
+                    previousAngularSpeed
+                            + Math.copySign(
+                                    deltaAtMaxAcceleration,
+                                    currentAngularSpeed - previousAngularSpeed);
             return new ChassisSpeeds(
                     currentSpeeds.vxMetersPerSecond,
                     currentSpeeds.vyMetersPerSecond,
@@ -141,18 +161,21 @@ public class AutoConstraintCalculator {
             ChassisSpeeds currentSpeeds,
             double distanceToSegmentEnd,
             AutoConstraintOptions options) {
-        double currentVelocity = hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
-        double decelerationDistance = Math.pow(currentVelocity, 2) / (2.0 * options.maxLinearAcceleration());
+        double currentVelocity =
+                hypot(currentSpeeds.vxMetersPerSecond, currentSpeeds.vyMetersPerSecond);
+        double decelerationDistance =
+                Math.pow(currentVelocity, 2) / (2.0 * options.maxLinearAcceleration());
 
         if (distanceToSegmentEnd > decelerationDistance) {
             return currentVelocity;
         }
 
-        // Limit speed based on remaining distance with the goal of coming to a perfect stop within acceleration limits
-        double perfectVelocity = Math.sqrt(2.0 * options.maxLinearAcceleration() * distanceToSegmentEnd);
+        // Limit speed based on remaining distance with the goal of coming to a perfect stop within
+        // acceleration limits
+        double perfectVelocity =
+                Math.sqrt(2.0 * options.maxLinearAcceleration() * distanceToSegmentEnd);
         return Math.max(perfectVelocity, 0.05); // minimum of 2 in/s
     }
 
-    private AutoConstraintCalculator() {
-    }
+    private AutoConstraintCalculator() {}
 }

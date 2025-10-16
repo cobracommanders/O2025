@@ -22,7 +22,6 @@ public enum ElevatorState {
     SCORE_L2(0.3),
     CUSTOM(0.0); // Set in the elevator class
 
-
     private final double defaultPosition;
     private final DoubleSubscriber tunablePosition;
 

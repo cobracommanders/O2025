@@ -1,7 +1,6 @@
 package frc.robot.config;
 
 import frc.robot.util.FeatureFlag;
-
 import java.util.function.BooleanSupplier;
 
 public class FeatureFlags {
@@ -17,7 +16,8 @@ public class FeatureFlags {
     public static final BooleanSupplier MT_VISION_METHOD =
             FeatureFlag.of("Vision/MTVisionMethod", true);
 
-    public static final BooleanSupplier FIELD_CALIBRATION = FeatureFlag.of("FieldCalibration", false);
+    public static final BooleanSupplier FIELD_CALIBRATION =
+            FeatureFlag.of("FieldCalibration", false);
 
     public static final BooleanSupplier AUTO_ALIGN_DISTANCE_COST =
             FeatureFlag.of("AutoAlign/Costs/Distance", true);
@@ -29,12 +29,10 @@ public class FeatureFlags {
     public static final BooleanSupplier USE_ANY_REEF_TAG =
             FeatureFlag.of("Vision/UseAnyReefTag", true);
 
-    public static final BooleanSupplier LED_INTAKE_BLINK =
-            FeatureFlag.of("LED/IntakeBlink", true);
+    public static final BooleanSupplier LED_INTAKE_BLINK = FeatureFlag.of("LED/IntakeBlink", true);
 
     public static final BooleanSupplier AUTO_ALGAE_INTAKE_HEIGHT =
             FeatureFlag.of("AutoAlign/AutoAlgaeIntakeHeight", false);
 
-    private FeatureFlags() {
-    }
+    private FeatureFlags() {}
 }

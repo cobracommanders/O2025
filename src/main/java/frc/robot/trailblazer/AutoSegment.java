@@ -3,7 +3,6 @@ package frc.robot.trailblazer;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.PoseErrorTolerance;
-
 import java.util.List;
 
 /**
@@ -13,8 +12,8 @@ public class AutoSegment {
     public final List<AutoPoint> points;
 
     /**
-     * Constraints to apply to any points that don't have their own constraints specified. If a point
-     * specifies its own constraints, this field will be ignored.
+     * Constraints to apply to any points that don't have their own constraints specified. If a
+     * point specifies its own constraints, this field will be ignored.
      */
     public final AutoConstraintOptions defaultConstraints;
 
@@ -46,7 +45,7 @@ public class AutoSegment {
     /**
      * Get the remaining distance from the robot's current pose to the end of the segment.
      *
-     * @param robotPose    The current pose of the robot.
+     * @param robotPose The current pose of the robot.
      * @param currentIndex The current index of the segment.
      */
     public double getRemainingDistance(Pose2d robotPose, int currentIndex) {
@@ -74,7 +73,8 @@ public class AutoSegment {
             return false;
         }
 
-        return positionTolerance.atPose(points.get(points.size() - 1).poseSupplier.get(), robotPose);
+        return positionTolerance.atPose(
+                points.get(points.size() - 1).poseSupplier.get(), robotPose);
     }
 
     public AutoConstraintOptions getConstraints(AutoPoint point) {
