@@ -67,18 +67,20 @@ public class RequestManager {
         }
     }
 
-    public void setAlgaeIntakeLevel(){
+    public Command setAlgaeIntakeLevel(){
         switch (getAlgaeIntakeLevel()){
             case GROUND_ALGAE -> {
-                groundAlgaeIntake();
+                return groundAlgaeIntake();
             } 
             case HIGH_REEF -> {
-                highReefAlgaeIntake(this::reefRobotSide);
+                return highReefAlgaeIntake(this::reefRobotSide);
             }
             case LOW_REEF -> {
-                lowReefAlgaeIntake(this::reefRobotSide);
+                return lowReefAlgaeIntake(this::reefRobotSide);
             }
         }
+
+        return Commands.none();
     }
 
     public ArmManagerState.HandGamePieceState getHandGamePiece() {
@@ -165,7 +167,7 @@ public class RequestManager {
     }
 
     public Command reefAlgaeIntake() {
-        return Commands.runOnce(() -> setAlgaeIntakeLevel());
+        return setAlgaeIntakeLevel();
     }
 
     public Command prepareLollipopAndAwaitReady() {
