@@ -29,6 +29,8 @@ public class Arm extends StateMachine<ArmState> {
 
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
 
+    private double customStatePosition = 0.0;
+
     public Arm() {
         super(ArmState.START_POSITION);
         TalonFXConfiguration motor_config = new TalonFXConfiguration()
@@ -77,13 +79,33 @@ public class Arm extends StateMachine<ArmState> {
     protected void collectInputs() {
         absolutePosition = encoder.getPosition().getValueAsDouble();
         armPosition = motor.getPosition().getValueAsDouble();
-        DogLog.log("Arm/Encoder position", absolutePosition);
-        DogLog.log("Arm/Motor position", armPosition);
+        DogLog.log("Arm/Absolute Encoder position", absolutePosition);
+        DogLog.log("Arm/Motor Encoder Position", armPosition);
+        DogLog.log("Arm/Code Position", getNormalizedPosition());
         DogLog.log("Arm/At Goal", atGoal());
+        DogLog.log("Arm/CustomPosition", customStatePosition);
         MechanismVisualizer.setArmPosition(armPosition);
     }
 
+    @Override
+    public void periodic() {
+        super.periodic();
+
+        // Periodically update
+        // afterTransition doesn't work because it is only called once when CUSTOM is set for the first time
+        if (getState() == ArmState.CUSTOM) {
+            setMotorToTargetPosition(customStatePosition);
+        }
+    }
+
+    /**
+     * Returns the arm position normalized to the range [-0.5, 0.5].
+     */
     public double getNormalizedPosition() {
+        return normalizePosition(armPosition);
+    }
+
+    public static double normalizePosition(double armPosition) {
         double position = armPosition % 1.0;
         if (position > 0.5)
             return position - 1.0;
@@ -101,6 +123,11 @@ public class Arm extends StateMachine<ArmState> {
         setStateFromRequest(state);
     }
 
+    public void setCustom(double targetPosition) {
+        this.customStatePosition = targetPosition;
+        setState(ArmState.CUSTOM);
+    }
+
     @Override
     public ArmState getState() {
         return super.getState();
@@ -109,12 +136,18 @@ public class Arm extends StateMachine<ArmState> {
     @Override
     protected void afterTransition(ArmState newState) {
         switch (newState) {
+            case CUSTOM -> setMotorToTargetPosition(customStatePosition);
+        
+
             // Custom cases can go here, default to standard position control
             default -> {
-                double position = newState.getPosition();
-                DogLog.log("Arm/Setpoint", position);
-                motor.setControl(motionMagicVoltage.withPosition(position));
+                setMotorToTargetPosition(newState.getPosition());
             }
         }
+    }
+
+    private void setMotorToTargetPosition(double position) {
+        DogLog.log("Arm/Setpoint", position);
+        motor.setControl(motionMagicVoltage.withPosition(position));
     }
 }

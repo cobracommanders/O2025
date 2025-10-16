@@ -13,16 +13,17 @@ import frc.robot.trailblazer.Trailblazer;
 
 public class Autos extends SubsystemBase {
   private final AutoChooser<AutoSelection> autoChooser;
-  private final RequestManager requestManager = RequestManager.getInstance();
+  private final RequestManager requestManager;
   private final Trailblazer trailblazer;
   private boolean hasEnabledAuto = false;
   private Pair<AutoSelection, BaseAuto> selectedRed;
   private Pair<AutoSelection, BaseAuto> selectedBlue;
   private Command autoCommand;
 
-  public Autos(Trailblazer trailblazer) {
+  public Autos(Trailblazer trailblazer, RequestManager requestManager) {
     autoChooser = new AutoChooser<>(AutoSelection.values(), AutoSelection.L4);
     this.trailblazer = trailblazer;
+    this.requestManager = requestManager;
 
     selectedRed =
         Pair.of(

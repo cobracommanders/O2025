@@ -4,10 +4,13 @@
 
 package frc.robot;
 
+import java.lang.management.OperatingSystemMXBean;
+
 import com.ctre.phoenix6.Utils;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,6 +22,7 @@ import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
+import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.subsystems.Lights.LED;
 import frc.robot.subsystems.armManager.ArmManager;
@@ -27,8 +31,8 @@ import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
-import frc.robot.subsystems.drivetrain.DriveStates;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.trailblazer.Trailblazer;
 
 public class Robot extends TimedRobot {
@@ -44,20 +48,25 @@ public class Robot extends TimedRobot {
     private Command autonomousCommand = Commands.none();
 
     // Uncomment as needed
-    public static RequestManager robotManager = RequestManager.getInstance();
-    public static RobotCommands robotCommands = RobotCommands.getInstance();
+    public static RequestManager requestManager = new RequestManager(armManager, GroundManager.getInstance(), Climber.getInstance());
     public static DriveSubsystem swerve = DriveSubsystem.getInstance();
+    private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+    private final RobotCommands robotCommands = new RobotCommands(trailblazer, requestManager);
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
+
+    private final Controls controls = new Controls(requestManager, robotCommands);
+
     // public static final Controls controls = new Controls();
     //private SendableChooser<Command> autoChooser;
     private final Timer seedImuTimer = new Timer();
     public static LED lights;
-    private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
+
+
     //private final Autos autos = new Autos(trailblazer);
     // public static OperatorOptions operatorOptions =
     // OperatorOptions.getInstance();
 
-    private final Autos autos = new Autos(trailblazer);
+    private final Autos autos = new Autos(trailblazer, requestManager);
 
 
     public Robot() {
@@ -83,6 +92,17 @@ public class Robot extends TimedRobot {
         // FmsSubsystem.getInstance().updateSimulation();
 
         swerve.setElevatorHeight(elevator.getHeight());
+        DogLog.log("OperatorOptions/AlgaeLevel", OperatorOptions.getInstance().algaeIntakeLevel);
+        if (FmsSubsystem.getInstance().isDisabled()){
+            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(200);
+            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(200);
+            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(200);
+        }
+        else {
+            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(0);
+            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(0);
+            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(0);
+        }
     }
 
     @Override
@@ -115,10 +135,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        Controls.getInstance().configureDriverCommands();
-        Controls.getInstance().configureOperatorCommands();
-        Controls.getInstance().configureDefaultCommands();
-        DriveSubsystem.getInstance().setState(DriveStates.TELEOP);
+        controls.configureDriveteamCommands();
+        controls.configureDefaultCommands();
+        DriveSubsystem.getInstance().requestTeleop();
     }
 
     @Override

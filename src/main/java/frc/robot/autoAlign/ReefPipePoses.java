@@ -1,11 +1,6 @@
 package frc.robot.autoAlign;
 
-import com.fasterxml.jackson.databind.JsonSerializable.Base;
-
 import edu.wpi.first.math.geometry.Pose2d;
-import frc.robot.localization.LocalizationSubsystem;
-import frc.robot.subsystems.drivetrain.CommandSwerveDrivetrain;
-import frc.robot.subsystems.drivetrain.DriveSubsystem;
 
 // Compute the offset poses for scoring on the reef once on boot to reduce GC pressure from dynamic
 // computation

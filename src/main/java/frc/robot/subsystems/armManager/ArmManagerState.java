@@ -19,11 +19,13 @@ public enum ArmManagerState {
      */
     PREPARE_IDLE_EMPTY(NONE), // Transition state
     PREPARE_IDLE_ALGAE(ALGAE), // Transition state
-    PREPARE_IDLE_CORAL(CORAL), // Transition state
+    PREPARE_IDLE_CORAL_DOWN(CORAL), // Transition state
+    PREPARE_IDLE_CORAL_UP(CORAL), // Transition state
 
     IDLE_EMPTY(NONE), // Waiting for a coral in the ground intake
     IDLE_ALGAE(ALGAE), // Idle holding algae
-    IDLE_CORAL(CORAL), // Idle holding coral
+    IDLE_CORAL_DOWN(CORAL), // Idle holding coral with the arm downwards
+    IDLE_CORAL_UP(CORAL), // Idle holding coral with the arm upwards
 
     IDLE_ALGAE_DROPPED(NONE), // Algae missing according to sensors, spins wheels to make sure it's actually gone and not going to collide with anything
 
@@ -40,7 +42,7 @@ public enum ArmManagerState {
      *
      * PREPARE_HANDOFF_<side> -> READY_HANDOFF_<side> when At Position
      * READY_HANDOFF_<side> -> EXECUTE_HANDOFF_<side> when External Signal
-     * EXECUTE_HANDOFF_<side> -> PREPARE_IDLE_CORAL when Slight Delay
+     * EXECUTE_HANDOFF_<side> -> PREPARE_IDLE_CORAL when External Signal
      */
     PREEMPTIVE_HANDOFF_LEFT(NONE), // Prepare above intake
     PREEMPTIVE_HANDOFF_MIDDLE(NONE), // Prepare above intake
@@ -61,6 +63,7 @@ public enum ArmManagerState {
      *
      * PREPARE_INVERTED_HANDOFF -> READY_INVERTED_HANDOFF when At Position
      * READY_INVERTED_HANDOFF -> EXECUTE_INVERTED_HANDOFF when External Signal
+     * EXECUTE_INVERTED_HANDOFF -> IDLE_EMPTY when External Signal
      */
     PREPARE_INVERTED_HANDOFF(CORAL),
     READY_INVERTED_HANDOFF(CORAL),
@@ -156,7 +159,19 @@ public enum ArmManagerState {
     READY_CLIMB(NONE);
 
     public enum HandGamePieceState {
-        CORAL, ALGAE, NONE
+        CORAL, ALGAE, NONE;
+
+        public boolean isCoral() {
+            return this == CORAL;
+        }
+
+        public boolean isAlgae() {
+            return this == ALGAE;
+        }
+
+        public boolean isNone() {
+            return this == NONE;
+        }
     }
 
     public final HandGamePieceState handGamePieceState;
@@ -168,25 +183,23 @@ public enum ArmManagerState {
     /* ******** Idle Utilities ******** */
     public boolean isIdleState() {
         return switch (this) {
-            case IDLE_ALGAE, IDLE_CORAL, IDLE_EMPTY, IDLE_ALGAE_DROPPED -> true;
+            case IDLE_ALGAE, IDLE_CORAL_UP, IDLE_CORAL_DOWN, IDLE_EMPTY -> true;
             default -> false;
         };
     }
-
-    public static ArmManagerState getIdleStateFor(HandGamePieceState handGamePieceState) {
-        return switch (handGamePieceState) {
-            case CORAL -> IDLE_CORAL;
-            case ALGAE -> IDLE_ALGAE;
-            case NONE -> IDLE_EMPTY;
-        };
-    }
-
 
     /* ******** Handoff Utilities ******** */
 
     public boolean isHandoffReadyState() {
         return switch (this) {
             case READY_HANDOFF_LEFT, READY_HANDOFF_MIDDLE, READY_HANDOFF_RIGHT -> true;
+            default -> false;
+        };
+    }
+
+    public boolean isHandoffExecuteState() {
+        return switch (this) {
+            case EXECUTE_HANDOFF_LEFT, EXECUTE_HANDOFF_MIDDLE, EXECUTE_HANDOFF_RIGHT -> true;
             default -> false;
         };
     }
@@ -199,7 +212,8 @@ public enum ArmManagerState {
         return switch (this) {
             case PREPARE_IDLE_EMPTY -> IDLE_EMPTY;
             case PREPARE_IDLE_ALGAE -> IDLE_ALGAE;
-            case PREPARE_IDLE_CORAL -> IDLE_CORAL;
+            case PREPARE_IDLE_CORAL_UP -> IDLE_CORAL_UP;
+            case PREPARE_IDLE_CORAL_DOWN -> IDLE_CORAL_DOWN;
             default -> this;
         };
     }
@@ -263,6 +277,13 @@ public enum ArmManagerState {
     public boolean isCoralReadyToScoreState() {
         return switch (this) {
             case READY_L4_LEFT, READY_L3_LEFT, READY_L2_LEFT, READY_L4_RIGHT, READY_L3_RIGHT, READY_L2_RIGHT -> true;
+            default -> false;
+        };
+    }
+
+    public boolean isCoralScoreState() {
+        return switch (this) {
+            case SCORE_L4_LEFT, SCORE_L3_LEFT, SCORE_L2_LEFT, SCORE_L4_RIGHT, SCORE_L3_RIGHT, SCORE_L2_RIGHT -> true;
             default -> false;
         };
     }

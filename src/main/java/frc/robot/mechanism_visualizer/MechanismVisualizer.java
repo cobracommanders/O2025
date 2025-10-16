@@ -71,7 +71,7 @@ public class MechanismVisualizer {
             // Display arm coral
             Transform3d armCoralTransform = new Transform3d(0.35, -0.55, 0.0, new Rotation3d(0.0, Math.PI / 2, 0.0));
             Transform3d armAlgaeTransform = new Transform3d(0.35, -0.7, 0.0, new Rotation3d(0.0, 0.0, 0.0));
-            switch (Robot.armManager.getSimHandGamePiece()) {
+            switch (Robot.armManager.getCurrentGamePiece()) {
                 case CORAL -> {
                     DogLog.log("MechanismVisualizer/ArmCoral", new Pose3d[]{robotPose3d.transformBy(new Transform3d(Pose3d.kZero, armPose.transformBy(armCoralTransform)))});
                     DogLog.log("MechanismVisualizer/ArmAlgae", new Pose3d[]{});

@@ -34,21 +34,21 @@ public class redL4 extends BaseAuto {
         return Commands.sequence(
                 blocks.scorePreloadL4(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_J, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
+                requestManager.prepareLollipopAndAwaitReady(),
                 // Commands.parallel(
 
                 blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_J, RobotScoringSide.LEFT),
                 // ),
                 blocks.scoreL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-      RobotCommands.getInstance().autoLollipopIntakeCommand(),
+      requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-      RobotCommands.getInstance().autoLollipopIntakeCommand(),
+      requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.ground_manager.coraldetection;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import dev.doglog.DogLog;
 import frc.robot.Constants;
@@ -20,8 +21,19 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
 
     private CoralDetector() {
         super(CoralDetectorState.NONE);
+
+        CANrangeConfiguration config = new CANrangeConfiguration();
+
+        config.ProximityParams.ProximityHysteresis = 0.008;
+        config.ProximityParams.ProximityThreshold = 0.065;
+        config.ProximityParams.MinSignalStrengthForValidMeasurement = 8000;
+
         lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
         rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
+
+        lCANRange.getConfigurator().apply(config);
+        rCANRange.getConfigurator().apply(config);
+
         this.name = getName();
     }
 
@@ -30,12 +42,16 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
         rDistance = rCANRange.getDistance().getValueAsDouble();
 
         //We can switch to using .isDetected() if we would like.
-        lDetected = lDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
-        rDetected = rDistance < Constants.CoralDetectorConstants.DETECTION_THRESHOLD;
+        lDetected = lCANRange.getIsDetected().getValue();
+        rDetected = rCANRange.getIsDetected().getValue();
+
         DogLog.log(name + "/Left Detected", lDetected);
         DogLog.log(name + "/Right Detected", rDetected);
         DogLog.log(name + "/Left Distance", lDistance);
         DogLog.log(name + "/Right Distance", rDistance);
+
+        DogLog.log(name + "/Left Signal", lCANRange.getSignalStrength().getValueAsDouble());
+        DogLog.log(name + "/Right Signal", rCANRange.getSignalStrength().getValueAsDouble());
     }
 
     @Override

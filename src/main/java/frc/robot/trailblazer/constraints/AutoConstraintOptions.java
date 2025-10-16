@@ -2,21 +2,17 @@ package frc.robot.trailblazer.constraints;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
+/**
+ * @param maxLinearVelocity      Max linear velocity allowed in meters per second. Set to 0 to disable.
+ * @param maxAngularVelocity     Max angular velocity allowed in radians per second. Set to 0 to disable.
+ * @param maxLinearAcceleration  Max linear acceleration allowed in meters per second squared. Set to 0 to disable.
+ * @param maxAngularAcceleration Max angular acceleration allowed in radians per second squared. Set to 0 to disable.
+ */
 public record AutoConstraintOptions(
-        /** Max linear velocity allowed in meters per second. Set to 0 to disable. */
         double maxLinearVelocity,
-        /** Max angular velocity allowed in radians per second. Set to 0 to disable. */
         double maxAngularVelocity,
-        /** Max linear acceleration allowed in meters per second squared. Set to 0 to disable. */
         double maxLinearAcceleration,
-        /** Max angular acceleration allowed in radians per second squared. Set to 0 to disable. */
         double maxAngularAcceleration) {
-    /**
-     * Default constraint options to use if no point or segment specific options are set.
-     */
-    public AutoConstraintOptions() {
-        this(4.75, 71.5, 8.5, 35.2);
-    }
 
     public AutoConstraintOptions withMaxLinearVelocity(double maxLinearVelocity) {
         return new AutoConstraintOptions(

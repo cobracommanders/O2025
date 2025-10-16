@@ -23,6 +23,8 @@ public class Elevator extends StateMachine<ElevatorState> {
     private double elevatorPosition;
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
 
+    private double customStateHeight = 0.0;
+
     public Elevator() {
         super(ElevatorState.IDLE);
         TalonFXConfiguration motor_config = new TalonFXConfiguration()
@@ -61,7 +63,19 @@ public class Elevator extends StateMachine<ElevatorState> {
         elevatorPosition = lMotor.getPosition().getValueAsDouble();
         DogLog.log("Elevator/Position", elevatorPosition);
         DogLog.log("Elevator/At Goal", atGoal());
+        DogLog.log("Elevator/CustomHeight", customStateHeight);
         MechanismVisualizer.setElevatorPosition(elevatorPosition);
+    }
+
+    @Override
+    public void periodic() {
+        super.periodic();
+
+        // Periodically update
+        // afterTransition doesn't work because it is only called once when CUSTOM is set for the first time
+        if (getState() == ElevatorState.CUSTOM) {
+            setMotorsToTargetHeight(customStateHeight);
+        }
     }
 
     @Override
@@ -77,6 +91,11 @@ public class Elevator extends StateMachine<ElevatorState> {
         setStateFromRequest(state);
     }
 
+    public void setCustom(double targetHeight) {
+        this.customStateHeight = targetHeight;
+        setState(ElevatorState.CUSTOM);
+    }
+
     @Override
     public ElevatorState getState() {
         return super.getState();
@@ -85,12 +104,16 @@ public class Elevator extends StateMachine<ElevatorState> {
     @Override
     protected void afterTransition(ElevatorState newState) {
         switch (newState) {
+            case CUSTOM -> setMotorsToTargetHeight(customStateHeight);
+
             // Custom cases can go here, default to standard position control
-            default -> {
-                double position = newState.getPosition();
-                DogLog.log("Elevator/Setpoint", position);
-                lMotor.setControl(motionMagicVoltage.withPosition(position));
-            }
+            default -> setMotorsToTargetHeight(newState.getPosition());
         }
+    }
+
+    private void setMotorsToTargetHeight(double newState) {
+        double position = MathUtil.clamp(newState, 0.0, ElevatorConstants.MaxHeight);
+        DogLog.log("Elevator/Setpoint", position);
+        lMotor.setControl(motionMagicVoltage.withPosition(position));
     }
 }

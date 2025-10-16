@@ -35,23 +35,21 @@ public class blueFourCoralProcessor extends BaseAuto {
                 blocks.driveToBackReefBlueProcessor(),
                 blocks.scorePreloadL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
-                RobotCommands.getInstance().setL2Command(),
+                requestManager.prepareLollipopAndAwaitReady(),
                 // Commands.parallel(
 
                 blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 // ),
                 blocks.scoreL2(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
+                requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
                 blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.scoreL2(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
                 blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                RobotCommands.getInstance().autoLollipopIntakeCommand(),
-                RobotCommands.getInstance().setL4Command(),
+                requestManager.prepareLollipopAndAwaitReady(),
 
                 // RobotCommands.getInstance().waitForAllIdle(),
                 // RobotCommands.getInstance().lollipopIntakeCommand(),
