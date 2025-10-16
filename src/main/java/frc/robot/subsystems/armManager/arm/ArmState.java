@@ -31,7 +31,7 @@ public enum ArmState {
     PREPARE_L3_LEFT(invertPosition(PREPARE_L3_RIGHT)),
     PREPARE_L2_RIGHT(0.08),
     PREPARE_L2_LEFT(invertPosition(PREPARE_L2_RIGHT)),
-    SCORE_L4_RIGHT(-0.005),
+    SCORE_L4_RIGHT(0.03),
     SCORE_L4_LEFT(invertPosition(SCORE_L4_RIGHT)),
     SCORE_L3_RIGHT(0.0),
     SCORE_L3_LEFT(invertPosition(SCORE_L3_RIGHT)),

@@ -6,7 +6,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 public enum ElevatorState {
     IDLE(0.1),
     IDLE_CORAL_UP(0.4),
-    HIGH_REEF_ALGAE(0.9),
+    HIGH_REEF_ALGAE(0.95),
     LOW_REEF_ALGAE(0.53),
     GROUND_ALGAE(0),
     ALGAE_NET(1.38),
@@ -17,7 +17,7 @@ public enum ElevatorState {
     PREPARE_L4(1.3),
     PREPARE_L3(0.765),
     PREPARE_L2(0.3),
-    SCORE_L4(1.0),
+    SCORE_L4(1.13),
     SCORE_L3(0.624),
     SCORE_L2(0.3),
     CUSTOM(0.0); // Set in the elevator class
