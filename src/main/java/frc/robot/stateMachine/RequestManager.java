@@ -215,7 +215,8 @@ public class RequestManager {
                 groundCommands.requestHandoffAndAwaitReady(),
                 armCommands.requestHandoffAndAwaitReady(coralPositionSupplier),
                 groundCommands.executeHandoff(),
-                waitSeconds(0.4), // TODO Tune
+                waitSeconds(0.1),
+                armCommands.completeHandoffAndCoralIdle(),
                 idleAll()
         )
                 .onlyIf(armCommands::currentGamePieceIsNone)

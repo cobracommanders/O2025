@@ -364,6 +364,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         setStateFromRequest(state);
     }
 
+    public void requestCoralIdle() {
+        setStateFromRequest(armScheduler.isArmUp() ? ArmManagerState.IDLE_CORAL_UP : ArmManagerState.IDLE_CORAL_DOWN);
+    }
+
     public void requestIdleClearGamePiece() {
         setStateFromRequest(ArmManagerState.IDLE_ALGAE_DROPPED);
     }
@@ -580,9 +584,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             return armManager
                     // .run() continually calls the given block until interrupted
                     // this lets the position be constantly updated in case it changes for some reason
-                    .run(() -> armManager.requestHandoff(position.get()))
+                    .runOnce(() -> armManager.requestHandoff(position.get()))
                     // Interrupt when ready
-                    .until(armManager::isHandoffReady)
+                    .andThen(Commands.waitUntil(armManager::isHandoffReady))
                     // Only let this run if the hand is not holding a game piece
                     .onlyIf(() -> armManager.getState().handGamePieceState.isNone())
                     .withName("requestHandoffAndAwaitReady");
@@ -614,6 +618,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
         public HandGamePieceState getCurrentGamePiece() {
             return armManager.getCurrentGamePiece();
+        }
+
+        public Command completeHandoffAndCoralIdle() {
+            return Commands.runOnce(armManager::requestCoralIdle).andThen(Commands.waitUntil(armManager::isIdleState));
         }
 
         public boolean currentGamePieceIsNone() {
