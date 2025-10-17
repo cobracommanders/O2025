@@ -53,7 +53,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
 
     private final double intakeMinInterferenceUpHeightFromPivot = Units.inchesToMeters(15.5);
     private final double intakePivotHeight = Units.inchesToMeters(7.5);
-    private final double intakeHeightOffset = Units.inchesToMeters(-4.0); // TODO ...
+    private final double intakeHeightOffset = Units.inchesToMeters(-5.0);
     private final double finalIntakeHeight = intakePivotHeight + intakeMinInterferenceUpHeightFromPivot + intakeHeightOffset;
     private final double intakeWidth = Units.inchesToMeters(21.25);
 
