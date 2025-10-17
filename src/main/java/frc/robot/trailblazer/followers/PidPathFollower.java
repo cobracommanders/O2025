@@ -35,6 +35,8 @@ public class PidPathFollower implements PathFollower {
         double distance = Math.hypot(xError, yError);
         Rotation2d direction = new Rotation2d(xError, yError);
 
-        return new PolarChassisSpeeds(-linearController.calculate(distance, 0.0), direction, rotationSpeed);
+        // 0.02 is added as a slight feedforward to make sure the robot always has the minimum power needed to move
+        // Completely arbitrary and may need tuning or removal at some point
+        return new PolarChassisSpeeds(-linearController.calculate(distance, 0.0) + 0.02, direction, rotationSpeed);
     }
 }
