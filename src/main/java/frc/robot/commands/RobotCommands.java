@@ -38,6 +38,10 @@ public class RobotCommands {
     // TODO consider using different constraints for different levels
     private static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, Units.degreesToRadians(360.0), 2.0, Units.degreesToRadians(720.0));
 
+    // Constraints for driving while mechanisms are extended
+    // TODO consider using different constraints for different levels
+    private static final AutoConstraintOptions SPEED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, Units.degreesToRadians(360.0), 4.0, Units.degreesToRadians(720.0));
+
     // Position offsets
     // These are set up as constants because they are called periodically while trailblazer runs, and doing this reduces objects created and therefore reduces garbage collection time
 
@@ -98,7 +102,7 @@ public class RobotCommands {
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete().asProxy(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
-                trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
+                trailblazer.followSegment(new AutoSegment(SPEED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                             // Switch between the offsets based on the side the robot is scoring on
                             Pose2d scoringPose = AutoAlign.getInstance().getUsedScoringPose();
                             return switch (AutoAlign.getScoringSideFromRobotPose(scoringPose)) {
