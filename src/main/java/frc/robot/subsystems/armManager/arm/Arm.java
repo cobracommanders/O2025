@@ -137,6 +137,7 @@ public class Arm extends StateMachine<ArmState> {
     protected void afterTransition(ArmState newState) {
         switch (newState) {
             case CUSTOM -> setMotorToTargetPosition(customStatePosition);
+        
 
             // Custom cases can go here, default to standard position control
             default -> {

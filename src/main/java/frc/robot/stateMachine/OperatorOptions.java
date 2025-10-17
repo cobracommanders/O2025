@@ -3,6 +3,7 @@ package frc.robot.stateMachine;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants;
+import frc.robot.autoAlign.ReefPipe;
 
 public class OperatorOptions {
     public CoralScoreLocation coralScoreLocation = CoralScoreLocation.L4;
@@ -35,7 +36,7 @@ public class OperatorOptions {
         GROUND_ALGAE,
         LOW_REEF,
         HIGH_REEF
-    }
+        }
 
     public Command setProcessorCommand() {
         return Commands.runOnce(() -> algaeScoreLocation = AlgaeScoreLocation.PROCESSOR).withName("setProcessor");
@@ -62,15 +63,15 @@ public class OperatorOptions {
     }
 
     public Command setHighReefAlgaeCommand() {
-        return Commands.runOnce(() -> algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.HIGH_REEF).withName("setHighReefAlgae");
+        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.HIGH_REEF).withName("setHighReefAlgae");
     }
 
     public Command setLowReefAlgaeCommand() {
-        return Commands.runOnce(() -> algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.LOW_REEF).withName("setLowReefAlgae");
+        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.LOW_REEF).withName("setLowReefAlgae");
     }
 
     public Command setGroundAlgaeCommand() {
-        return Commands.runOnce(() -> algaeIntakeLevel = OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE).withName("setGroundAlgae");
+        return Commands.runOnce(() -> algaeIntakeLevel = AlgaeIntakeLevel.GROUND_ALGAE).withName("setGroundAlgae");
     }
 
     public boolean isCoralScoringL1() {
@@ -79,6 +80,10 @@ public class OperatorOptions {
 
     public FieldConstants.PipeScoringLevel getPipeScoringLevelOrL4() {
         return coralScoreLocation.toPipeScoringLevelOrL4();
+    }
+
+    public AlgaeIntakeLevel getAlgaeIntakeLevel(){
+        return algaeIntakeLevel;
     }
 
     private static OperatorOptions instance;

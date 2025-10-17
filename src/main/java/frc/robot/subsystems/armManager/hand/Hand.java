@@ -35,8 +35,12 @@ public class Hand extends StateMachine<HandState> {
         setStateFromRequest(state);
     }
 
-    public boolean hasAlgae() {
-        return statorCurrent > Constants.HandConstants.algaeStallCurrent;
+    public boolean hasAlgaeForIntake() {
+        return statorCurrent > Constants.HandConstants.intakeAlgaeStallCurrent;
+    }
+
+    public boolean droppedAlgae() {
+        return statorCurrent > Constants.HandConstants.hasAlgaeStallCurrent;
     }
 
     @Override
