@@ -197,7 +197,7 @@ public class RequestManager {
 
     public Command coralIntakeUntilPiece() {
         return groundCommands.intakeUntilPiece()
-                .andThen(handoffRequest())
+                .andThen(handoffRequest().onlyIf(() -> OperatorOptions.getInstance().coralScoreLocation != OperatorOptions.CoralScoreLocation.L1))
                 .withName("coralIntakeRequest");
     }
 

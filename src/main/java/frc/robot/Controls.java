@@ -14,6 +14,8 @@ import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.GroundManager;
+import frc.robot.subsystems.ground_manager.GroundManager.CommandWrapper;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 import frc.robot.vision.VisionSubsystem;
 
@@ -29,10 +31,12 @@ public class Controls {
 
     private final RequestManager requestManager;
     private final RobotCommands robotCommands;
+    private final CommandWrapper groundManagerCommands;
 
-    public Controls(RequestManager requestManager, RobotCommands robotCommands) {
+    public Controls(RequestManager requestManager, RobotCommands robotCommands, CommandWrapper groundManagerCommands) {
         this.requestManager = requestManager;
         this.robotCommands = robotCommands;
+        this.groundManagerCommands = groundManagerCommands;
 
         driver.setTriggerThreshold(0.2);
         driver.setDeadzone(0.15);
@@ -59,6 +63,8 @@ public class Controls {
         /* ******** DRIVER ******** */
         // Intake Coral
         driver.leftTrigger().onTrue(requestManager.coralIntakeUntilPiece());
+
+        driver.rightTrigger().onTrue(groundManagerCommands.prepareL1AndAwaitReady().andThen(groundManagerCommands.executeL1ScoreAndAwaitIdle()));
 
         // Reset Gyro
         driver.A().onTrue(runOnce(() -> DriveSubsystem.getInstance().setYawFromFMS()));

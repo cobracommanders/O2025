@@ -33,6 +33,7 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.WinchSpeeds;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
+import frc.robot.subsystems.ground_manager.GroundManager.CommandWrapper;
 import frc.robot.trailblazer.Trailblazer;
 
 public class Robot extends TimedRobot {
@@ -53,8 +54,9 @@ public class Robot extends TimedRobot {
     private final Trailblazer trailblazer = new Trailblazer(swerve, localization);
     private final RobotCommands robotCommands = new RobotCommands(trailblazer, requestManager);
     public static LocalizationSubsystem localization = LocalizationSubsystem.getInstance();
+    private final CommandWrapper groundManagerCommands = new CommandWrapper(GroundManager.getInstance());
 
-    private final Controls controls = new Controls(requestManager, robotCommands);
+    private final Controls controls = new Controls(requestManager, robotCommands, groundManagerCommands);
 
     // public static final Controls controls = new Controls();
     //private SendableChooser<Command> autoChooser;
