@@ -69,15 +69,15 @@ public class RobotCommands {
     // 2. Drive up to the final scoring position
     // 3. Score coral
     // 4. Drive backwards to pull the coral out and signal that the sequence is complete
-    public Command teleopReefAlignAndScore(BooleanSupplier backupDriveInterrupt) {
+    public Command teleopReefAlignAndScore(BooleanSupplier backupDriveInterrupt, BooleanSupplier overrideScore) {
         return sequence(
                 // Start by driving up to the reef and preparing the arm for scoring in parallel
                 parallel(
                         sequence(
+                                requestManager.handoffRequest().asProxy(),
                                 // Wait until the hand has a coral
                                 // This lets the command run while the handoff is happening without causing issues
-                                waitUntil(() -> requestManager.getHandGamePiece().isCoral() && requestManager.isArmIdle()),
-
+                                waitUntil(() -> requestManager.getHandGamePiece().isCoral() && (requestManager.isArmIdle() || requestManager.isArmReadyToScoreCoral())),
                                 // Set arm and elevator to prepare score state
                                 requestManager.prepareCoralScoreAndAwaitReady().asProxy() // See note above for .asProxy()
                         ),
@@ -98,7 +98,7 @@ public class RobotCommands {
                 // Drive to the final scoring position now that the arm is ready to score
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                     return AutoAlign.getInstance().getUsedScoringPose();
-                }))),
+                }))).until(overrideScore), // Scoring can be overriden before autoalign completes
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete().asProxy(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete

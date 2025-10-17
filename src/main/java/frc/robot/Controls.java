@@ -69,7 +69,11 @@ public class Controls {
         // Score Coral
         driver.rightBumper()
                 // whileTrue will cancel the command when the button is released
-                .whileTrue(robotCommands.teleopReefAlignAndScore(driver::isStickActive))
+                .whileTrue(Commands.either(
+                        requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
+                        robotCommands.teleopReefAlignAndScore(driver::isStickActive, () -> driver.rightTrigger().getAsBoolean()),
+                        () -> OperatorOptions.getInstance().isCoralScoringL1()
+                ))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
                 // Only resets if the robot is far away from the reef and not likely to score again soon
                 .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
