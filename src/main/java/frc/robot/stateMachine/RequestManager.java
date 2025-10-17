@@ -198,9 +198,7 @@ public class RequestManager {
     }
 
     public Command coralIntakeUntilPiece() {
-        return groundCommands.intakeUntilPiece()
-                .andThen(handoffRequest())
-                .withName("coralIntakeRequest");
+        return groundCommands.intakeUntilPiece().withName("coralIntakeRequest");
     }
 
     public Command climbRequest() {
