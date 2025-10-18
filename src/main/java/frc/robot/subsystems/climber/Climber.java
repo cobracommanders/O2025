@@ -68,6 +68,11 @@ public class Climber extends StateMachine<ClimberStates> {
       case IDLE:
         // none
         break;
+        case DEPLOYING:
+          if(atGoal()){
+            nextState = ClimberStates.WAIT_FOR_CAGE;
+          }
+          break;
         case WAIT_FOR_CAGE:
           if (atGoal()) {
             nextState = ClimberStates.CONTINUE_SUCKING;
