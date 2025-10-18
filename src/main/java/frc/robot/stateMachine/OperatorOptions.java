@@ -24,6 +24,7 @@ public class OperatorOptions {
 
         FieldConstants.PipeScoringLevel toPipeScoringLevelOrL4() {
             return switch (this) {
+                case L1 -> FieldConstants.PipeScoringLevel.L1;
                 case L2 -> FieldConstants.PipeScoringLevel.L2;
                 case L3 -> FieldConstants.PipeScoringLevel.L3;
                 case L4 -> FieldConstants.PipeScoringLevel.L4;

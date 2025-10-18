@@ -296,6 +296,7 @@ public enum ArmManagerState {
             case L4 -> robotSide == RobotScoringSide.LEFT ? PREPARE_L4_LEFT : PREPARE_L4_RIGHT;
             case L3 -> robotSide == RobotScoringSide.LEFT ? PREPARE_L3_LEFT : PREPARE_L3_RIGHT;
             case L2 -> robotSide == RobotScoringSide.LEFT ? PREPARE_L2_LEFT : PREPARE_L2_RIGHT;
+            case L1 -> robotSide == RobotScoringSide.LEFT ? IDLE_CORAL_DOWN : IDLE_CORAL_DOWN;
         };
     }
 
