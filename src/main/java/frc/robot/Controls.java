@@ -76,7 +76,13 @@ public class Controls {
 
         driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
 
-        driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
+        driver.rightTrigger().onTrue(Commands.either(
+            groundManagerCommands.prepareL1AndAwaitReady().andThen(groundManagerCommands.executeL1ScoreAndAwaitIdle()), 
+            requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle(),
+             () -> !requestManager.getHandGamePiece().isAlgae()));
+
+
+        //requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle()
 
         // Fix drivetrain state
         driver.X().onTrue(runOnce(() -> {

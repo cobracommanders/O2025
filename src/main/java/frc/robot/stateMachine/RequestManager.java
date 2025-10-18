@@ -207,17 +207,21 @@ public class RequestManager {
     }
 
     public Command handoffRequest() {
-        return groundCommands.requestHandoffAndAwaitReady().alongWith(armCommands.requestHandoffAndAwaitReady())
-                // Request execution once both mechanisms are positioned
-                .andThen(
-                        armCommands.executeHandoffUntilIntakeWait(),
-                        groundCommands.executeHandoff()
-                )
-                // Wait for handoff time
-                .andThen(waitSeconds(0.4)) // TODO Potentially incorporate canranges for extra speed
-                .andThen(idleAll())
-                .onlyIf(armCommands::currentGamePieceIsNone)
-                .withName("handoffRequest");
+        if(OperatorOptions.getInstance().coralScoreLocation != OperatorOptions.CoralScoreLocation.L1){
+            return groundCommands.requestHandoffAndAwaitReady().alongWith(armCommands.requestHandoffAndAwaitReady())
+                    // Request execution once both mechanisms are positioned
+                    .andThen(
+                            armCommands.executeHandoffUntilIntakeWait(),
+                            groundCommands.executeHandoff()
+                    )
+                    // Wait for handoff time
+                    .andThen(waitSeconds(0.4)) // TODO Potentially incorporate canranges for extra speed
+                    .andThen(idleAll())
+                    .onlyIf(armCommands::currentGamePieceIsNone)
+                    .withName("handoffRequest");
+            } else {
+                return groundCommands.prepareL1AndAwaitReady();
+            }
     }
 
     public Command invertedHandoffRequest() {
