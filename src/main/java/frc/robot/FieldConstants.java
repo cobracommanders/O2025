@@ -20,6 +20,6 @@ public class FieldConstants {
     }
 
     public enum PipeScoringLevel {
-        L1, L2, L3, L4
+        L2, L3, L4
     }
 }
