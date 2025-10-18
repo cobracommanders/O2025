@@ -25,11 +25,11 @@ import frc.robot.util.PoseErrorTolerance;
 public class AutoBlocks {
     private static final PoseErrorTolerance AFTER_SCORE_POSITION_TOLERANCE = new PoseErrorTolerance(0.6, 25);
 
-        private static final PoseErrorTolerance LOLLIPOP_APPROACH_TOLERANCE = new PoseErrorTolerance(0.6, 10);
+        private static final PoseErrorTolerance LOLLIPOP_APPROACH_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
 
         private static final PoseErrorTolerance SUPER_FAST_LOLLIPOP_APPROACH_TOLERANCE = new PoseErrorTolerance(0.8,
                         20);
-        public static final PoseErrorTolerance APPROACH_REEF_TOLERANCE = new PoseErrorTolerance(0.4, 10);
+        public static final PoseErrorTolerance APPROACH_REEF_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
 
         private static final PoseErrorTolerance DEFAULT_POSITION_TOLERANCE =
             new PoseErrorTolerance(0.1, 5);
@@ -198,8 +198,8 @@ public class AutoBlocks {
                                                 new AutoSegment(
                                                         BASE_CONSTRAINTS,
                                                         AutoBlocks.APPROACH_REEF_TOLERANCE,
-                                                        new AutoPoint(new Pose2d(12.836, 1.085, Rotation2d.fromDegrees(90.0))),
-                                                        new AutoPoint(new Pose2d(14.644, 2.240, Rotation2d.fromDegrees(90.0))))));
+                                                        new AutoPoint(new Pose2d(13.536, 1.085, Rotation2d.fromDegrees(90.0))),
+                                                        new AutoPoint(new Pose2d(15.000, 2.240, Rotation2d.fromDegrees(90.0))))));
         }
 
         public Command driveToBackReefRedProcessor() {
