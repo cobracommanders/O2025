@@ -99,7 +99,7 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
     private ReefSide bestAlgaeSide = ReefSide.SIDE_AB;
 
     private AutoAlign() {
-        super(AutoAlignState.DEFAULT_STATE);
+        super(AutoAlignState.DEFAULT_STATE, "AutoAlign");
         this.localization = LocalizationSubsystem.getInstance();
         this.swerve = DriveSubsystem.getInstance();
         this.tagAlign = new TagAlign(swerve, localization);
@@ -127,27 +127,27 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         robotPose = localization.getPose();
         bestReefPipe = tagAlign.getBestPipe();
         usedScoringPose = tagAlign.getUsedScoringPose(bestReefPipe);
-        isAligned = tagAlign.isAligned(bestReefPipe);
-        isAlignedDebounced = isAlignedDebouncer.calculate(isAligned);
+        // isAligned = tagAlign.isAligned(bestReefPipe);
+        // isAlignedDebounced = isAlignedDebouncer.calculate(isAligned);
         bestAlgaeSide = tagAlign.getBestAlgaeSide();
-        algaeAlignSpeeds =
-                tagAlign.getAlgaeAlignmentChassisSpeeds(
-                        bestAlgaeSide.getPose(reefSideOffset, robotScoringSide, robotPose),
-                        robotPose,
-                        CONSTRAINTS,
-                        new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
+        // algaeAlignSpeeds =
+        //         tagAlign.getAlgaeAlignmentChassisSpeeds(
+        //                 bestAlgaeSide.getPose(reefSideOffset, robotScoringSide, robotPose),
+        //                 robotPose,
+        //                 CONSTRAINTS,
+        //                 new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
         tagAlignSpeeds =
                 tagAlign.getReefPipeAlignmentChassisSpeeds(
                         usedScoringPose,
                         robotPose,
                         CONSTRAINTS,
                         new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
-        l1AlignSpeeds =
-                tagAlign.getL1AlignmentChassisSpeeds(
-                        usedScoringPose,
-                        robotPose,
-                        L1_CONSTRAINTS,
-                        new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
+        // l1AlignSpeeds =
+        //         tagAlign.getL1AlignmentChassisSpeeds(
+        //                 usedScoringPose,
+        //                 robotPose,
+        //                 L1_CONSTRAINTS,
+        //                 new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
         tagAlign.setLevel(ReefPipeLevel.L3, ReefPipeLevel.L3, getScoringSideFromRobotPose(robotPose));
     }
 
@@ -176,13 +176,13 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         reefSideOffset = offset;
     }
 
-    public boolean isAligned() {
-        return isAligned;
-    }
+    // public boolean isAligned() {
+    //     return isAligned;
+    // }
 
-    public boolean isAlignedDebounced() {
-        return isAlignedDebounced;
-    }
+    // public boolean isAlignedDebounced() {
+    //     return isAlignedDebounced;
+    // }
 
     public Pose2d getUsedScoringPose() {
         return usedScoringPose;

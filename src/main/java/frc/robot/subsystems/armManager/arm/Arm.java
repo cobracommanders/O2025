@@ -32,7 +32,7 @@ public class Arm extends StateMachine<ArmState> {
     private double customStatePosition = 0.0;
 
     public Arm() {
-        super(ArmState.START_POSITION);
+        super(ArmState.START_POSITION, "Arm");
         TalonFXConfiguration motor_config = new TalonFXConfiguration()
                 .withSlot0(
                         new Slot0Configs()

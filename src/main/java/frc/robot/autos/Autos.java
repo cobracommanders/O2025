@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.RequestManager;
@@ -15,24 +16,26 @@ public class Autos extends SubsystemBase {
   private final AutoChooser<AutoSelection> autoChooser;
   private final RequestManager requestManager;
   private final Trailblazer trailblazer;
+  private final RobotCommands robotCommands;
   private boolean hasEnabledAuto = false;
   private Pair<AutoSelection, BaseAuto> selectedRed;
   private Pair<AutoSelection, BaseAuto> selectedBlue;
   private Command autoCommand;
 
-  public Autos(Trailblazer trailblazer, RequestManager requestManager) {
+  public Autos(Trailblazer trailblazer, RequestManager requestManager, RobotCommands robotCommands) {
     autoChooser = new AutoChooser<>(AutoSelection.values(), AutoSelection.L4);
     this.trailblazer = trailblazer;
     this.requestManager = requestManager;
+    this.robotCommands = robotCommands;
 
     selectedRed =
         Pair.of(
             AutoSelection.L4,
-            AutoSelection.L4.redAuto.apply(requestManager, trailblazer));
+            AutoSelection.L4.redAuto.apply(requestManager, trailblazer, robotCommands));
     selectedBlue =
         Pair.of(
             AutoSelection.L4,
-            AutoSelection.L4.blueAuto.apply(requestManager, trailblazer));
+            AutoSelection.L4.blueAuto.apply(requestManager, trailblazer, robotCommands));
     autoCommand = createAutoCommand();
   }
 
@@ -71,12 +74,12 @@ public class Autos extends SubsystemBase {
       selectedRed =
           Pair.of(
               autoChooser.getSelectedAuto(),
-              autoChooser.getSelectedAuto().redAuto.apply(requestManager, trailblazer));
+              autoChooser.getSelectedAuto().redAuto.apply(requestManager, trailblazer, robotCommands));
 
       selectedBlue =
           Pair.of(
               autoChooser.getSelectedAuto(),
-              autoChooser.getSelectedAuto().blueAuto.apply(requestManager, trailblazer));
+              autoChooser.getSelectedAuto().blueAuto.apply(requestManager, trailblazer, robotCommands));
 
       autoCommand = createAutoCommand();
     }

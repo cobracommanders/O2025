@@ -13,14 +13,12 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
     private final CANrange rCANRange;
     public boolean lDetected = false;
     public boolean rDetected = false;
-    public double lDistance;
     public double rDistance;
-    public final String name;
 
     public CoralDetectorState simCoralPosition = CoralDetectorState.NONE;
 
     private CoralDetector() {
-        super(CoralDetectorState.NONE);
+        super(CoralDetectorState.NONE, "CoralDetector");
 
         CANrangeConfiguration config = new CANrangeConfiguration();
 
@@ -33,13 +31,9 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
 
         lCANRange.getConfigurator().apply(config);
         rCANRange.getConfigurator().apply(config);
-
-        this.name = getName();
     }
 
     protected void collectInputs() {
-        lDistance = lCANRange.getDistance().getValueAsDouble();
-        rDistance = rCANRange.getDistance().getValueAsDouble();
 
         //We can switch to using .isDetected() if we would like.
         lDetected = lCANRange.getIsDetected().getValue();
@@ -47,11 +41,9 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
 
         DogLog.log(name + "/Left Detected", lDetected);
         DogLog.log(name + "/Right Detected", rDetected);
-        DogLog.log(name + "/Left Distance", lDistance);
-        DogLog.log(name + "/Right Distance", rDistance);
 
-        DogLog.log(name + "/Left Signal", lCANRange.getSignalStrength().getValueAsDouble());
-        DogLog.log(name + "/Right Signal", rCANRange.getSignalStrength().getValueAsDouble());
+        // DogLog.log(name + "/Left Signal", lCANRange.getSignalStrength().getValueAsDouble());
+        // DogLog.log(name + "/Right Signal", rCANRange.getSignalStrength().getValueAsDouble());
     }
 
     @Override

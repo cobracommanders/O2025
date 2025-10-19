@@ -35,7 +35,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
             Elevator elevator,
             Hand hand
     ) {
-        super(ArmSchedulerState.READY);
+        super(ArmSchedulerState.READY, "ArmScheduler");
         this.arm = arm;
         this.elevator = elevator;
         this.hand = hand;

@@ -71,16 +71,27 @@ public class Controls {
                 // whileTrue will cancel the command when the button is released
                 .whileTrue(Commands.either(
                         requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
-                        robotCommands.teleopReefAlignAndScore(driver::isStickActive, () -> driver.rightTrigger().getAsBoolean()),
+                        robotCommands.teleopReefAlignAndScore(driver::isStickActive, true),
                         () -> OperatorOptions.getInstance().isCoralScoringL1()
                 ))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
                 // Only resets if the robot is far away from the reef and not likely to score again soon
                 .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
+    
 
         driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
 
-        driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
+        // driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
+        driver.rightTrigger()
+        // whileTrue will cancel the command when the button is released
+        .whileTrue(Commands.either(
+                requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
+                robotCommands.teleopReefAlignAndScore(driver::isStickActive, false),
+                () -> OperatorOptions.getInstance().isCoralScoringL1()
+        ))
+        // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
+        // Only resets if the robot is far away from the reef and not likely to score again soon
+        .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
         // Fix drivetrain state
         driver.X().onTrue(runOnce(() -> {

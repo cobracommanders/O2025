@@ -26,7 +26,7 @@ public class Elevator extends StateMachine<ElevatorState> {
     private double customStateHeight = 0.0;
 
     public Elevator() {
-        super(ElevatorState.IDLE);
+        super(ElevatorState.IDLE, "Elevator");
         TalonFXConfiguration motor_config = new TalonFXConfiguration()
                 .withSlot0(
                         new Slot0Configs()

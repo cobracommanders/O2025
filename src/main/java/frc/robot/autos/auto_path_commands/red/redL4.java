@@ -16,8 +16,8 @@ import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 public class redL4 extends BaseAuto {
     private static final AutoConstraintOptions CONSTRAINTS = new AutoConstraintOptions(2, 57, 1, 30);
 
-    public redL4(RequestManager robotManager, Trailblazer trailblazer) {
-        super(robotManager, trailblazer);
+    public redL4(RequestManager robotManager, Trailblazer trailblazer, RobotCommands robotCommands) {
+        super(robotManager, trailblazer, robotCommands);
     }
 
     @Override

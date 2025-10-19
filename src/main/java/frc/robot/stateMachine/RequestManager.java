@@ -202,18 +202,19 @@ public class RequestManager {
     }
 
     public Command climbRequest() {
-        return Commands.parallel(groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing())
-                .andThen(climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
+        return Commands.parallel(groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing(), climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
     }
 
     public Command handoffRequest() {
         return sequence(
                 // Intake moves first to avoid collision
                 // TODO might be possible to run in parallel
+
                 groundCommands.requestHandoffAndAwaitReady(),
                 armCommands.requestHandoffAndAwaitReady(coralPositionSupplier),
                 groundCommands.executeHandoff(),
                 waitSeconds(0.1),
+                //armCommands.completeHandoffAndCoralIdle(),
                 armCommands.completeHandoffAndCoralIdle(),
                 idleAll()
         )

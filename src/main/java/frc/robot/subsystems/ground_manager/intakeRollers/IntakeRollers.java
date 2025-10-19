@@ -10,7 +10,6 @@ import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 
 
 public class IntakeRollers extends StateMachine<IntakeRollersStates>{
-  public final String name = getName();
   
     private final TalonFX motor;
     private double motorStatorCurrent;
@@ -18,7 +17,7 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
     private CoralDetector coralDetector = CoralDetector.getInstance();
     
     private IntakeRollers() {
-        super(IntakeRollersStates.IDLE);
+        super(IntakeRollersStates.IDLE, "IntakeRollers");
         motor = new TalonFX(Ports.IntakeRollersPorts.INTAKE_ROLLER_MOTOR);
     }
    

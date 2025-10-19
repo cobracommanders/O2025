@@ -10,6 +10,7 @@ import dev.doglog.DogLog;
 /** A state machine backed by {@link LifecycleSubsystem}. */
 public abstract class StateMachine<S extends Enum<S>> extends SubsystemBase {
   private S state;
+  protected String name;
   private boolean isInitialized = false;
   private double lastTransitionTimestamp = Timer.getFPGATimestamp();
 
@@ -19,8 +20,9 @@ public abstract class StateMachine<S extends Enum<S>> extends SubsystemBase {
    * @param priority The subsystem priority of this subsystem in {@link LifecycleSubsystemManager}.
    * @param initialState The initial/default state of the state machine.
    */
-  protected StateMachine(S initialState) {
+  protected StateMachine(S initialState, String name) {
     state = initialState;
+    this.name = name;
   }
 
   /** Processes collecting inputs, state transitions, and state actions. */
@@ -125,7 +127,7 @@ public abstract class StateMachine<S extends Enum<S>> extends SubsystemBase {
 
 
     lastTransitionTimestamp = Timer.getFPGATimestamp();
-    DogLog.log(this.getName() + "/State", state);
+    DogLog.log(name + "/State", state);
 
     afterTransition(state);
   }

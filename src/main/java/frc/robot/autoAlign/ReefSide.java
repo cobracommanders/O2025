@@ -4,6 +4,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.fms.FmsSubsystem;
+import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.stateMachine.OperatorOptions;
 
 public enum ReefSide {
   SIDE_AB(
@@ -127,5 +129,15 @@ public enum ReefSide {
 
   public int getTagID() {
     return FmsSubsystem.getInstance().isRedAlliance() ? redTagID : blueTagID;
+  }
+
+  public Pose2d getLeft() {
+    Pose2d robotPose = LocalizationSubsystem.getInstance().getPose();
+    return pipe1.getPose(OperatorOptions.getInstance().getReefPipeLevelOrL4(), AutoAlign.getScoringSideFromRobotPose(robotPose), robotPose);
+  }
+
+  public Pose2d getRight() {
+    Pose2d robotPose = LocalizationSubsystem.getInstance().getPose();
+    return pipe2.getPose(OperatorOptions.getInstance().getReefPipeLevelOrL4(), AutoAlign.getScoringSideFromRobotPose(robotPose), robotPose);
   }
 }

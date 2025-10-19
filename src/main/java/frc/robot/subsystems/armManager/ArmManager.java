@@ -38,7 +38,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             Hand hand,
             Elevator elevator,
             Arm arm) {
-        super(ArmManagerState.START_POSITION);
+        super(ArmManagerState.START_POSITION, "ArmManager");
         this.hand = hand;
 
         this.armScheduler = new ArmScheduler(arm, elevator, hand);
@@ -365,7 +365,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     public void requestCoralIdle() {
-        setStateFromRequest(armScheduler.isArmUp() ? ArmManagerState.IDLE_CORAL_UP : ArmManagerState.IDLE_CORAL_DOWN);
+        setStateFromRequest(ArmManagerState.IDLE_CORAL_DOWN);
     }
 
     public void requestIdleClearGamePiece() {
@@ -592,13 +592,17 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     .withName("requestHandoffAndAwaitReady");
         }
 
+        public Command completeHandoffAndCoralIdle() {
+            return Commands.runOnce(armManager::requestCoralIdle).andThen(Commands.waitUntil(armManager::isIdleState));
+        }
+
         /**
          * Prepare for inverted handoff and await ready state.
          */
         public Command requestInvertedHandoffAndAwaitReady() {
             return armManager
                     .runOnce(armManager::requestInvertedHandoff)
-                    .andThen(Commands.waitUntil(armManager::isReadyToExecuteInvertedHandoff))
+                    .until(armManager::isHandoffReady)
                     // Only let this run if the hand is holding a coral
                     .onlyIf(() -> armManager.getState().handGamePieceState.isCoral())
                     .withName("requestInvertedHandoffAndAwaitReady");
@@ -620,9 +624,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             return armManager.getCurrentGamePiece();
         }
 
-        public Command completeHandoffAndCoralIdle() {
-            return Commands.runOnce(armManager::requestCoralIdle).andThen(Commands.waitUntil(armManager::isIdleState));
-        }
+        // public Command completeHandoffAndCoralIdle() {
+        //     return Commands.runOnce(armManager::requestCoralIdle).andThen(Commands.waitUntil(armManager::isIdleState));
+        // }
 
         public boolean currentGamePieceIsNone() {
             return getCurrentGamePiece().isNone();

@@ -45,7 +45,7 @@ public class Limelight extends StateMachine<LimelightStates> {
             boolean mt1Compatible) {
         // not just
         // singleton
-        super(initialState);
+        super(initialState, "Limelight");
         limelightTableName = "limelight-" + name;
         this.name = name;
         limelightTimer.start();
@@ -163,8 +163,6 @@ public class Limelight extends StateMachine<LimelightStates> {
             DogLog.logFault(
                     limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
         }
-
-        LimelightHelpers.setPipelineIndex(limelightTableName, getState().pipelineIndex);
         switch (getState()) {
             case TAGS -> {
                 LimelightHelpers.SetFiducialIDFiltersOverride(limelightTableName, VALID_APRILTAGS);
@@ -202,6 +200,11 @@ public class Limelight extends StateMachine<LimelightStates> {
         DogLog.log(
                 "CameraPositionCalibration/" + name + "/LL Yaw",
                 Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getZ()));
+    }
+
+    @Override
+    protected void afterTransition(LimelightStates newState) {
+        LimelightHelpers.setPipelineIndex(limelightTableName, getState().pipelineIndex);
     }
 
     private static Pose3d getRobotRelativeCameraPosition(

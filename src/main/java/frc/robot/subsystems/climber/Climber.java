@@ -20,7 +20,6 @@ import frc.robot.stateMachine.StateMachine;
 public class Climber extends StateMachine<ClimberStates> {
   public final DoubleSubscriber climberSpeed = DogLog.tunable("climb/Speed [-1, 1]", 0.0);
   private final DutyCycle encoder;
-  private final String name = getName();
   private final TalonFX wheelMotor;
   private final TalonFX winchMotor;
   private TalonFXConfiguration wheel_motor_config = new TalonFXConfiguration();
@@ -32,7 +31,7 @@ public class Climber extends StateMachine<ClimberStates> {
   private double absolutePosition;
 
   private Climber() {
-    super(ClimberStates.IDLE);
+    super(ClimberStates.IDLE, "Climber");
     // TODO: update configs
     encoder = new DutyCycle(new DigitalInput(Ports.ClimberPorts.CLIMER_DUTY_CYCLE_ENCODER));
     winch_motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;

@@ -35,7 +35,6 @@ import frc.robot.TunablePid;
 import frc.robot.stateMachine.StateMachine;
 
 public class IntakePivot extends StateMachine<IntakePivotStates> {
-  public final String name = getName();
 
   // Create a tunable double with a key of "Intake/Voltage" and a default value of
   // 4.5
@@ -63,7 +62,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
   private IntakePivot() {
-    super(IntakePivotStates.IDLE);
+    super(IntakePivotStates.IDLE, "IntakePivot");
     encoder = new DutyCycle(new DigitalInput(Ports.IntakePivotPorts.INTAKE_PIVOT_DUTY_CYCLE_ENCODER));
     motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;

@@ -12,7 +12,9 @@ import frc.robot.FieldConstants;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipe;
 import frc.robot.autoAlign.ReefPipeLevel;
+import frc.robot.autoAlign.ReefSide;
 import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.commands.RobotCommands;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.AutoPoint;
@@ -23,7 +25,10 @@ import frc.robot.util.MathHelpers;
 import frc.robot.util.PoseErrorTolerance;
 
 public class AutoBlocks {
-    private static final PoseErrorTolerance AFTER_SCORE_POSITION_TOLERANCE = new PoseErrorTolerance(0.6, 25);
+
+        private final RobotCommands robotCommands;
+
+        private static final PoseErrorTolerance AFTER_SCORE_POSITION_TOLERANCE = new PoseErrorTolerance(0.6, 25);
 
         private static final PoseErrorTolerance LOLLIPOP_APPROACH_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
 
@@ -84,9 +89,10 @@ public class AutoBlocks {
         private final RequestManager requestManager;
         private final Trailblazer trailblazer;
 
-    public AutoBlocks(RequestManager requestManager, Trailblazer trailblazer) {
+    public AutoBlocks(RequestManager requestManager, Trailblazer trailblazer, RobotCommands robotCommands) {
         this.requestManager = requestManager;
         this.trailblazer = trailblazer;
+        this.robotCommands = robotCommands;
     }
 
     private Pose2d getLollipopCoordsBlue(int lollipop) {
@@ -190,6 +196,10 @@ public class AutoBlocks {
                         ,
                                 requestManager.executeCoralScoreAndAwaitComplete());
         }
+
+        // public Command autoScore(ReefPipe pipe, RobotScoringSide scoringSide){
+        //         return robotCommands.teleopReefAlignAndScore(()-> false, ()-> false, false);
+        // }
 
         public Command driveToBackReefRedNonProcessor() {
                 return Commands.sequence(

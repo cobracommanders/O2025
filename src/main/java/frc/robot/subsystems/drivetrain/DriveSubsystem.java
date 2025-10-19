@@ -63,7 +63,7 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     private boolean hasAppliedOperatorPerspective = false;
 
     private DriveSubsystem() {
-        super(DriveStates.TELEOP);
+        super(DriveStates.TELEOP, "DriveSubsystem");
     }
 
     @Override
@@ -73,8 +73,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
             case AUTO, TELEOP ->
                     nextState = FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
             case REEF_ALIGN_TELEOP -> { /* Await Control */ }
-            case ALGAE_ALIGN_TELEOP ->
-                    nextState = AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
+            case ALGAE_ALIGN_TELEOP -> nextState = DriveStates.ALGAE_ALIGN_TELEOP;
+                    // nextState = AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
         }
 
         return nextState;

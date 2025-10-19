@@ -74,7 +74,7 @@ public class Robot extends TimedRobot {
     // public static OperatorOptions operatorOptions =
     // OperatorOptions.getInstance();
 
-    private final Autos autos = new Autos(trailblazer, requestManager);
+    private final Autos autos = new Autos(trailblazer, requestManager, robotCommands);
 
 
     public Robot() {
@@ -120,6 +120,8 @@ public class Robot extends TimedRobot {
         //SmartDashboard.putData(autoChooser);
         lights = new LED();
         AutoAlign.getInstance();
+        controls.configureDriveteamCommands();
+        controls.configureDefaultCommands();
     }
 
     @Override
@@ -143,8 +145,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
-        controls.configureDriveteamCommands();
-        controls.configureDefaultCommands();
         DriveSubsystem.getInstance().requestTeleop();
     }
 

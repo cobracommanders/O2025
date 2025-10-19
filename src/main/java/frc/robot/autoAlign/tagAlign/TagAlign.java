@@ -32,7 +32,7 @@ public class TagAlign {
             List.copyOf(Arrays.asList(ReefPipe.values()));
     public static final List<ReefSide> ALL_REEF_SIDES =
             List.copyOf(Arrays.asList(ReefSide.values()));
-
+    private static final State kZeroState = new State(0, 0);
     private static final ProfiledPIDController REEF_PIPE_ROTATION_CONTROLLER =
             new ProfiledPIDController(
                     5.75,
@@ -289,7 +289,6 @@ public class TagAlign {
             AutoConstraintOptions constraints,
             PolarChassisSpeeds currentSpeeds,
             boolean reset) {
-        rotationController.enableContinuousInput(-Math.PI, Math.PI);
 
         if (FeatureFlags.AUTO_ALIGN_DEADBAND.getAsBoolean()) {
             if (aligned || inRange(targetPose)) {
@@ -329,8 +328,8 @@ public class TagAlign {
         var driveVelocityMagnitude =
                 translationController.calculate(
                         distanceToGoalMeters,
-                        new State(0, 0),
-                        new Constraints(constraints.maxLinearVelocity(), constraints.maxLinearAcceleration()));
+                        kZeroState,
+                        constraints.getLinearConstraints());
 
         if (!translationGood) {
             driveVelocityMagnitude += Math.copySign(FEED_FORWARD.get(), driveVelocityMagnitude);
@@ -346,10 +345,10 @@ public class TagAlign {
 
         var driveDirection = MathHelpersDog.getDriveDirection(currentPose, targetPose);
 
-        DogLog.log("AutoAlign/DistanceToGoal", distanceToGoalMeters);
-        DogLog.log("AutoAlign/DriveVelocityMagnitude", driveVelocityMagnitude);
-        DogLog.log("AutoAlign/RotationSpeed", rotationSpeed);
-        DogLog.log("AutoAlign/DriveDirection", driveDirection.getDegrees());
+        // DogLog.log("AutoAlign/DistanceToGoal", distanceToGoalMeters);
+        // DogLog.log("AutoAlign/DriveVelocityMagnitude", driveVelocityMagnitude);
+        // DogLog.log("AutoAlign/RotationSpeed", rotationSpeed);
+        // DogLog.log("AutoAlign/DriveDirection", driveDirection.getDegrees());
 
         return new PolarChassisSpeeds(driveVelocityMagnitude, driveDirection, rotationSpeed);
     }

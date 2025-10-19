@@ -15,7 +15,7 @@ public class Hand extends StateMachine<HandState> {
     private double statorCurrent;
 
     public Hand() {
-        super(HandState.IDLE_CORAL);
+        super(HandState.IDLE_CORAL, "Hand");
         TalonFXConfiguration motor_config = new TalonFXConfiguration();
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
