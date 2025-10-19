@@ -30,14 +30,13 @@ public class AutoBlocks {
 
         private static final PoseErrorTolerance AFTER_SCORE_POSITION_TOLERANCE = new PoseErrorTolerance(0.6, 25);
 
-        private static final PoseErrorTolerance LOLLIPOP_APPROACH_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
+
 
         private static final PoseErrorTolerance SUPER_FAST_LOLLIPOP_APPROACH_TOLERANCE = new PoseErrorTolerance(0.8,
                         20);
         public static final PoseErrorTolerance APPROACH_REEF_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
 
-        private static final PoseErrorTolerance DEFAULT_POSITION_TOLERANCE =
-            new PoseErrorTolerance(0.1, 5);
+
 
         public static final Transform2d INTAKE_CORAL_GROUND_LINEUP_OFFSET = new Transform2d(-0.6, -0.9,
                         Rotation2d.kZero);
@@ -46,7 +45,7 @@ public class AutoBlocks {
                         Units.inchesToMeters(-60),
                         Rotation2d.kZero);
 
-        private static final Transform2d APPROACH_LOLLIPOP_OFFSET = new Transform2d(0, Units.inchesToMeters(15),
+        private static final Transform2d APPROACH_LOLLIPOP_OFFSET = new Transform2d(0, Units.inchesToMeters(12),
                         Rotation2d.kZero);
 
         public Transform2d clearReefOffset = new Transform2d(new Translation2d(0.4, -1), Rotation2d.kZero);
@@ -66,14 +65,13 @@ public class AutoBlocks {
         public static final AutoConstraintOptions MAX_CONSTRAINTS = new AutoConstraintOptions(4.75, 57, 4.0, 30);
         public static final AutoConstraintOptions LOLLIPOP_RACE_CONSTRAINTS = MAX_CONSTRAINTS.withMaxLinearVelocity(5)
                         .withMaxLinearAcceleration(4.5);
-        public static final AutoConstraintOptions BASE_CONSTRAINTS = new AutoConstraintOptions(4.75, 30, 1.25, 25);
+        public static final AutoConstraintOptions BASE_CONSTRAINTS = new AutoConstraintOptions(4.75, 30, 1.6, 25);
 
         public static final AutoConstraintOptions CORAL_MAP_CONSTRAINTS = new AutoConstraintOptions(4.0, 10, 2.5, 10);
         private static final AutoConstraintOptions SCORING_CONSTRAINTS = BASE_CONSTRAINTS.withMaxLinearVelocity(2);
                         //.withMaxLinearAcceleration(1.75);
         private static final AutoConstraintOptions L2_SCORING_CONSTRAINTS = BASE_CONSTRAINTS.withMaxLinearVelocity(3.3)
                         .withMaxLinearAcceleration(2.15);
-        private static final AutoConstraintOptions LOLLIPOP_CONSTRAINTS = BASE_CONSTRAINTS;
                         // .withMaxLinearAcceleration(2.0)
                         // .withMaxLinearVelocity(1.7).withMaxAngularVelocity(40);
 
@@ -187,7 +185,7 @@ public class AutoBlocks {
                                 trailblazer.followSegment(
                                                 new AutoSegment(
                                                                 BASE_CONSTRAINTS,
-                                                                DEFAULT_POSITION_TOLERANCE,
+                                                                AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 //AutoBlocks.APPROACH_REEF_TOLERANCE,
                                                                 new AutoPoint(() -> pipe.getPose(ReefPipeLevel.L4,
                                                                                 scoringSide))))
@@ -206,10 +204,15 @@ public class AutoBlocks {
                                 //new WaitCommand(0.2),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
-                                                        BASE_CONSTRAINTS,
-                                                        AutoBlocks.APPROACH_REEF_TOLERANCE,
+                                                        new AutoConstraintOptions(
+                                                                4.75,
+                                                                Units.degreesToRadians(360.0), 
+                                                        6.0, 
+                                                                Units.degreesToRadians(720.0)
+                                                                ),
+                                                        new PoseErrorTolerance(Units.inchesToMeters(12.0), 10.0),
                                                         new AutoPoint(new Pose2d(13.536, 1.085, Rotation2d.fromDegrees(90.0))),
-                                                        new AutoPoint(new Pose2d(15.000, 2.240, Rotation2d.fromDegrees(90.0))))));
+                                                        new AutoPoint(new Pose2d(15.00, 4.00, Rotation2d.fromDegrees(90.0))))));
         }
 
         public Command driveToBackReefRedProcessor() {
@@ -253,19 +256,29 @@ public class AutoBlocks {
                                                 new AutoPoint(() -> getClearReefOffsetPose(pipe, scoringSide))));
         }
 
-        public Command pickUpLolli(Lollipop lollipop, ReefPipe pipe, RobotScoringSide scoringSide) {
+        public Command pickUpLolli(Lollipop lollipop) {
                 return Commands.sequence(
                                 trailblazer.followSegment(
                                                 new AutoSegment(
-                                                                BASE_CONSTRAINTS,
-                                                                AutoBlocks.LOLLIPOP_APPROACH_TOLERANCE,
+                                                         new AutoConstraintOptions(
+                                                                4.75,
+                                                                 Units.degreesToRadians(360.0), 
+                                                                 1.5, 
+                                                                 Units.degreesToRadians(720.0)
+                                                                 ),
+                                                         new PoseErrorTolerance(Units.inchesToMeters(1.0), 1.0),
                                                                 new AutoPoint(() -> getLolliApproach(lollipop.index))
 
                                                 )),
                                 trailblazer.followSegment(
                                                 new AutoSegment(
-                                                                LOLLIPOP_CONSTRAINTS,
-                                                                DEFAULT_POSITION_TOLERANCE,
+                                                         new AutoConstraintOptions(
+                                                                4.75,
+                                                                Units.degreesToRadians(360.0), 
+                                                                1.0, 
+                                                                Units.degreesToRadians(720.0)
+                                                                ),
+                                                         new PoseErrorTolerance(Units.inchesToMeters(0.75), 1),
                                                                 new AutoPoint(() -> getLolliIntake(lollipop.index)))));
         }
 

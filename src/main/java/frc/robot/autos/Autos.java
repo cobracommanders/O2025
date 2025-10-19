@@ -23,19 +23,19 @@ public class Autos extends SubsystemBase {
   private Command autoCommand;
 
   public Autos(Trailblazer trailblazer, RequestManager requestManager, RobotCommands robotCommands) {
-    autoChooser = new AutoChooser<>(AutoSelection.values(), AutoSelection.L4);
+    autoChooser = new AutoChooser<>(AutoSelection.values(), AutoSelection.FOUR_CORAL_NON_PROCESSOR);
     this.trailblazer = trailblazer;
     this.requestManager = requestManager;
     this.robotCommands = robotCommands;
 
     selectedRed =
         Pair.of(
-            AutoSelection.L4,
-            AutoSelection.L4.redAuto.apply(requestManager, trailblazer, robotCommands));
+            AutoSelection.FOUR_CORAL_NON_PROCESSOR,
+            AutoSelection.FOUR_CORAL_NON_PROCESSOR.redAuto.apply(requestManager, trailblazer, robotCommands));
     selectedBlue =
         Pair.of(
-            AutoSelection.L4,
-            AutoSelection.L4.blueAuto.apply(requestManager, trailblazer, robotCommands));
+            AutoSelection.FOUR_CORAL_NON_PROCESSOR,
+            AutoSelection.FOUR_CORAL_NON_PROCESSOR.blueAuto.apply(requestManager, trailblazer, robotCommands));
     autoCommand = createAutoCommand();
   }
 

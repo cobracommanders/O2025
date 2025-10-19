@@ -82,7 +82,7 @@ public class Controls {
         driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
 
         // driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
-        driver.rightTrigger()
+        driver.leftBumper()
         // whileTrue will cancel the command when the button is released
         .whileTrue(Commands.either(
                 requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
@@ -106,7 +106,7 @@ public class Controls {
 
         // Algae Intake
         //driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
-        driver.leftBumper().onTrue(Commands.either(
+        driver.rightTrigger().onTrue(Commands.either(
                 requestManager.groundAlgaeIntake(),
                 requestManager.reefAlgaeIntake(),
                 () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE

@@ -135,14 +135,7 @@ public class RobotCommands {
         return sequence(
                 // Start by driving up to the reef and preparing the arm for scoring in parallel
                 parallel(
-                        // sequence(
-                                // requestManager.handoffRequest().asProxy(),
-                        //         // // Wait until the hand has a coral
-                        //         // // This lets the command run while the handoff is happening without causing issues
-                                // waitUntil(() -> requestManager.getHandGamePiece().isCoral() && (requestManager.isArmIdle() || requestManager.isArmReadyToScoreCoral())),
-                        //         // Set arm and elevator to prepare score state
-                                requestManager.prepareCoralScoreAndAwaitReady(scoringLevel), // See note above for .asProxy()
-                        // ),
+                        requestManager.prepareCoralScoreAndAwaitReady(scoringLevel), // See note above for .asProxy()
                         // requestManager.prepareCoralScoreAndAwaitReady(scoringLevel).asProxy(),
                         // Drive up to the AWAIT_ARM_OFFSET position
                         // This ensures the robot doesn't get too close to the reef while the arm is still preparing
@@ -165,7 +158,7 @@ public class RobotCommands {
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
-                trailblazer.followSegment(new AutoSegment(SPEED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
+                trailblazer.followSegment(new AutoSegment(SPEED_DRIVE_CONSTRAINTS, new PoseErrorTolerance(Units.inchesToMeters(12), Rotation2d.fromDegrees(10)), new AutoPoint(() -> {
                             // Switch between the offsets based on the side the robot is scoring on
                             Pose2d scoringPose = reefpipe.getPose(reefPipeLevel, scoringSide);
                             return switch (scoringSide) {
