@@ -75,15 +75,19 @@ public class AutoBlocks {
                 trailblazer.followSegment(
                         new AutoSegment(
                                 new AutoConstraintOptions(
-                                        4.75,
+                                        4.0,
                                         Units.degreesToRadians(360.0),
                                         6.0,
                                         Units.degreesToRadians(360.0)
                                 ),
                                 new PoseErrorTolerance(Units.inchesToMeters(6.0), 10.0),
                                 new AutoPoint(new Pose2d(14.75, 2.0, Rotation2d.fromDegrees(70.0))),
-                                new AutoPoint(new Pose2d(14.75, 4.0, Rotation2d.fromDegrees(90.0)))
-                ))
+                                new AutoPoint(
+                                        new Pose2d(14.75, 4.0, Rotation2d.fromDegrees(90.0)),
+                                        requestManager.prepareCoralScoreAndAwaitReady().asProxy(),
+                                        maximumConstraints.withMaxLinearAcceleration(3.0)
+                                )
+                        ))
         );
     }
 

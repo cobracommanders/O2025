@@ -108,8 +108,7 @@ public class RobotCommands {
                 // Drive to the final scoring position now that the arm is ready to score
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                     ReefSide reefSide = AutoAlign.getInstance().getClosestReefSide();
-                    Pose2d scoringPose = isLeft ? reefSide.getLeft() : reefSide.getRight();
-                    return scoringPose;
+                    return isLeft ? reefSide.getLeft() : reefSide.getRight();
                 }))), // Scoring can be overriden before autoalign completes
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete().asProxy(), // See note above for .asProxy()
@@ -131,7 +130,7 @@ public class RobotCommands {
                 .finallyDo(() -> DriveSubsystem.getInstance().requestTeleop());
     }
 
-    public Command autoReefAlignAndScore(RobotScoringSide scoringSide, ReefPipe reefpipe, ReefPipeLevel reefPipeLevel, PipeScoringLevel scoringLevel) {
+    public Command autoReefAlignAndScore(RobotScoringSide scoringSide, ReefPipe reefpipe, PipeScoringLevel scoringLevel) {
         return sequence(
                 // Start by driving up to the reef and preparing the arm for scoring in parallel
                 parallel(
@@ -141,7 +140,7 @@ public class RobotCommands {
                         // This ensures the robot doesn't get too close to the reef while the arm is still preparing
                         trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                                     // Switch between the offsets based on the side the robot is scoring on
-                                    Pose2d scoringPose = reefpipe.getPose(reefPipeLevel, scoringSide);
+                                    Pose2d scoringPose = reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
                                     return switch (scoringSide) {
                                         case LEFT -> scoringPose.transformBy(AWAIT_ARM_LEFT_OFFSET);
                                         case RIGHT -> scoringPose.transformBy(AWAIT_ARM_RIGHT_OFFSET);
@@ -153,14 +152,14 @@ public class RobotCommands {
                 // requestManager.prepareCoralScoreAndAwaitReady(scoringLevel).asProxy(),
                 // Drive to the final scoring position now that the arm is ready to score
                 trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
-                    return reefpipe.getPose(reefPipeLevel, scoringSide);
+                    return reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
                 }))),
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
                 trailblazer.followSegment(new AutoSegment(SPEED_DRIVE_CONSTRAINTS, new PoseErrorTolerance(Units.inchesToMeters(3), 10), new AutoPoint(() -> {
                             // Switch between the offsets based on the side the robot is scoring on
-                            Pose2d scoringPose = reefpipe.getPose(reefPipeLevel, scoringSide);
+                            Pose2d scoringPose = reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
                             return switch (scoringSide) {
                                 case LEFT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET);
                                 case RIGHT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET);
