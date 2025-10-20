@@ -22,4 +22,10 @@ public class FieldConstants {
     public enum PipeScoringLevel {
         L2, L3, L4
     }
+
+    public static final double kCoralDiameterInches = 4.5;
+    public static final double kCoralRadiusInches = kCoralDiameterInches / 2.0;
+
+    public static final double kAlgaeDiameterInches = 16.25;
+    public static final double kAlgaeRadiusInches = kAlgaeDiameterInches / 2.0;
 }

@@ -20,12 +20,9 @@ import frc.robot.subsystems.armManager.elevator.Elevator;
 import frc.robot.subsystems.armManager.elevator.ElevatorState;
 import frc.robot.subsystems.armManager.hand.Hand;
 import frc.robot.subsystems.armManager.hand.HandState;
-import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
 
 import java.util.function.Supplier;
-
-import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 
 public class ArmManager extends StateMachine<ArmManagerState> {
     private final Hand hand;
@@ -138,6 +135,17 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                  SCORE_L4_RIGHT,
                  SCORE_L3_RIGHT,
                  SCORE_L2_RIGHT -> {
+                if (atPosition()) {
+                    nextState = currentState.getCoralScoreToFinishedState();
+                }
+            }
+
+            case FINISHED_SCORE_L4_LEFT,
+                 FINISHED_SCORE_L3_LEFT,
+                 FINISHED_SCORE_L2_LEFT,
+                 FINISHED_SCORE_L4_RIGHT,
+                 FINISHED_SCORE_L3_RIGHT,
+                 FINISHED_SCORE_L2_RIGHT -> {
                 if (isReadyToReturnToIdleAfterScoringCoral()) {
                     nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
                 }
@@ -275,12 +283,18 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case PREPARE_L2_RIGHT, READY_L2_RIGHT ->
                     requestState(ArmState.PREPARE_L2_RIGHT, ElevatorState.PREPARE_L2, HandState.IDLE_CORAL);
 
-            case SCORE_L4_LEFT -> requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
-            case SCORE_L3_LEFT -> requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.SCORE_CORAL);
-            case SCORE_L2_LEFT -> requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.SCORE_CORAL);
-            case SCORE_L4_RIGHT -> requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
-            case SCORE_L3_RIGHT -> requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.SCORE_CORAL);
-            case SCORE_L2_RIGHT -> requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.SCORE_CORAL);
+            case SCORE_L4_LEFT, FINISHED_SCORE_L4_LEFT ->
+                    requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
+            case SCORE_L3_LEFT, FINISHED_SCORE_L3_LEFT ->
+                    requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.SCORE_CORAL);
+            case SCORE_L2_LEFT, FINISHED_SCORE_L2_LEFT ->
+                    requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.SCORE_CORAL);
+            case SCORE_L4_RIGHT, FINISHED_SCORE_L4_RIGHT ->
+                    requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
+            case SCORE_L3_RIGHT, FINISHED_SCORE_L3_RIGHT ->
+                    requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.SCORE_CORAL);
+            case SCORE_L2_RIGHT, FINISHED_SCORE_L2_RIGHT ->
+                    requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.SCORE_CORAL);
 
 
             /* ******** ALGAE INTAKE STATES ******** */
@@ -303,18 +317,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
             case PREPARE_SCORE_ALGAE_PROCESSOR, READY_SCORE_ALGAE_PROCESSOR ->
                     requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE);
-            case SCORE_ALGAE_NET_LEFT ->
-                    hand.setState(HandState.SCORE_ALGAE_NET);
-            case SCORE_ALGAE_NET_RIGHT ->
-                    hand.setState(HandState.SCORE_ALGAE_NET);
+            case SCORE_ALGAE_NET_LEFT -> hand.setState(HandState.SCORE_ALGAE_NET);
+            case SCORE_ALGAE_NET_RIGHT -> hand.setState(HandState.SCORE_ALGAE_NET);
             case SCORE_ALGAE_PROCESSOR ->
                     requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR);
 
             /* ******** LOLLIPOP INTAKE STATES ******** */
-            case PREPARE_INTAKE_LOLLIPOP ->
-                    requestState(ArmState.PREPARE_LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
-            case ACTIVE_INTAKE_LOLLIPOP ->
-                    requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
+            case PREPARE_INTAKE_LOLLIPOP -> requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
+            case ACTIVE_INTAKE_LOLLIPOP -> requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
 
             /* ******** CLIMB STATES ******** */
             case PREPARE_CLIMB, READY_CLIMB -> requestState(ArmState.CLIMB, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
@@ -403,10 +413,8 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         setStateFromRequest(getState().getCoralReadyToScoreState());
     }
 
-    private final Debouncer isScoreCompleteDebouncer = new Debouncer(0.1);
-
-    public boolean isCoralScoreComplete() {
-        return isScoreCompleteDebouncer.calculate(getState().isCoralScoreState() && atPosition());
+    public boolean isCoralScoreFinished() {
+        return getState().isCoralScoreFinishedState();
     }
 
     public void requestAlgaeNetScore(RobotScoringSide robotSide) {
@@ -520,7 +528,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
          */
         public Command executeCoralScoreAndAwaitComplete() {
             return armManager.runOnce(armManager::requestCoralScoreExecution)
-                    .andThen(Commands.waitUntil(armManager::isCoralScoreComplete))
+                    .andThen(Commands.waitUntil(armManager::isCoralScoreFinished))
                     .onlyIf(armManager::isReadyToScoreCoral)
                     .withName("executeCoralScoreAndAwaitComplete");
         }

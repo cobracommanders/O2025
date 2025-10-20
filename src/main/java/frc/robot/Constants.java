@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.armManager.elevator.ElevatorState;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 
@@ -18,7 +19,7 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.24;
         public static final double MotionMagicCruiseVelocity = 7;
-        public static final double MotionMagicAcceleration = 3.5;
+        public static final double MotionMagicAcceleration = 4.5;
 //        public static final double encoderOffset = -0.64111328125 + 0.005371;
         public static final double encoderOffset = -0.384277 - 0.25;
         public static final double inchesFromCenter = 6.615;
@@ -57,11 +58,10 @@ public final class Constants {
     }
 
     public static final class DrivetrainConstants {
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 5.94;
-        public static final double MAX_ACCELERATION_METERS_PER_SECOND_SQUARED = 300;
-
         public static final double maxSpeed = TunerConstants.kSpeedAt12Volts;
         public static final double maxAngularRate = Math.PI * 3.5;
+
+        public static final double WIDTH_METERS = Units.inchesToMeters(35.0);
     }
 
     public static class ClimberConstants {

@@ -7,6 +7,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Robot;
 import frc.robot.trailblazer.constraints.AutoConstraintCalculator;
 import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.trailblazer.followers.PathFollower;
@@ -20,14 +21,19 @@ public class Trailblazer {
     private final LocalizationBase localization;
 
     private final PathTracker pathTracker = new PurePursuitPathTracker(false, true);
-    private final PathFollower pathFollower =
-            new PidPathFollower(new PIDController(3.7, 0, 0.05), new PIDController(4.0, 0, 0.2));
+    private final PathFollower pathFollower;
     private int previousAutoPointIndex = -1;
     private TimestampedChassisSpeeds previousSpeeds = new TimestampedChassisSpeeds(0);
 
     public Trailblazer(SwerveBase swerve, LocalizationBase localization) {
         this.swerve = swerve;
         this.localization = localization;
+
+        if (Robot.isSimulation()) {
+            this.pathFollower = new PidPathFollower(new PIDController(5.0, 0, 0.1), new PIDController(5.0, 0, 0.0));
+        } else {
+            this.pathFollower = new PidPathFollower(new PIDController(3.7, 0, 0.05), new PIDController(4.0, 0, 0.2));
+        }
     }
 
     public Command followSegment(AutoSegment segment) {
@@ -53,6 +59,12 @@ public class Trailblazer {
                             double distanceToSegmentEnd = segment.getRemainingDistance(localization.getPose(), currentAutoPointIndex);
 
                             var constrainedVelocityGoal = getSwerveSetpoint(currentAutoPoint, segment.defaultConstraints, distanceToSegmentEnd);
+
+                            DogLog.log("Autos/Trailblazer/Tracker/VelocityTarget", constrainedVelocityGoal);
+                            DogLog.log("Autos/Trailblazer/Tracker/VelocityActual", swerve.getFieldRelativeSpeeds());
+
+                            DogLog.log("Autos/Trailblazer/Tracker/NormalizedVelocityTarget", Math.hypot(constrainedVelocityGoal.vxMetersPerSecond, constrainedVelocityGoal.vyMetersPerSecond));
+                            DogLog.log("Autos/Trailblazer/Tracker/NormalizedVelocityActual", Math.hypot(swerve.getFieldRelativeSpeeds().vxMetersPerSecond, swerve.getFieldRelativeSpeeds().vyMetersPerSecond));
                             swerve.setFieldRelativeAutoSpeeds(constrainedVelocityGoal);
 
                             DogLog.log("Autos/Trailblazer/Tracker/CurrentPointIndex", currentAutoPointIndex);
