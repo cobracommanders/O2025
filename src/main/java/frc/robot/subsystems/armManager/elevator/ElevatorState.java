@@ -20,7 +20,7 @@ public enum ElevatorState {
     PREPARE_L2(0.35),
     SCORE_L4(1.13),
     SCORE_L3(0.624),
-    SCORE_L2(0.35),
+    SCORE_L2(0.32),
     CUSTOM(0.0); // Set in the elevator class
 
 

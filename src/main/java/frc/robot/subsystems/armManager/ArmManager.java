@@ -283,17 +283,24 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case PREPARE_L2_RIGHT, READY_L2_RIGHT ->
                     requestState(ArmState.PREPARE_L2_RIGHT, ElevatorState.PREPARE_L2, HandState.IDLE_CORAL);
 
-            case SCORE_L4_LEFT, FINISHED_SCORE_L4_LEFT ->
+            case SCORE_L4_LEFT -> requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL);
+            case SCORE_L3_LEFT -> requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL);
+            case SCORE_L2_LEFT -> requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL);
+            case SCORE_L4_RIGHT -> requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL);
+            case SCORE_L3_RIGHT -> requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL);
+            case SCORE_L2_RIGHT -> requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL);
+
+            case FINISHED_SCORE_L4_LEFT ->
                     requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
-            case SCORE_L3_LEFT, FINISHED_SCORE_L3_LEFT ->
+            case FINISHED_SCORE_L3_LEFT ->
                     requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.SCORE_CORAL);
-            case SCORE_L2_LEFT, FINISHED_SCORE_L2_LEFT ->
+            case FINISHED_SCORE_L2_LEFT ->
                     requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.SCORE_CORAL);
-            case SCORE_L4_RIGHT, FINISHED_SCORE_L4_RIGHT ->
+            case FINISHED_SCORE_L4_RIGHT ->
                     requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
-            case SCORE_L3_RIGHT, FINISHED_SCORE_L3_RIGHT ->
+            case FINISHED_SCORE_L3_RIGHT ->
                     requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.SCORE_CORAL);
-            case SCORE_L2_RIGHT, FINISHED_SCORE_L2_RIGHT ->
+            case FINISHED_SCORE_L2_RIGHT ->
                     requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.SCORE_CORAL);
 
 
