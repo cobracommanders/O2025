@@ -166,12 +166,14 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         double targetArmPosition = state.getPosition();
 
         // Checks if the elevator is lower than the minimum required for the arm to not collide with the intake
-        boolean willSwingThroughDrivetrainIfDownwardSwing = elevator.getHeight() < minElevatorHeightForFullArmMovement;
+        boolean willSwingThroughRobotIfDownwardSwing = elevator.getHeight() < minElevatorHeightForFullArmMovement;
 
         // Check if the arm is moving from the left side to the right side
         boolean isSwitchingSides = isArmRight(currentArmPosition) != isArmRight(targetArmPosition);
 
-        if (willSwingThroughDrivetrainIfDownwardSwing && isSwitchingSides && isArmHorizontal(10)) {
+        boolean isExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
+
+        if (willSwingThroughRobotIfDownwardSwing && isSwitchingSides && isExtendingOutOfFrame) {
             return ArmState.UP;
         }
 
