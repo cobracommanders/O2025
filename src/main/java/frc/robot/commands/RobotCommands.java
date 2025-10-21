@@ -42,6 +42,8 @@ public class RobotCommands {
 
     // Tight tolerance for scoring coral
     private static final PoseErrorTolerance CORAL_SCORE_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0);
+
+    private static final PoseErrorTolerance AUTO_CORAL_SCORE_TOLERANCE = new PoseErrorTolerance(Units.inchesToMeters(1), 1.0);
     // Constraints for driving while mechanisms are extended
     // TODO consider using different constraints for different levels
     private static final AutoConstraintOptions EXTENDED_DRIVE_CONSTRAINTS = new AutoConstraintOptions(5.0, Units.degreesToRadians(360.0), 4.0, Units.degreesToRadians(720.0));
@@ -60,8 +62,8 @@ public class RobotCommands {
 
     // Distance to drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
     // Kind of arbitrary, and it is interrupted when the driver touches the controls
-    private final Transform2d DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET = new Transform2d(0.0, -0.25, Rotation2d.kZero);
-    private final Transform2d DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET = new Transform2d(0.0, 0.25, Rotation2d.kZero);
+    private final Transform2d DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET = new Transform2d(0.0, -0.275, Rotation2d.kZero);
+    private final Transform2d DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET = new Transform2d(0.0, 0.275, Rotation2d.kZero);
 
 
     // .asProxy() means that the full command (.teleopReefAlignAndScore) won't require the subsystems used
@@ -138,7 +140,7 @@ public class RobotCommands {
                         // requestManager.prepareCoralScoreAndAwaitReady(scoringLevel).asProxy(),
                         // Drive up to the AWAIT_ARM_OFFSET position
                         // This ensures the robot doesn't get too close to the reef while the arm is still preparing
-                        trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
+                        trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, AUTO_CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
                                     // Switch between the offsets based on the side the robot is scoring on
                                     Pose2d scoringPose = reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
                                     return switch (scoringSide) {
@@ -157,7 +159,7 @@ public class RobotCommands {
                 // Once the drive command finishes, score the coral and wait for the arm to finish moving
                 requestManager.executeCoralScoreAndAwaitComplete(), // See note above for .asProxy()
                 // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
-                trailblazer.followSegment(new AutoSegment(SPEED_DRIVE_CONSTRAINTS, new PoseErrorTolerance(Units.inchesToMeters(3), 10), new AutoPoint(() -> {
+                trailblazer.followSegment(new AutoSegment(SPEED_DRIVE_CONSTRAINTS, new PoseErrorTolerance(Units.inchesToMeters(8), 10), new AutoPoint(() -> {
                             // Switch between the offsets based on the side the robot is scoring on
                             Pose2d scoringPose = reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
                             return switch (scoringSide) {

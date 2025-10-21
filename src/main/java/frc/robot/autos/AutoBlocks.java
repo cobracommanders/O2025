@@ -75,9 +75,9 @@ public class AutoBlocks {
                 trailblazer.followSegment(
                         new AutoSegment(
                                 new AutoConstraintOptions(
-                                        4.0,
+                                        4.75,
                                         Units.degreesToRadians(360.0),
-                                        6.0,
+                                        9,
                                         Units.degreesToRadians(360.0)
                                 ),
                                 new PoseErrorTolerance(Units.inchesToMeters(6.0), 10.0),
@@ -94,8 +94,8 @@ public class AutoBlocks {
     public Command approachLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(4.0),
-                        new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0),
+                        maximumConstraints.withMaxLinearAcceleration(4.5),
+                        new PoseErrorTolerance(Units.inchesToMeters(4), 2.0),
                         new AutoPoint(() -> getLollipopApproachPose(lollipop.index))
                 ));
     }
@@ -103,8 +103,8 @@ public class AutoBlocks {
     public Command intakeLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(2.0),
-                        new PoseErrorTolerance(Units.inchesToMeters(0.75), 1.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
+                        maximumConstraints.withMaxLinearAcceleration(4.5),
+                        new PoseErrorTolerance(Units.inchesToMeters(4), 1.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
                         new AutoPoint(() -> getLollipopIntakePose(lollipop.index)))
         );
     }

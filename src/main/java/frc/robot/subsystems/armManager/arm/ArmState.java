@@ -12,7 +12,7 @@ public enum ArmState {
     HANDOFF_LEFT(-0.265),
     HANDOFF_MIDDLE(-0.25),
     CLIMB(0.0),
-    LOLLIPOP(-0.035),
+    LOLLIPOP(-0.056),
     ALGAE_PROCESSOR(0),
 
     RIGHT(0.0),

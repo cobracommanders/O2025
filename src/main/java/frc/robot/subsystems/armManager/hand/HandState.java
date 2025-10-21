@@ -5,7 +5,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum HandState {
     IDLE_ALGAE(-0.1),
-    IDLE_CORAL(0.0),
+    IDLE_CORAL(0),
     IDLE_EMPTY(0.0),
     CLEAR_ALGAE(0.5), // Clear algae that is dropped according to sensors
 
