@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.config.FeatureFlags;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.stateMachine.StateMachine;
@@ -39,7 +40,12 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         this.arm = arm;
         this.elevator = elevator;
         this.hand = hand;
-        this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean()) {
+            this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+        } else {
+            this.visualization = null;
+        }
     }
 
     private final double armLength = Units.inchesToMeters(24.5);
@@ -294,13 +300,17 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
 
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
-        visualization.drawArm(
-                elevatorBaseHeight + elevator.getHeight(),
-                coordinate1.x(),
-                coordinate1.y(),
-                coordinate2.x(),
-                coordinate2.y());
-        visualization.drawIntake(intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean() && visualization != null) {
+            visualization.drawArm(
+                    elevatorBaseHeight + elevator.getHeight(),
+                    coordinate1.x(),
+                    coordinate1.y(),
+                    coordinate2.x(),
+                    coordinate2.y());
+
+            visualization.drawIntake(intakeWidth, finalIntakeHeight);
+        }
     }
 
     public boolean isArmUp() {

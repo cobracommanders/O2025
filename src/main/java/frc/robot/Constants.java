@@ -4,9 +4,6 @@ import frc.robot.subsystems.armManager.elevator.ElevatorState;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 
 public final class Constants {
-
-    public static boolean tuningMode = true;
-
     public static boolean isSimulation = false;
 
     public static final double SIM_LOOP_TIME = 0.02;
