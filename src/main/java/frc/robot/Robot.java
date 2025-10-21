@@ -4,13 +4,13 @@
 
 package frc.robot;
 
-import java.lang.management.OperatingSystemMXBean;
-
 import com.ctre.phoenix6.Utils;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.IntegerPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.PubSubOption;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -101,16 +101,25 @@ public class Robot extends TimedRobot {
 
         swerve.setElevatorHeight(elevator.getHeight());
         DogLog.log("OperatorOptions/AlgaeLevel", OperatorOptions.getInstance().algaeIntakeLevel);
-        if (FmsSubsystem.getInstance().isDisabled()){
-            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(200);
-            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(200);
-            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(200);
-        }
-        else {
-            NetworkTableInstance.getDefault().getTable("limelight-bl").getEntry("throttle_set").setInteger(0);
-            NetworkTableInstance.getDefault().getTable("limelight-fl").getEntry("throttle_set").setInteger(0);
-            NetworkTableInstance.getDefault().getTable("limelight-right").getEntry("throttle_set").setInteger(0);
-        }
+    }
+
+
+    private final IntegerPublisher limelight_bl_throttle = NetworkTableInstance.getDefault().getTable("limelight-bl").getIntegerTopic("throttle_set").publish(PubSubOption.periodic(500));
+    private final IntegerPublisher limelight_fl_throttle = NetworkTableInstance.getDefault().getTable("limelight-fl").getIntegerTopic("throttle_set").publish(PubSubOption.periodic(500));
+    private final IntegerPublisher limelight_right_throttle = NetworkTableInstance.getDefault().getTable("limelight-right").getIntegerTopic("throttle_set").publish(PubSubOption.periodic(500));
+
+    @Override
+    public void disabledInit() {
+        limelight_bl_throttle.set(200);
+        limelight_fl_throttle.set(200);
+        limelight_right_throttle.set(200);
+    }
+
+    @Override
+    public void disabledExit() {
+        limelight_bl_throttle.set(0);
+        limelight_fl_throttle.set(0);
+        limelight_right_throttle.set(0);
     }
 
     @Override
