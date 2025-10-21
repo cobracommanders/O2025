@@ -1,5 +1,6 @@
 package frc.robot.subsystems.armManager.arm;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -14,15 +15,17 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.util.PhoenixSignalManager;
 
 public class Arm extends StateMachine<ArmState> {
-    private static TalonFX motor;
-    private final CANcoder encoder;
+    private final TalonFX motor = new TalonFX(Ports.ArmPorts.MOTOR);
+    private final CANcoder encoder = new CANcoder(Ports.ArmPorts.ENCODER);
 
     private double armPosition;
     private double absolutePosition;
@@ -30,6 +33,9 @@ public class Arm extends StateMachine<ArmState> {
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
 
     private double customStatePosition = 0.0;
+
+    private final StatusSignal<Angle> absolutePositionSignal = encoder.getPosition();
+    private final StatusSignal<Angle> positionSignal = motor.getPosition();
 
     public Arm() {
         super(ArmState.START_POSITION, "Arm");
@@ -54,11 +60,14 @@ public class Arm extends StateMachine<ArmState> {
         canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.7;
         canCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
 
-        encoder = new CANcoder(Ports.ArmPorts.ENCODER);
-        motor = new TalonFX(Ports.ArmPorts.MOTOR);
-
         motor.getConfigurator().apply(motor_config);
         encoder.getConfigurator().apply(canCoderConfig);
+
+        PhoenixSignalManager.registerSignals(
+                false,
+                absolutePositionSignal,
+                positionSignal
+        );
 
         collectInputs();
         syncEncoder();
@@ -77,8 +86,9 @@ public class Arm extends StateMachine<ArmState> {
 
     @Override
     protected void collectInputs() {
-        absolutePosition = encoder.getPosition().getValueAsDouble();
-        armPosition = motor.getPosition().getValueAsDouble();
+        absolutePosition = absolutePositionSignal.getValueAsDouble();
+        armPosition = positionSignal.getValueAsDouble();
+
         DogLog.log("Arm/Absolute Encoder position", absolutePosition);
         DogLog.log("Arm/Motor Encoder Position", armPosition);
         DogLog.log("Arm/Code Position", getNormalizedPosition());
@@ -137,7 +147,7 @@ public class Arm extends StateMachine<ArmState> {
     protected void afterTransition(ArmState newState) {
         switch (newState) {
             case CUSTOM -> setMotorToTargetPosition(customStatePosition);
-        
+
 
             // Custom cases can go here, default to standard position control
             default -> {

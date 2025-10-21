@@ -1,18 +1,26 @@
 package frc.robot.subsystems.armManager.hand;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import frc.robot.Constants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.util.PhoenixSignalManager;
 
 public class Hand extends StateMachine<HandState> {
-    public static TalonFX motor;
+    private final TalonFX motor = new TalonFX(Ports.HandPorts.MOTOR);
 
     private double statorCurrent;
+    private double angularVelocity;
+
+    private final StatusSignal<Current> statorCurrentSignal = motor.getStatorCurrent();
+    private final StatusSignal<AngularVelocity> velocitySignal = motor.getVelocity();
 
     public Hand() {
         super(HandState.IDLE_CORAL, "Hand");
@@ -20,15 +28,17 @@ public class Hand extends StateMachine<HandState> {
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        motor = new TalonFX(Ports.HandPorts.MOTOR);
-
         motor.getConfigurator().apply(motor_config);
+
+        PhoenixSignalManager.registerSignals(false, statorCurrentSignal, velocitySignal);
     }
 
     @Override
     public void collectInputs() {
-        statorCurrent = motor.getStatorCurrent().getValueAsDouble();
+        statorCurrent = statorCurrentSignal.getValueAsDouble();
+        angularVelocity = velocitySignal.getValueAsDouble();
         DogLog.log("Hand/Stator Current", statorCurrent);
+        DogLog.log("Hand/Angular Velocity", angularVelocity);
     }
 
     public void setState(HandState state) {

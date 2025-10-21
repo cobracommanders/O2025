@@ -34,6 +34,7 @@ import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.trailblazer.Trailblazer;
+import frc.robot.util.PhoenixSignalManager;
 
 public class Robot extends TimedRobot {
     private static final Arm arm = new Arm();
@@ -48,7 +49,6 @@ public class Robot extends TimedRobot {
 
     private final CoralDetector coralDetector = CoralDetector.getInstance();
 
-    // Uncomment as needed
     private final RequestManager requestManager = new RequestManager(
             armManager,
             GroundManager.getInstance(),
@@ -69,6 +69,8 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotPeriodic() {
+        PhoenixSignalManager.refreshAll();
+
         CommandScheduler.getInstance().run();
         lights.periodic();
         MechanismVisualizer.publishData();

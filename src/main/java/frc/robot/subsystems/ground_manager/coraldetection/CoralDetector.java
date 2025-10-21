@@ -1,21 +1,26 @@
 package frc.robot.subsystems.ground_manager.coraldetection;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import dev.doglog.DogLog;
-import frc.robot.Constants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.util.PhoenixSignalManager;
 
 public class CoralDetector extends StateMachine<CoralDetectorState> {
-    private final CANrange lCANRange;
-    private final CANrange rCANRange;
+    private final CANrange lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
+    private final CANrange rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
+
     public boolean lDetected = false;
     public boolean rDetected = false;
     public double rDistance;
 
     public CoralDetectorState simCoralPosition = CoralDetectorState.NONE;
+
+    private final StatusSignal<Boolean> lIsDetectedSignal = lCANRange.getIsDetected();
+    private final StatusSignal<Boolean> rIsDetectedSignal = rCANRange.getIsDetected();
 
     private CoralDetector() {
         super(CoralDetectorState.NONE, "CoralDetector");
@@ -26,18 +31,18 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
         config.ProximityParams.ProximityThreshold = 0.065;
         config.ProximityParams.MinSignalStrengthForValidMeasurement = 8000;
 
-        lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
-        rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
-
         lCANRange.getConfigurator().apply(config);
         rCANRange.getConfigurator().apply(config);
+
+        PhoenixSignalManager.registerSignals(false, lIsDetectedSignal, rIsDetectedSignal);
     }
 
     protected void collectInputs() {
 
         //We can switch to using .isDetected() if we would like.
-        lDetected = lCANRange.getIsDetected().getValue();
-        rDetected = rCANRange.getIsDetected().getValue();
+
+        lDetected = lIsDetectedSignal.getValue();
+        rDetected = rIsDetectedSignal.getValue();
 
         DogLog.log(name + "/Left Detected", lDetected);
         DogLog.log(name + "/Right Detected", rDetected);

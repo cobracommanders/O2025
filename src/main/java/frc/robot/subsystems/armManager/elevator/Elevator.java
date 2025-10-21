@@ -1,5 +1,6 @@
 package frc.robot.subsystems.armManager.elevator;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -11,19 +12,23 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.Angle;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Ports;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.util.PhoenixSignalManager;
 
 public class Elevator extends StateMachine<ElevatorState> {
-    private static TalonFX lMotor;
-    private static TalonFX rMotor;
+    private final TalonFX lMotor = new TalonFX(Ports.ElevatorPorts.LMOTOR);
+    private final TalonFX rMotor = new TalonFX(Ports.ElevatorPorts.RMOTOR);
 
     private double elevatorPosition;
     private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
 
     private double customStateHeight = 0.0;
+
+    private final StatusSignal<Angle> positionSignal = lMotor.getPosition();
 
     public Elevator() {
         super(ElevatorState.IDLE, "Elevator");
@@ -42,9 +47,6 @@ public class Elevator extends StateMachine<ElevatorState> {
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MotionMagicCruiseVelocity;
         motor_config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MotionMagicAcceleration;
 
-        lMotor = new TalonFX(Ports.ElevatorPorts.LMOTOR);
-        rMotor = new TalonFX(Ports.ElevatorPorts.RMOTOR);
-
         lMotor.getConfigurator().apply(motor_config);
         rMotor.getConfigurator().apply(motor_config);
 
@@ -52,6 +54,8 @@ public class Elevator extends StateMachine<ElevatorState> {
         rMotor.setPosition(0);
 
         rMotor.setControl(new Follower(Ports.ElevatorPorts.LMOTOR, true));
+
+        PhoenixSignalManager.registerSignals(false, positionSignal);
     }
 
     public boolean atGoal() {
@@ -60,7 +64,7 @@ public class Elevator extends StateMachine<ElevatorState> {
 
     @Override
     public void collectInputs() {
-        elevatorPosition = lMotor.getPosition().getValueAsDouble();
+        elevatorPosition = positionSignal.getValueAsDouble();
         DogLog.log("Elevator/Position", elevatorPosition);
         DogLog.log("Elevator/At Goal", atGoal());
         DogLog.log("Elevator/CustomHeight", customStateHeight);
