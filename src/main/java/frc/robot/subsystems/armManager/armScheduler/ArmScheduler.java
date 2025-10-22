@@ -5,6 +5,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.config.FeatureFlags;
+import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.stateMachine.RequestManager;
 import frc.robot.Constants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
@@ -36,7 +41,12 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         this.arm = arm;
         this.elevator = elevator;
         this.hand = hand;
-        this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean()) {
+            this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+        } else {
+            this.visualization = null;
+        }
     }
 
     private final double armLength = Units.inchesToMeters(24.5);
@@ -274,7 +284,6 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         DogLog.log("ArmScheduler/armAngle", arm.getNormalizedPosition());
         DogLog.log("ArmScheduler/elevatorHeight", elevator.getHeight());
         DogLog.log("ArmScheduler/armUp", isArmUp(arm.getNormalizedPosition()));
-        SmartDashboard.putData("ArmScheduler/ArmViz", visualization.getMechanism2d());
         DogLog.log("ArmScheduler/armHittingIntake", willArmHitIntake(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armHittingDrivetrain", willArmHitDrivetrain(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
@@ -283,13 +292,19 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
 
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
-        visualization.drawArm(
-                elevatorBaseHeight + elevator.getHeight(),
-                coordinate1.x(),
-                coordinate1.y(),
-                coordinate2.x(),
-                coordinate2.y());
-        visualization.drawIntake(intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean() && visualization != null) {
+            visualization.drawArm(
+                    elevatorBaseHeight + elevator.getHeight(),
+                    coordinate1.x(),
+                    coordinate1.y(),
+                    coordinate2.x(),
+                    coordinate2.y());
+
+            visualization.drawIntake(intakeWidth, finalIntakeHeight);
+
+            SmartDashboard.putData("ArmScheduler/ArmViz", visualization.getMechanism2d());
+        }
     }
 
     public boolean isArmUp() {

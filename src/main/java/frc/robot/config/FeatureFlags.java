@@ -1,10 +1,13 @@
 package frc.robot.config;
 
+import frc.robot.Robot;
 import frc.robot.util.FeatureFlag;
 
 import java.util.function.BooleanSupplier;
 
 public class FeatureFlags {
+    public static BooleanSupplier useMechanismVisualizer = FeatureFlag.of("UseMechanismVisualizer", Robot.isSimulation());
+
     public static final BooleanSupplier AUTO_ALIGN_DEADBAND =
             FeatureFlag.of("AutoAlign/Deadband", false);
 
