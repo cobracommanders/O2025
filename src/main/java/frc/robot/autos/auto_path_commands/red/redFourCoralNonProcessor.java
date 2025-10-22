@@ -32,25 +32,7 @@ public class redFourCoralNonProcessor extends BaseAuto {
         return Commands.sequence(
                 blocks.driveToBackReefRedNonProcessor(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy(),
-
-                Commands.parallel(
-                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
-                        blocks.approachLollipop(Lollipop.RIGHT)
-                ),
-
-                blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
-
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
-
-                Commands.parallel(
-                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
-                        blocks.approachLollipop(Lollipop.MIDDLE)
-                ),
-
-                blocks.intakeLollipop(Lollipop.MIDDLE).asProxy(),
-
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
 
                 Commands.parallel(
                         requestManager.prepareLollipopAndAwaitReady().asProxy(),
@@ -59,7 +41,25 @@ public class redFourCoralNonProcessor extends BaseAuto {
 
                 blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
+
+                Commands.parallel(
+                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                        blocks.approachLollipop(Lollipop.MIDDLE)
+                ),
+
+                blocks.intakeLollipop(Lollipop.MIDDLE).asProxy(),
+
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
+
+                Commands.parallel(
+                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                        blocks.approachLollipop(Lollipop.RIGHT)
+                ),
+
+                blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
+
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy(),
                 requestManager.idleAll().asProxy()
         )
                 .beforeStarting(() -> startTime = Timer.getTimestamp())
