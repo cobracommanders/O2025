@@ -175,14 +175,6 @@ public class RobotCommands {
 
     /* ******** MISC. ******** */
 
-    public Command algaeAlignCommand() {
-        return runOnce(() -> AutoAlign
-                .getInstance()
-                .setAlgaeIntakingOffset(ReefSideOffset.ALGAE_INTAKING)).andThen(runOnce(() -> DriveSubsystem
-                .getInstance()
-                .requestAlgaeAlign()));
-    }
-
     public Command driveTeleopCommand() {
         return runOnce(() -> DriveSubsystem.getInstance().requestTeleop());
     }
