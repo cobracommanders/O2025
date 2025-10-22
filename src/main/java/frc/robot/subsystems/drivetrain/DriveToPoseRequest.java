@@ -6,8 +6,9 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathSharedStore;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 public class DriveToPoseRequest implements SwerveRequest {
@@ -15,8 +16,23 @@ public class DriveToPoseRequest implements SwerveRequest {
             .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
             .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage);
 
-    private final PIDController linearController = new PIDController(3.7, 0, 0.05);
-    private final PIDController thetaController = new PIDController(4.0, 0, 0.2);
+    private final ProfiledPIDController linearController = new ProfiledPIDController(
+            3.7,
+            0,
+            0.05,
+            new TrapezoidProfile.Constraints(
+                    5.0, 4.0
+            )
+    );
+
+    private final ProfiledPIDController thetaController = new ProfiledPIDController(
+            4.0,
+            0,
+            0.2,
+            new TrapezoidProfile.Constraints(
+                    Units.degreesToRadians(360.0), Units.degreesToRadians(360.0)
+            )
+    );
 
     public DriveToPoseRequest() {
         thetaController.enableContinuousInput(-Math.PI, Math.PI);

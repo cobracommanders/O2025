@@ -5,6 +5,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -25,6 +26,7 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
     private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
     private ChassisSpeeds algaeAutoAlignSpeeds = new ChassisSpeeds();
+    private Pose2d driveToPoseTarget = Pose2d.kZero;
 
     public final TunerConstants.TunerSwerveDrivetrain drivetrain = new TunerConstants.TunerSwerveDrivetrain(
             TunerConstants.DrivetrainConstants,
@@ -59,6 +61,8 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 //            .withDeadband(0.05)
 //            .withRotationalDeadband(Units.degreesToRadians(2.0))
             ;
+
+    private final DriveToPoseRequest driveToPoseRequest = new DriveToPoseRequest();
 
     private boolean hasAppliedOperatorPerspective = false;
 
@@ -116,6 +120,10 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         autoSpeeds = speeds;
     }
 
+    public void setDriveToPoseTarget(Pose2d target) {
+        driveToPoseTarget = target;
+    }
+
     @Override
     public void simulationPeriodic() {
         drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
@@ -167,6 +175,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 
     public void requestAlgaeAlign() {
         setStateFromRequest(DriveStates.ALGAE_ALIGN_TELEOP);
+        setTeleopSpeeds(0.0, 0.0, 0.0);
+    }
+
+    public void requestDriveToPose() {
+        setStateFromRequest(DriveStates.DRIVE_TO_POSE);
         setTeleopSpeeds(0.0, 0.0, 0.0);
     }
 
