@@ -16,7 +16,7 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.24;
         public static final double MotionMagicCruiseVelocity = 7;
-        public static final double MotionMagicAcceleration = 3.5;
+        public static final double MotionMagicAcceleration = 4.5;
 //        public static final double encoderOffset = -0.64111328125 + 0.005371;
         public static final double encoderOffset = -0.384277 - 0.25;
         public static final double inchesFromCenter = 6.615;
@@ -30,7 +30,7 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.48;
         public static final double MotionMagicCruiseVelocity = 7.0;
-        public static final double MotionMagicAcceleration = 8.5;
+        public static final double MotionMagicAcceleration = 8.0;
         public static final double Tolerance = 0.025;
         public static final double MaxHeight = ElevatorState.ALGAE_NET.getPosition();
     }

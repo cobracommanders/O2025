@@ -59,8 +59,8 @@ public class redFourCoralNonProcessor extends BaseAuto {
 
                 blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy(),
-                requestManager.idleAll().asProxy()
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy()
+//                requestManager.idleAll().asProxy()
         )
                 .beforeStarting(() -> startTime = Timer.getTimestamp())
                 .finallyDo(() -> System.out.println("Total time: " + (Timer.getTimestamp() - startTime)))

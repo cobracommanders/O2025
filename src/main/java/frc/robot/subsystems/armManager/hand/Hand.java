@@ -11,10 +11,11 @@ import edu.wpi.first.units.measure.Current;
 import frc.robot.Constants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.drivetrain.TunerConstants;
 import frc.robot.util.PhoenixSignalManager;
 
 public class Hand extends StateMachine<HandState> {
-    private final TalonFX motor = new TalonFX(Ports.HandPorts.MOTOR);
+    private final TalonFX motor = new TalonFX(Ports.HandPorts.MOTOR, TunerConstants.kCANBus.getName());
 
     private double statorCurrent;
     private double angularVelocity;
@@ -30,7 +31,7 @@ public class Hand extends StateMachine<HandState> {
 
         motor.getConfigurator().apply(motor_config);
 
-        PhoenixSignalManager.registerSignals(false, statorCurrentSignal, velocitySignal);
+        PhoenixSignalManager.registerSignals(true, statorCurrentSignal, velocitySignal);
     }
 
     @Override

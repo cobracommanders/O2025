@@ -77,16 +77,18 @@ public class AutoBlocks {
                                 new AutoConstraintOptions(
                                         4.75,
                                         Units.degreesToRadians(360.0),
-                                        9,
+                                        6,
                                         Units.degreesToRadians(360.0)
                                 ),
-                                new PoseErrorTolerance(Units.inchesToMeters(6.0), 10.0),
-                                new AutoPoint(new Pose2d(14.75, 2.0, Rotation2d.fromDegrees(70.0))),
+                                new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
                                 new AutoPoint(
-                                        new Pose2d(14.75, 3.8, Rotation2d.fromDegrees(90.0)),
-                                        requestManager.prepareCoralScoreAndAwaitReady().asProxy(),
-                                        maximumConstraints.withMaxLinearAcceleration(3.0)
-                                )
+                                        new Pose2d(13, 2.25, Rotation2d.fromDegrees(70.0))
+                                ),
+                                new AutoPoint(
+                                        new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0)),
+                                        requestManager.prepareCoralScoreAndAwaitReady(),
+                                        maximumConstraints.withMaxLinearAcceleration(3.5)
+                                        )
                         ))
         );
     }
@@ -94,8 +96,8 @@ public class AutoBlocks {
     public Command approachLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(4.5),
-                        new PoseErrorTolerance(Units.inchesToMeters(4), 2.0),
+                        maximumConstraints.withMaxLinearAcceleration(3.5),
+                        new PoseErrorTolerance(Units.inchesToMeters(2), 1.0),
                         new AutoPoint(() -> getLollipopApproachPose(lollipop.index))
                 ));
     }
@@ -103,8 +105,8 @@ public class AutoBlocks {
     public Command intakeLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(4.5),
-                        new PoseErrorTolerance(Units.inchesToMeters(4), 1.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
+                        maximumConstraints.withMaxLinearAcceleration(4.0),
+                        new PoseErrorTolerance(Units.inchesToMeters(3), 2.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
                         new AutoPoint(() -> getLollipopIntakePose(lollipop.index)))
         );
     }

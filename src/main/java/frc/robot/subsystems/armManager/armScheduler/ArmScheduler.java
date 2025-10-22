@@ -213,7 +213,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
                 double elevatorPositionToPlaceArmAboveIntake = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
 
                 // If the arm is swinging downwards through the robot, just keep the elevator at full height until it passes for smoother motion
-                if (isSwitchingSides && !isArmUp(arm.getNormalizedPosition())) {
+                if (isSwitchingSides && !isArmUp(arm.getNormalizedPosition  ())) {
                     elevator.setCustom(minElevatorHeightForFullArmMovement);
                 } else {
                     elevator.setCustom(elevatorPositionToPlaceArmAboveIntake);

@@ -21,11 +21,12 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Ports;
 import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.subsystems.drivetrain.TunerConstants;
 import frc.robot.util.PhoenixSignalManager;
 
 public class Arm extends StateMachine<ArmState> {
-    private final TalonFX motor = new TalonFX(Ports.ArmPorts.MOTOR);
-    private final CANcoder encoder = new CANcoder(Ports.ArmPorts.ENCODER);
+    private final TalonFX motor = new TalonFX(Ports.ArmPorts.MOTOR, TunerConstants.kCANBus.getName());
+    private final CANcoder encoder = new CANcoder(Ports.ArmPorts.ENCODER, TunerConstants.kCANBus.getName());
 
     private double armPosition;
     private double absolutePosition;
@@ -64,7 +65,7 @@ public class Arm extends StateMachine<ArmState> {
         encoder.getConfigurator().apply(canCoderConfig);
 
         PhoenixSignalManager.registerSignals(
-                false,
+                true,
                 absolutePositionSignal,
                 positionSignal
         );
