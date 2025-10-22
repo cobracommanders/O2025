@@ -235,4 +235,12 @@ public class RequestManager {
                 .onlyIf(armCommands::currentGamePieceIsNone)
                 .withName("invertedHandoffRequest");
     }
+
+    public Command overrideArmAcceleration(double armAcceleration) {
+        return armCommands.overrideArmAcceleration(armAcceleration);
+    }
+
+    public Command clearOverrideArmAcceleration() {
+        return armCommands.clearOverrideArmAcceleration();
+    }
 }

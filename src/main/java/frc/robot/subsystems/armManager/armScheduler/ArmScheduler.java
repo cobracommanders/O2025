@@ -325,6 +325,14 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         setStateFromRequest(assessState());
     }
 
+    public void overrideArmAcceleration(double armAcceleration) {
+        arm.setOverrideAcceleration(armAcceleration);
+    }
+
+    public void clearOverrideArmAcceleration() {
+        arm.clearOverrideAcceleration();
+    }
+
     /**
      * Checks that both the Arm and Elevator are at position in the final state.
      */

@@ -32,6 +32,7 @@ public class Arm extends StateMachine<ArmState> {
     private double absolutePosition;
 
     private double acceleration = ArmConstants.DefaultMotionMagicAcceleration;
+    private double overrideAcceleration = Double.NaN;
 
     private final DynamicMotionMagicVoltage motionMagicVoltage = new DynamicMotionMagicVoltage(0, ArmConstants.DefaultMotionMagicAcceleration, ArmConstants.MotionMagicCruiseVelocity, ArmConstants.MotionMagicJerk).withSlot(0);
 
@@ -85,6 +86,14 @@ public class Arm extends StateMachine<ArmState> {
             return;
         }
         motor.setPosition(absolutePosition);
+    }
+
+    public void setOverrideAcceleration(double acceleration) {
+        this.overrideAcceleration = acceleration;
+    }
+
+    public void clearOverrideAcceleration() {
+        this.overrideAcceleration = Double.NaN;
     }
 
     @Override
@@ -163,6 +172,7 @@ public class Arm extends StateMachine<ArmState> {
 
     private void setMotorToTargetPosition(double position) {
         DogLog.log("Arm/Setpoint", position);
-        motor.setControl(motionMagicVoltage.withPosition(position).withAcceleration(acceleration));
+        double finalAcceleration = Double.isNaN(overrideAcceleration) ? acceleration : overrideAcceleration;
+        motor.setControl(motionMagicVoltage.withPosition(position).withAcceleration(finalAcceleration));
     }
 }

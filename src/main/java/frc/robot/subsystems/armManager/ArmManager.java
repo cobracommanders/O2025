@@ -61,6 +61,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         return getState().isIdleState();
     }
 
+    public void overrideArmAcceleration(double armAcceleration) {
+        armScheduler.overrideArmAcceleration(armAcceleration);
+    }
+
+    public void clearOverrideArmAcceleration() {
+        armScheduler.clearOverrideArmAcceleration();
+    }
+
     @Override
     protected void collectInputs() {
         DogLog.log("ArmManager/atPosition", atPosition());
@@ -643,9 +651,13 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             return armManager.getCurrentGamePiece();
         }
 
-        // public Command completeHandoffAndCoralIdle() {
-        //     return Commands.runOnce(armManager::requestCoralIdle).andThen(Commands.waitUntil(armManager::isIdleState));
-        // }
+        public Command overrideArmAcceleration(double armAcceleration) {
+            return Commands.runOnce(() -> armManager.overrideArmAcceleration(armAcceleration));
+        }
+
+        public Command clearOverrideArmAcceleration() {
+            return Commands.runOnce(armManager::clearOverrideArmAcceleration);
+        }
 
         public boolean currentGamePieceIsNone() {
             return getCurrentGamePiece().isNone();
