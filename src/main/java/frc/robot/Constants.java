@@ -16,7 +16,8 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.24;
         public static final double MotionMagicCruiseVelocity = 7;
-        public static final double MotionMagicAcceleration = 4.5;
+        public static final double DefaultMotionMagicAcceleration = 4.5;
+        public static final double MotionMagicJerk = 0.0;
 //        public static final double encoderOffset = -0.64111328125 + 0.005371;
         public static final double encoderOffset = -0.384277 - 0.25;
         public static final double inchesFromCenter = 6.615;

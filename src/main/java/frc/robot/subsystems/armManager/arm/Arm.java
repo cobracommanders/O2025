@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -31,7 +31,9 @@ public class Arm extends StateMachine<ArmState> {
     private double armPosition;
     private double absolutePosition;
 
-    private final MotionMagicVoltage motionMagicVoltage = new MotionMagicVoltage(0).withSlot(0);
+    private double acceleration = ArmConstants.DefaultMotionMagicAcceleration;
+
+    private final DynamicMotionMagicVoltage motionMagicVoltage = new DynamicMotionMagicVoltage(0, ArmConstants.DefaultMotionMagicAcceleration, ArmConstants.MotionMagicCruiseVelocity, ArmConstants.MotionMagicJerk).withSlot(0);
 
     private double customStatePosition = 0.0;
 
@@ -53,7 +55,7 @@ public class Arm extends StateMachine<ArmState> {
         motor_config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motor_config.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MotionMagicCruiseVelocity;
-        motor_config.MotionMagic.MotionMagicAcceleration = ArmConstants.MotionMagicAcceleration;
+        motor_config.MotionMagic.MotionMagicAcceleration = ArmConstants.DefaultMotionMagicAcceleration;
         motor_config.ClosedLoopGeneral.ContinuousWrap = true;
 
         CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
@@ -95,6 +97,7 @@ public class Arm extends StateMachine<ArmState> {
         DogLog.log("Arm/Code Position", getNormalizedPosition());
         DogLog.log("Arm/At Goal", atGoal());
         DogLog.log("Arm/CustomPosition", customStatePosition);
+        DogLog.log("Arm/Acceleration", acceleration);
         MechanismVisualizer.setArmPosition(armPosition);
     }
 
@@ -130,13 +133,14 @@ public class Arm extends StateMachine<ArmState> {
         SimArm.updateSimPosition(motor, encoder);
     }
 
-    public void setState(ArmState state) {
+    public void setState(ArmState state, double acceleration) {
+        this.acceleration = acceleration;
         setStateFromRequest(state);
     }
 
-    public void setCustom(double targetPosition) {
+    public void setCustom(double targetPosition, double acceleration) {
         this.customStatePosition = targetPosition;
-        setState(ArmState.CUSTOM);
+        setState(ArmState.CUSTOM, acceleration);
     }
 
     @Override
@@ -159,6 +163,6 @@ public class Arm extends StateMachine<ArmState> {
 
     private void setMotorToTargetPosition(double position) {
         DogLog.log("Arm/Setpoint", position);
-        motor.setControl(motionMagicVoltage.withPosition(position));
+        motor.setControl(motionMagicVoltage.withPosition(position).withAcceleration(acceleration));
     }
 }
