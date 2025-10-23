@@ -177,7 +177,6 @@ public class RequestManager {
     }
 
     public Command reefAlgaeIntake() {
-        //return setAlgaeIntakeLevel();
         return Commands.either(
                 highReefAlgaeIntake(this::reefRobotSide),
                 lowReefAlgaeIntake(this::reefRobotSide),
@@ -202,7 +201,7 @@ public class RequestManager {
     }
 
     public Command climbRequest() {
-        return Commands.parallel(groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing(), climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
+        return Commands.parallel(groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing()).andThen(climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
     }
 
     public Command handoffRequest() {
@@ -213,7 +212,7 @@ public class RequestManager {
                 groundCommands.requestHandoffAndAwaitReady(),
                 armCommands.requestHandoffAndAwaitReady(coralPositionSupplier),
                 groundCommands.executeHandoff(),
-                waitSeconds(0.1),
+                waitSeconds(0.15),
                 //armCommands.completeHandoffAndCoralIdle(),
                 armCommands.completeHandoffAndCoralIdle(),
                 idleAll()

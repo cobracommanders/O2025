@@ -67,7 +67,7 @@ public class Controls {
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
 
         // Score Coral
-        driver.rightBumper()
+        operator.rightBumper()
                 // whileTrue will cancel the command when the button is released
                 .whileTrue(Commands.either(
                         requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
@@ -80,9 +80,9 @@ public class Controls {
     
 
         driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
+        driver.X().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
 
-        // driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
-        driver.leftBumper()
+        operator.leftBumper()
         // whileTrue will cancel the command when the button is released
         .whileTrue(Commands.either(
                 requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
@@ -94,12 +94,12 @@ public class Controls {
         .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
         // Fix drivetrain state
-        driver.X().onTrue(runOnce(() -> {
-            Command currentCommand = driveSubsystem.getCurrentCommand();
-            if (currentCommand != null) {
-                currentCommand.cancel();
-            }
-        }).andThen(robotCommands.driveTeleopCommand()));
+//        driver.X().onTrue(runOnce(() -> {
+//            Command currentCommand = driveSubsystem.getCurrentCommand();
+//            if (currentCommand != null) {
+//                currentCommand.cancel();
+//            }
+//        }).andThen(robotCommands.driveTeleopCommand()));
 
         // Align to Reef Algae
         // driver.Y().onTrue(robotCommands.algaeAlignCommand());
@@ -118,9 +118,9 @@ public class Controls {
 
 
         /* ******** OPERATOR ******** */
-        operator.leftBumper().onTrue(operatorOptions.setProcessorCommand());
-        operator.leftTrigger().and(operator.rightTrigger()).onTrue(requestManager.climbRequest());
-        operator.rightBumper().onTrue(operatorOptions.setBargeCommand());
+        operator.leftTrigger().onTrue(operatorOptions.setProcessorCommand());
+//        driver.leftBumper().and(driver.rightBumper()).onTrue(requestManager.climbRequest());
+        operator.rightTrigger().onTrue(operatorOptions.setBargeCommand());
         operator.Y().onTrue(operatorOptions.setL3Command());
         operator.B().onTrue(operatorOptions.setL4Command());
         operator.X().onTrue(operatorOptions.setL2Command());
@@ -129,7 +129,7 @@ public class Controls {
         //operator.POVMinus90().onTrue(requestManager.prepareCoralScoreAndAwaitReady().andThen(robotCommands.driveTeleopCommand()));
         operator.POV90().onTrue(operatorOptions.setGroundAlgaeCommand());
         operator.POV180().onTrue(operatorOptions.setLowReefAlgaeCommand());
-        operator.back().onTrue(requestManager.invertedHandoffRequest());
+        operator.back().onTrue(requestManager.climbRequest());
         operator.start().onTrue(requestManager.resetArmGamePieceAndIdle());
     }
 }
