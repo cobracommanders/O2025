@@ -201,7 +201,7 @@ public class RequestManager {
     }
 
     public Command climbRequest() {
-        return Commands.parallel(groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing()).andThen(climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
+        return Commands.parallel(groundCommands.requestClimbAndAwaitReady(), armCommands.requestClimbAndAwaitReady()).andThen(climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
     }
 
     public Command handoffRequest() {

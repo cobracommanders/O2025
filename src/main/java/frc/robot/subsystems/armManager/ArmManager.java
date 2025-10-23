@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants;
 import frc.robot.FieldConstants;
-import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.localization.LocalizationSubsystem;
@@ -468,6 +467,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         }
     }
 
+    public boolean isReadyToClimb() {
+        return getState() == ArmManagerState.READY_CLIMB;
+    }
+
     public static class CommandWrapper {
         private final ArmManager armManager;
 
@@ -524,10 +527,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         /**
          * Request climb and do nothing.
          */
-        public Command requestClimbAndDoNothing() {
+        public Command requestClimbAndAwaitReady() {
             return armManager.runOnce(armManager::requestClimb)
-                    .andThen(doNothing())
-                    .withName("requestClimbAndDoNothing");
+                    .andThen(Commands.waitUntil(armManager::isReadyToClimb))
+                    .withName("requestClimbAndAwaitReady");
         }
 
         /**

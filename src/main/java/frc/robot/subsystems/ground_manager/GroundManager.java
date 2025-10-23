@@ -70,6 +70,11 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                     nextState = GroundManagerStates.READY_INVERTED_HANDOFF;
                 }
             }
+            case PREPARE_CLIMB -> {
+                if (intakePivot.atGoal()) {
+                    nextState = GroundManagerStates.CLIMB;
+                }
+            }
             case IDLE, READY_SCORE_L1, CLIMB, READY_INVERTED_HANDOFF, READY_HANDOFF, HANDOFF -> {
                 /* Await Control */
             }
@@ -100,7 +105,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 intakePivot.setState(IntakePivotStates.SCORE_L1);
                 rollers.setState(IntakeRollersStates.SCORE_L1);
             }
-            case CLIMB -> {
+            case PREPARE_CLIMB, CLIMB -> {
                 intakePivot.setState(IntakePivotStates.CLIMB);
                 rollers.setState(IntakeRollersStates.IDLE);
             }
@@ -123,6 +128,10 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
 
     public void requestIdle() {
         setStateFromRequest(GroundManagerStates.IDLE);
+    }
+
+    public void requestClimb() {
+        setStateFromRequest(GroundManagerStates.PREPARE_CLIMB);
     }
 
     public void requestHandoffExecution() {
@@ -150,10 +159,10 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                     .withName("idleAndAwaitReady");
         }
 
-        public Command climbAndDoNothing() {
-            return setState(GroundManagerStates.CLIMB)
-                    .andThen(doNothing())
-                    .withName("climbAndDoNothing");
+        public Command requestClimbAndAwaitReady() {
+            return groundManager.runOnce(groundManager::requestClimb)
+                    .andThen(groundManager.waitForState(GroundManagerStates.CLIMB))
+                    .withName("requestClimbAndAwaitReady");
         }
 
         /**
