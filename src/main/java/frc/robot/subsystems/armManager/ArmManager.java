@@ -89,9 +89,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             }
 
             case IDLE_ALGAE -> {
-                if (algaeDroppedOrMissingDebouncer.calculate(!hand.droppedAlgae()) && !Robot.isSimulation()) {
-                    nextState = ArmManagerState.IDLE_ALGAE_DROPPED;
-                }
+//                if (algaeDroppedOrMissingDebouncer.calculate(!hand.droppedAlgae()) && !Robot.isSimulation()) {
+//                    nextState = ArmManagerState.IDLE_ALGAE_DROPPED;
+//                }
             }
 
             case IDLE_ALGAE_DROPPED -> {
@@ -209,7 +209,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case SCORE_ALGAE_NET_LEFT,
                  SCORE_ALGAE_NET_RIGHT,
                  SCORE_ALGAE_PROCESSOR -> {
-                if (timeout(1)) {
+                if (timeout(1.5)) {
                     nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
                 }
             }
@@ -296,11 +296,11 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.PREPARE_L2_RIGHT, ElevatorState.PREPARE_L2, HandState.IDLE_CORAL);
 
             case SCORE_L4_LEFT -> requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
-            case SCORE_L3_LEFT -> requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 6.0);
-            case SCORE_L2_LEFT -> requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L3_LEFT -> requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 3.0);
+            case SCORE_L2_LEFT -> requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 3.0);
             case SCORE_L4_RIGHT -> requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
-            case SCORE_L3_RIGHT -> requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 6.0);
-            case SCORE_L2_RIGHT -> requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L3_RIGHT -> requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 3.0);
+            case SCORE_L2_RIGHT -> requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 3.0);
 
             case FINISHED_SCORE_L4_LEFT ->
                     requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
@@ -577,8 +577,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
          */
         public Command requestAlgaeReefIntakeAndAwaitIdle(Supplier<RobotScoringSide> side, boolean top) {
             return armManager.runOnce(() -> armManager.requestReefAlgaeIntake(side.get(), top))
-                    .repeatedly()
-                    .withDeadline(armManager.waitForState(ArmManagerState.PREPARE_IDLE_ALGAE))
+                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_ALGAE))
                     .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
                     .withName("requestAlgaeReefIntakeAndAwaitIdle");
         }

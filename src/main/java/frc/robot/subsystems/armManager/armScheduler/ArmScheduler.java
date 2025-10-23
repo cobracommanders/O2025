@@ -65,7 +65,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private final double finalIntakeHeight = intakePivotHeight + intakeMinInterferenceUpHeightFromPivot + intakeHeightOffset;
     private final double intakeWidth = Units.inchesToMeters(21.25);
 
-    private final double minElevatorHeightForFullArmMovement = getNearestElevatorHeightWithoutArmCollision(ArmState.DOWN.getPosition(), 0.0);
+    private final double minElevatorHeightForFullArmMovement = getNearestElevatorHeightWithoutArmCollision(ArmState.DOWN.getPosition(), 0.0) + Units.inchesToMeters(3.0);
 
     private ArmSchedulerState assessState() {
         boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());

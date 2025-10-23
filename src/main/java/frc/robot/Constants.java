@@ -43,9 +43,9 @@ public final class Constants {
         public static final double I = 0.0;
         public static final double D = 0.0;
         public static final double G = 0.32;
-        public static final double MotionMagicAcceleration = 5;
-        public static final double MotionMagicCruiseVelocity = 7;
-        public static final double MotionMagicJerk = 125;
+        public static final double MotionMagicAcceleration = 20;
+        public static final double MotionMagicCruiseVelocity = 10;
+        public static final double MotionMagicJerk = 0;
         public static final double InitialPosition = 0.3186;
         public static final double EncoderOffset = 0;
     }

@@ -78,7 +78,7 @@ public class Arm extends StateMachine<ArmState> {
     }
 
     public boolean atGoal() {
-        return MathUtil.isNear(getState().getPosition(), getNormalizedPosition(), ArmConstants.Tolerance);
+        return MathUtil.isNear(getState().getPosition(), getNormalizedPosition(), ArmConstants.Tolerance, -0.5, 0.5);
     }
 
     public void syncEncoder() {
@@ -103,7 +103,7 @@ public class Arm extends StateMachine<ArmState> {
 
         DogLog.log("Arm/Absolute Encoder position", absolutePosition);
         DogLog.log("Arm/Motor Encoder Position", armPosition);
-        DogLog.log("Arm/Code Position", getNormalizedPosition());
+        DogLog.log("Arm/Normalized Position", getNormalizedPosition());
         DogLog.log("Arm/At Goal", atGoal());
         DogLog.log("Arm/CustomPosition", customStatePosition);
         DogLog.log("Arm/Acceleration", acceleration);

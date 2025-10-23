@@ -6,6 +6,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import dev.doglog.DogLog;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import frc.robot.Constants;
@@ -13,6 +14,8 @@ import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 import frc.robot.util.PhoenixSignalManager;
+
+import static java.lang.Math.abs;
 
 public class Hand extends StateMachine<HandState> {
     private final TalonFX motor = new TalonFX(Ports.HandPorts.MOTOR, TunerConstants.kCANBus.getName());
@@ -40,18 +43,21 @@ public class Hand extends StateMachine<HandState> {
         angularVelocity = velocitySignal.getValueAsDouble();
         DogLog.log("Hand/Stator Current", statorCurrent);
         DogLog.log("Hand/Angular Velocity", angularVelocity);
+        DogLog.log("Hand/hasAlgaeForIntake", hasAlgaeForIntake());
     }
 
     public void setState(HandState state) {
         setStateFromRequest(state);
     }
 
+    private final Debouncer hasAlgaeDebouncer = new Debouncer(0.25);
+
     public boolean hasAlgaeForIntake() {
-        return statorCurrent > Constants.HandConstants.intakeAlgaeStallCurrent;
+        return hasAlgaeDebouncer.calculate(abs(angularVelocity) < 55);
     }
 
     public boolean droppedAlgae() {
-        return statorCurrent > Constants.HandConstants.hasAlgaeStallCurrent;
+        return abs(angularVelocity) > 55;
     }
 
     @Override

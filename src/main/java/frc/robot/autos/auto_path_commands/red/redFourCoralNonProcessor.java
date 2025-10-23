@@ -57,13 +57,12 @@ public class redFourCoralNonProcessor extends BaseAuto {
 
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
 
-                Commands.parallel(
-                        Commands.sequence(
-                                requestManager.overrideArmAcceleration(6.0),
-                                requestManager.prepareLollipopAndAwaitReady().asProxy(),
-                                requestManager.clearOverrideArmAcceleration()
-                        ),
-                        blocks.approachLollipop(Lollipop.RIGHT)
+                Commands.sequence(
+                        requestManager.overrideArmAcceleration(6.0),
+                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                        requestManager.clearOverrideArmAcceleration()
+                ).withDeadline(
+                    blocks.approachLollipop(Lollipop.RIGHT)
                 ),
 
                 blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
@@ -71,7 +70,7 @@ public class redFourCoralNonProcessor extends BaseAuto {
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy()
 //                requestManager.idleAll().asProxy()
         )
-                .beforeStarting(() -> startTime = Timer.getTimestamp())
+//                .beforeStarting(() -> startTime = Timer.getTimestamp())
                 .finallyDo(() -> {
                     System.out.println("Total time: " + (Timer.getTimestamp() - startTime));
                     requestManager.clearOverrideArmAcceleration().schedule();

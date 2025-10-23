@@ -5,7 +5,7 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum ArmState {
     START_POSITION(0.25),
-    IDLE_ALGAE(0.18),
+    IDLE_ALGAE(0.25),
     IDLE_CORAL_UP(0.25),
     INTAKE_GROUND_ALGAE(-0.03),
     HANDOFF_RIGHT(-0.235),
@@ -34,9 +34,9 @@ public enum ArmState {
     PREPARE_L2_LEFT(invertPosition(PREPARE_L2_RIGHT)),
     SCORE_L4_RIGHT(0.05),
     SCORE_L4_LEFT(invertPosition(SCORE_L4_RIGHT)),
-    SCORE_L3_RIGHT(0.0),
+    SCORE_L3_RIGHT(0.01),
     SCORE_L3_LEFT(invertPosition(SCORE_L3_RIGHT)),
-    SCORE_L2_RIGHT(0.0),
+    SCORE_L2_RIGHT(0.01),
     SCORE_L2_LEFT(invertPosition(SCORE_L2_RIGHT)),
     CUSTOM(0.0); // Set in the arm class
 

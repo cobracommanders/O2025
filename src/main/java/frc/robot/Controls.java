@@ -67,7 +67,7 @@ public class Controls {
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
 
         // Score Coral
-        operator.rightBumper()
+        operator.rightTrigger()
                 // whileTrue will cancel the command when the button is released
                 .whileTrue(Commands.either(
                         requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
@@ -76,13 +76,19 @@ public class Controls {
                 ))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
                 // Only resets if the robot is far away from the reef and not likely to score again soon
-                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
-    
+                .onFalse(requestManager.idleAll().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
-        driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
+
+        driver.Y().onTrue(
+                Commands.either(
+                        requestManager.algaeNetScore(() -> requestManager.netRobotSide()),
+                        requestManager.algaeProcessorScore(() -> driver.X().getAsBoolean()),
+                        () -> operatorOptions.algaeScoreLocation == OperatorOptions.AlgaeScoreLocation.BARGE
+                )
+        );
         driver.X().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
 
-        operator.leftBumper()
+        operator.leftTrigger()
         // whileTrue will cancel the command when the button is released
         .whileTrue(Commands.either(
                 requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
@@ -91,7 +97,7 @@ public class Controls {
         ))
         // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
         // Only resets if the robot is far away from the reef and not likely to score again soon
-        .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
+        .onFalse(requestManager.idleAll().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
         // Fix drivetrain state
 //        driver.X().onTrue(runOnce(() -> {
@@ -106,7 +112,7 @@ public class Controls {
 
         // Algae Intake
         //driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
-        driver.rightTrigger().onTrue(Commands.either(
+        driver.rightTrigger().and((operator.leftTrigger().negate().and(operator.rightTrigger().negate()))).onTrue(Commands.either(
                 requestManager.groundAlgaeIntake(),
                 requestManager.reefAlgaeIntake(),
                 () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
@@ -118,9 +124,9 @@ public class Controls {
 
 
         /* ******** OPERATOR ******** */
-        operator.leftTrigger().onTrue(operatorOptions.setProcessorCommand());
+        operator.leftBumper().onTrue(operatorOptions.setProcessorCommand());
 //        driver.leftBumper().and(driver.rightBumper()).onTrue(requestManager.climbRequest());
-        operator.rightTrigger().onTrue(operatorOptions.setBargeCommand());
+        operator.rightBumper().onTrue(operatorOptions.setBargeCommand());
         operator.Y().onTrue(operatorOptions.setL3Command());
         operator.B().onTrue(operatorOptions.setL4Command());
         operator.X().onTrue(operatorOptions.setL2Command());

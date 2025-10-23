@@ -53,22 +53,23 @@ public abstract class BaseAuto implements NamedAuto {
     TrailblazerPathLogger.markAuto(this);
     // We continuously reset the pose anyway, but doing it here should be fine
     // It's basically free as long as we aren't updating the IMU
-    return timing
-        .time(
-            "TotalTime",
-            // TODO: Seems like this doesn't run or runs incorrectly in sim
-            Commands.runOnce(() -> LocalizationSubsystem.getInstance().resetPose(getStartingPose())),
-            createAutoCommand())
-        .finallyDo(
-            interrupted -> {
-              // Stop driving once the auto finishes
-              DriveSubsystem.getInstance().setFieldRelativeAutoSpeeds(new ChassisSpeeds());
-
-              // Check if we are enabled, since auto commands are cancelled during disable
-              if (interrupted && DriverStation.isAutonomousEnabled()) {
-                DogLog.logFault("Auto command interrupted outside teleop");
-              }
-            })
-        .withName(autoName + "Command");
+    return createAutoCommand();
+//            timing
+//        .time(
+//            "TotalTime",
+//            // TODO: Seems like this doesn't run or runs incorrectly in sim
+//            Commands.runOnce(() -> LocalizationSubsystem.getInstance().resetPose(getStartingPose())),
+//            createAutoCommand())
+//        .finallyDo(
+//            interrupted -> {
+//              // Stop driving once the auto finishes
+//              DriveSubsystem.getInstance().setFieldRelativeAutoSpeeds(new ChassisSpeeds());
+//
+//              // Check if we are enabled, since auto commands are cancelled during disable
+//              if (interrupted && DriverStation.isAutonomousEnabled()) {
+//                DogLog.logFault("Auto command interrupted outside teleop");
+//              }
+//            })
+//        .withName(autoName + "Command");
   }
 }

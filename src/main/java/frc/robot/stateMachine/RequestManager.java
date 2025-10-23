@@ -117,7 +117,7 @@ public class RequestManager {
 
     public Command algaeProcessorScore(BooleanSupplier confirmation) {
         return armCommands.requestAlgaeProcessorPrepareAndAwaitReady()
-                .andThen(armCommands.doNothing().until(confirmation))
+                .andThen(Commands.waitUntil(confirmation))
                 .andThen(armCommands.executeAlgaeProcessorScoreAndAwaitIdle());
     }
 
@@ -241,5 +241,9 @@ public class RequestManager {
 
     public Command clearOverrideArmAcceleration() {
         return armCommands.clearOverrideArmAcceleration();
+    }
+
+    public boolean armHasAlgae() {
+        return armCommands.getCurrentGamePiece() == ArmManagerState.HandGamePieceState.ALGAE;
     }
 }

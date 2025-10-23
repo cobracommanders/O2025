@@ -71,8 +71,7 @@ public class AutoBlocks {
     }
 
     public Command driveToBackReefRedNonProcessor() {
-        return Commands.sequence(
-                trailblazer.followSegment(
+        return trailblazer.followSegment(
                         new AutoSegment(
                                 new AutoConstraintOptions(
                                         4.75,
@@ -82,15 +81,14 @@ public class AutoBlocks {
                                 ),
                                 new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
                                 new AutoPoint(
-                                        new Pose2d(13, 2.25, Rotation2d.fromDegrees(70.0))
+                                        new Pose2d(13, 2.0, Rotation2d.fromDegrees(70.0))
                                 ),
                                 new AutoPoint(
                                         new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0)),
                                         requestManager.prepareCoralScoreAndAwaitReady(),
                                         maximumConstraints.withMaxLinearAcceleration(3.5)
-                                        )
-                        ))
-        );
+                                )
+                        ));
     }
 
     public Command approachLollipop(Lollipop lollipop) {
