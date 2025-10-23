@@ -39,12 +39,17 @@ public class redFourCoralNonProcessor extends BaseAuto {
                         blocks.approachLollipop(Lollipop.LEFT)
                 ),
 
+
                 blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
 
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
 
                 Commands.parallel(
-                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                        Commands.sequence(
+                                requestManager.overrideArmAcceleration(6.0),
+                                requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                                requestManager.clearOverrideArmAcceleration()
+                        ),
                         blocks.approachLollipop(Lollipop.MIDDLE)
                 ),
 
@@ -53,7 +58,11 @@ public class redFourCoralNonProcessor extends BaseAuto {
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
 
                 Commands.parallel(
-                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                        Commands.sequence(
+                                requestManager.overrideArmAcceleration(6.0),
+                                requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                                requestManager.clearOverrideArmAcceleration()
+                        ),
                         blocks.approachLollipop(Lollipop.RIGHT)
                 ),
 
@@ -63,7 +72,10 @@ public class redFourCoralNonProcessor extends BaseAuto {
 //                requestManager.idleAll().asProxy()
         )
                 .beforeStarting(() -> startTime = Timer.getTimestamp())
-                .finallyDo(() -> System.out.println("Total time: " + (Timer.getTimestamp() - startTime)))
+                .finallyDo(() -> {
+                    System.out.println("Total time: " + (Timer.getTimestamp() - startTime));
+                    requestManager.clearOverrideArmAcceleration().schedule();
+                })
                 ;
     }
 }

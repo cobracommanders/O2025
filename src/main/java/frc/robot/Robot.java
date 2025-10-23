@@ -128,6 +128,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void teleopInit() {
+        armManager.clearOverrideArmAcceleration();
         DriveSubsystem.getInstance().requestTeleop();
     }
 

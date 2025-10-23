@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants;
 import frc.robot.FieldConstants;
 import frc.robot.Robot;
 import frc.robot.autoAlign.AutoAlign;
@@ -58,6 +59,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
     public boolean isIdleState() {
         return getState().isIdleState();
+    }
+
+    public void overrideArmAcceleration(double armAcceleration) {
+        armScheduler.overrideArmAcceleration(armAcceleration);
+    }
+
+    public void clearOverrideArmAcceleration() {
+        armScheduler.clearOverrideArmAcceleration();
     }
 
     @Override
@@ -229,7 +238,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     }
 
     private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState) {
-        armScheduler.scheduleStates(armState, elevatorState, handState);
+        this.requestState(armState, elevatorState, handState, Constants.ArmConstants.DefaultMotionMagicAcceleration);
+    }
+    private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState, double armAcceleration) {
+        armScheduler.scheduleStates(armState, elevatorState, handState, armAcceleration);
     }
 
     public boolean isArmUp() {
@@ -283,12 +295,12 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case PREPARE_L2_RIGHT, READY_L2_RIGHT ->
                     requestState(ArmState.PREPARE_L2_RIGHT, ElevatorState.PREPARE_L2, HandState.IDLE_CORAL);
 
-            case SCORE_L4_LEFT -> requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL);
-            case SCORE_L3_LEFT -> requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL);
-            case SCORE_L2_LEFT -> requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL);
-            case SCORE_L4_RIGHT -> requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL);
-            case SCORE_L3_RIGHT -> requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL);
-            case SCORE_L2_RIGHT -> requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL);
+            case SCORE_L4_LEFT -> requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L3_LEFT -> requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L2_LEFT -> requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L4_RIGHT -> requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L3_RIGHT -> requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L2_RIGHT -> requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 6.0);
 
             case FINISHED_SCORE_L4_LEFT ->
                     requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
@@ -639,9 +651,13 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             return armManager.getCurrentGamePiece();
         }
 
-        // public Command completeHandoffAndCoralIdle() {
-        //     return Commands.runOnce(armManager::requestCoralIdle).andThen(Commands.waitUntil(armManager::isIdleState));
-        // }
+        public Command overrideArmAcceleration(double armAcceleration) {
+            return Commands.runOnce(() -> armManager.overrideArmAcceleration(armAcceleration));
+        }
+
+        public Command clearOverrideArmAcceleration() {
+            return Commands.runOnce(armManager::clearOverrideArmAcceleration);
+        }
 
         public boolean currentGamePieceIsNone() {
             return getCurrentGamePiece().isNone();
