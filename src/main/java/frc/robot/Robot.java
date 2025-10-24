@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autos.Autos;
+import frc.robot.autos.auto_path_commands.FourCoralNonProcessor;
 import frc.robot.commands.RobotCommands;
 import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
@@ -36,6 +37,7 @@ import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.trailblazer.Trailblazer;
+import frc.robot.util.MathHelpers;
 import frc.robot.util.PhoenixSignalManager;
 
 public class Robot extends TimedRobot {
@@ -64,7 +66,6 @@ public class Robot extends TimedRobot {
 
     private final Controls controls = new Controls(requestManager, robotCommands);
 
-    private final Timer seedImuTimer = new Timer();
     public static LED lights;
 
     private final Autos autos = new Autos(trailblazer, requestManager, robotCommands);
@@ -114,19 +115,18 @@ public class Robot extends TimedRobot {
         controls.configureDefaultCommands();
     }
 
+    private final Command autoCommand = new FourCoralNonProcessor(requestManager, trailblazer, robotCommands).getAutoCommand();
+
     @Override
     public void autonomousInit() {
-        seedImuTimer.reset();
-        seedImuTimer.start();
-
-        Command autonomousCommand = autos.getAutoCommand();
-
         if (Utils.isSimulation()) {
-            localization.resetPose(new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90)));
+            Pose2d startingPose = new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90));
+            localization.resetPose(
+                    DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(startingPose) : startingPose
+            );
         }
 
-        DogLog.log("Selected Auto", autonomousCommand.getName());
-        autonomousCommand.schedule();
+        autoCommand.schedule();
     }
 
     @Override
