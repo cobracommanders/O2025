@@ -25,8 +25,6 @@ public class redFourCoralNonProcessor extends BaseAuto {
         return Points.START_R1_AND_B1.redPose;
     }
 
-    double startTime = 0.0;
-
     @Override
     protected Command createAutoCommand() {
         return Commands.sequence(
@@ -37,7 +35,6 @@ public class redFourCoralNonProcessor extends BaseAuto {
                 blocks.approachLollipop(Lollipop.LEFT).withDeadline(
                         requestManager.prepareLollipopAndAwaitReady().asProxy()
                 ),
-
 
                 blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
 
@@ -50,7 +47,6 @@ public class redFourCoralNonProcessor extends BaseAuto {
                                 requestManager.clearOverrideArmAcceleration()
                         )
                 ),
-
 
                 blocks.intakeLollipop(Lollipop.MIDDLE).asProxy(),
 
@@ -67,11 +63,8 @@ public class redFourCoralNonProcessor extends BaseAuto {
                 blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
 
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy()
-//                requestManager.idleAll().asProxy()
         )
-//                .beforeStarting(() -> startTime = Timer.getTimestamp())
                 .finallyDo(() -> {
-                    System.out.println("Total time: " + (Timer.getTimestamp() - startTime));
                     requestManager.clearOverrideArmAcceleration().schedule();
                 })
                 ;

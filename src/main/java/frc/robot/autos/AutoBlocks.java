@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.ArmConstants;
@@ -80,11 +81,15 @@ public class AutoBlocks {
                                         Units.degreesToRadians(360.0)
                                 ),
                                 new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
+                                new AutoPoint(() -> {
+                                    Pose2d initial_waypoint = new Pose2d(13, 2.0, Rotation2d.fromDegrees(70.0));
+                                    return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(initial_waypoint) : initial_waypoint;
+                                }),
                                 new AutoPoint(
-                                        new Pose2d(13, 2.0, Rotation2d.fromDegrees(70.0))
-                                ),
-                                new AutoPoint(
-                                        new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0)),
+                                        () -> {
+                                            Pose2d final_waypoint = new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0));
+                                            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
+                                        },
                                         requestManager.prepareCoralScoreAndAwaitReady(),
                                         maximumConstraints.withMaxLinearAcceleration(3.5)
                                 )

@@ -52,7 +52,7 @@ public class Autos extends SubsystemBase {
               || DriverStation.isAutonomous()
               || DriverStation.isFMSAttached())) {
         // Continuously reset pose
-        resetPoseForAuto();
+//        resetPoseForAuto();
       }
     }
     if (DriverStation.isAutonomousEnabled()) {
@@ -60,11 +60,11 @@ public class Autos extends SubsystemBase {
     }
   }
 
-  private void resetPoseForAuto() {
-    var auto = FmsSubsystem.getInstance().isRedAlliance() ? selectedRed.getSecond() : selectedBlue.getSecond();
-    var startingPose = auto.getStartingPose();
-    LocalizationSubsystem.getInstance().resetPose(startingPose);
-  }
+//  private void resetPoseForAuto() {
+//    var auto = FmsSubsystem.getInstance().isRedAlliance() ? selectedRed.getSecond() : selectedBlue.getSecond();
+//    var startingPose = auto.getStartingPose();
+//    LocalizationSubsystem.getInstance().resetPose(startingPose);
+//  }
 
   private void updateSelection() {
     // If anything about the auto selection has changed, fully recreate all the commands
