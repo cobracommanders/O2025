@@ -157,7 +157,11 @@ public class RequestManager {
      * Request ground algae intake and await game piece.
      */
     public Command groundAlgaeIntake() {
-        return armCommands.requestGroundAlgaeIntakeAndAwaitGamePiece();
+        return Commands.sequence(
+                groundCommands.prepareL1AndAwaitReady(),
+                armCommands.requestGroundAlgaeIntakeAndAwaitGamePiece(),
+                groundCommands.idleAndAwaitReady()
+        );
     }
 
     public Command highReefAlgaeIntake(Supplier<RobotScoringSide> side) {

@@ -7,7 +7,7 @@ public enum HandState {
     IDLE_ALGAE(-0.12),
     IDLE_CORAL(0),
     IDLE_EMPTY(0.0),
-    CLEAR_ALGAE(0.5), // Clear algae that is dropped according to sensors
+    CLEAR_ALGAE(1.0), // Clear algae that is dropped according to sensors
 
     SCORE_CORAL(0.5),
     HANDOFF(-1.0),

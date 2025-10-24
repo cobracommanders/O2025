@@ -9,10 +9,10 @@ public enum ElevatorState {
     IDLE_CORAL_UP(0.4),
     HIGH_REEF_ALGAE(0.9),
     LOW_REEF_ALGAE(0.53),
-    GROUND_ALGAE(0),
+    GROUND_ALGAE(0.16),
     ALGAE_NET(1.38),
     ALGAE_PROCESSOR(0.1),
-    HANDOFF(0.775 - Units.inchesToMeters(0.75)), // Actual handoff position
+    HANDOFF(0.775 - Units.inchesToMeters(1.25)), // Actual handoff position
     IDLE_EMPTY(0.825), // State above the intake that allows the intake to move in/out freely
     LOLLIPOP(0),
     PREPARE_L4(1.3),

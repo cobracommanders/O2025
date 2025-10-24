@@ -105,7 +105,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        DogLog.setEnabled(!DriverStation.isFMSAttached());
+        DogLog.setEnabled(false);
 
         FmsSubsystem.getInstance();
         lights = new LED();

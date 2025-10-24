@@ -264,7 +264,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.IDLE_EMPTY, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_ALGAE, IDLE_ALGAE ->
-                    requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE);
+                    requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE, 2);
             case IDLE_ALGAE_DROPPED -> requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
 
             /* ******** HANDOFF STATES ******** */
@@ -330,15 +330,15 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
             /* ******** ALGAE SCORE STATES ******** */
             case PREPARE_SCORE_ALGAE_NET_LEFT, READY_SCORE_ALGAE_NET_LEFT ->
-                    requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
+                    requestState(ArmState.ALGAE_NET_LEFT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE, 2);
             case PREPARE_SCORE_ALGAE_NET_RIGHT, READY_SCORE_ALGAE_NET_RIGHT ->
-                    requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE);
+                    requestState(ArmState.ALGAE_NET_RIGHT, ElevatorState.ALGAE_NET, HandState.IDLE_ALGAE, 2);
             case PREPARE_SCORE_ALGAE_PROCESSOR, READY_SCORE_ALGAE_PROCESSOR ->
-                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE);
+                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE, 2);
             case SCORE_ALGAE_NET_LEFT -> hand.setState(HandState.SCORE_ALGAE_NET);
             case SCORE_ALGAE_NET_RIGHT -> hand.setState(HandState.SCORE_ALGAE_NET);
             case SCORE_ALGAE_PROCESSOR ->
-                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR);
+                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR, 2);
 
             /* ******** LOLLIPOP INTAKE STATES ******** */
             case PREPARE_INTAKE_LOLLIPOP -> requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
