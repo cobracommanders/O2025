@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.FieldConstants;
@@ -71,7 +70,7 @@ public class AutoBlocks {
         return getLollipopIntakePose(lollipop).plus(APPROACH_LOLLIPOP_OFFSET);
     }
 
-    public Command driveToBackReefRedNonProcessor() {
+    public Command initialDriveToReefBackNonProcessor() {
         return trailblazer.followSegment(
                         new AutoSegment(
                                 new AutoConstraintOptions(

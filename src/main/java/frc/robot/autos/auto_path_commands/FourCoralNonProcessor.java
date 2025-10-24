@@ -1,12 +1,10 @@
-package frc.robot.autos.auto_path_commands.red;
+package frc.robot.autos.auto_path_commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.FieldConstants.PipeScoringLevel;
 import frc.robot.autoAlign.ReefPipe;
-import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.autos.AutoBlocks.Lollipop;
 import frc.robot.autos.BaseAuto;
@@ -15,8 +13,8 @@ import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.Trailblazer;
 
-public class redFourCoralNonProcessor extends BaseAuto {
-    public redFourCoralNonProcessor(RequestManager robotManager, Trailblazer trailblazer, RobotCommands robotCommands) {
+public class FourCoralNonProcessor extends BaseAuto {
+    public FourCoralNonProcessor(RequestManager robotManager, Trailblazer trailblazer, RobotCommands robotCommands) {
         super(robotManager, trailblazer, robotCommands);
     }
 
@@ -28,7 +26,7 @@ public class redFourCoralNonProcessor extends BaseAuto {
     @Override
     protected Command createAutoCommand() {
         return Commands.sequence(
-                blocks.driveToBackReefRedNonProcessor(),
+                blocks.initialDriveToReefBackNonProcessor(),
 
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
 
