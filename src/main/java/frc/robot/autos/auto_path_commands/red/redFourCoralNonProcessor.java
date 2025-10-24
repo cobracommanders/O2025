@@ -34,9 +34,8 @@ public class redFourCoralNonProcessor extends BaseAuto {
 
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
 
-                Commands.parallel(
-                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
-                        blocks.approachLollipop(Lollipop.LEFT)
+                blocks.approachLollipop(Lollipop.LEFT).withDeadline(
+                        requestManager.prepareLollipopAndAwaitReady().asProxy()
                 ),
 
 
@@ -44,25 +43,25 @@ public class redFourCoralNonProcessor extends BaseAuto {
 
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
 
-                Commands.parallel(
+                blocks.approachLollipop(Lollipop.MIDDLE).withDeadline(
                         Commands.sequence(
                                 requestManager.overrideArmAcceleration(6.0),
                                 requestManager.prepareLollipopAndAwaitReady().asProxy(),
                                 requestManager.clearOverrideArmAcceleration()
-                        ),
-                        blocks.approachLollipop(Lollipop.MIDDLE)
+                        )
                 ),
+
 
                 blocks.intakeLollipop(Lollipop.MIDDLE).asProxy(),
 
                 robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
 
-                Commands.sequence(
-                        requestManager.overrideArmAcceleration(6.0),
-                        requestManager.prepareLollipopAndAwaitReady().asProxy(),
-                        requestManager.clearOverrideArmAcceleration()
-                ).withDeadline(
-                    blocks.approachLollipop(Lollipop.RIGHT)
+                blocks.approachLollipop(Lollipop.RIGHT).withDeadline(
+                        Commands.sequence(
+                                requestManager.overrideArmAcceleration(6.0),
+                                requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                                requestManager.clearOverrideArmAcceleration()
+                        )
                 ),
 
                 blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
