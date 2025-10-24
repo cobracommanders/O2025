@@ -24,7 +24,7 @@ import java.util.Map;
 public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveBase {
     private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
     private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
-    private ChassisSpeeds algaeAutoAlignSpeeds = new ChassisSpeeds();
+    private final ChassisSpeeds algaeAutoAlignSpeeds = new ChassisSpeeds();
 
     public final TunerConstants.TunerSwerveDrivetrain drivetrain = new TunerConstants.TunerSwerveDrivetrain(
             TunerConstants.DrivetrainConstants,
@@ -63,7 +63,7 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     private boolean hasAppliedOperatorPerspective = false;
 
     private DriveSubsystem() {
-        super(DriveStates.TELEOP);
+        super(DriveStates.TELEOP, "DriveSubsystem");
     }
 
     @Override
@@ -73,8 +73,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
             case AUTO, TELEOP ->
                     nextState = FmsSubsystem.getInstance().isAutonomous() ? DriveStates.AUTO : DriveStates.TELEOP;
             case REEF_ALIGN_TELEOP -> { /* Await Control */ }
-            case ALGAE_ALIGN_TELEOP ->
-                    nextState = AutoAlign.getInstance().isAlignedDebounced() ? DriveStates.TELEOP : DriveStates.ALGAE_ALIGN_TELEOP;
         }
 
         return nextState;
@@ -123,7 +121,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 
     @Override
     protected void collectInputs() {
-        algaeAutoAlignSpeeds = FmsSubsystem.getInstance().isRedAlliance() ? flipSpeeds(AutoAlign.getInstance().getAlgaeAlignSpeeds()) : AutoAlign.getInstance().getAlgaeAlignSpeeds();
         teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
 
         DogLog.log("Swerve/AutoSpeeds", autoSpeeds);
@@ -165,11 +162,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         setTeleopSpeeds(0.0, 0.0, 0.0);
     }
 
-    public void requestAlgaeAlign() {
-        setStateFromRequest(DriveStates.ALGAE_ALIGN_TELEOP);
-        setTeleopSpeeds(0.0, 0.0, 0.0);
-    }
-
     protected void sendSwerveRequest(DriveStates newState) {
         switch (newState) {
             case TELEOP -> {
@@ -188,15 +180,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
                                 .withVelocityX(autoSpeeds.vxMetersPerSecond)
                                 .withVelocityY(autoSpeeds.vyMetersPerSecond)
                                 .withRotationalRate(autoSpeeds.omegaRadiansPerSecond)
-                                .withDriveRequestType(DriveRequestType.Velocity));
-            }
-
-            case ALGAE_ALIGN_TELEOP -> {
-                drivetrain.setControl(
-                        autoDrive
-                                .withVelocityX(algaeAutoAlignSpeeds.vxMetersPerSecond)
-                                .withVelocityY(algaeAutoAlignSpeeds.vyMetersPerSecond)
-                                .withRotationalRate(algaeAutoAlignSpeeds.omegaRadiansPerSecond)
                                 .withDriveRequestType(DriveRequestType.Velocity));
             }
         }

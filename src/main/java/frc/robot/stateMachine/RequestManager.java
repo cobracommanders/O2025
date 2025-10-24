@@ -117,7 +117,7 @@ public class RequestManager {
 
     public Command algaeProcessorScore(BooleanSupplier confirmation) {
         return armCommands.requestAlgaeProcessorPrepareAndAwaitReady()
-                .andThen(armCommands.doNothing().until(confirmation))
+                .andThen(Commands.waitUntil(confirmation))
                 .andThen(armCommands.executeAlgaeProcessorScoreAndAwaitIdle());
     }
 
@@ -157,7 +157,11 @@ public class RequestManager {
      * Request ground algae intake and await game piece.
      */
     public Command groundAlgaeIntake() {
-        return armCommands.requestGroundAlgaeIntakeAndAwaitGamePiece();
+        return Commands.sequence(
+                groundCommands.prepareL1AndAwaitReady(),
+                armCommands.requestGroundAlgaeIntakeAndAwaitGamePiece(),
+                groundCommands.idleAndAwaitReady()
+        );
     }
 
     public Command highReefAlgaeIntake(Supplier<RobotScoringSide> side) {
@@ -177,7 +181,6 @@ public class RequestManager {
     }
 
     public Command reefAlgaeIntake() {
-        //return setAlgaeIntakeLevel();
         return Commands.either(
                 highReefAlgaeIntake(this::reefRobotSide),
                 lowReefAlgaeIntake(this::reefRobotSide),
@@ -202,18 +205,19 @@ public class RequestManager {
     }
 
     public Command climbRequest() {
-        return Commands.parallel(groundCommands.climbAndDoNothing(), armCommands.requestClimbAndDoNothing())
-                .andThen(climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
+        return Commands.parallel(groundCommands.requestClimbAndAwaitReady(), armCommands.requestClimbAndAwaitReady()).andThen(climber.runOnce(() -> climber.setState(ClimberStates.DEPLOYING)));
     }
 
     public Command handoffRequest() {
         return sequence(
                 // Intake moves first to avoid collision
                 // TODO might be possible to run in parallel
+
                 groundCommands.requestHandoffAndAwaitReady(),
                 armCommands.requestHandoffAndAwaitReady(coralPositionSupplier),
                 groundCommands.executeHandoff(),
-                waitSeconds(0.1),
+                waitSeconds(0.15),
+                //armCommands.completeHandoffAndCoralIdle(),
                 armCommands.completeHandoffAndCoralIdle(),
                 idleAll()
         )
@@ -233,5 +237,17 @@ public class RequestManager {
                 .andThen(idleAll())
                 .onlyIf(armCommands::currentGamePieceIsNone)
                 .withName("invertedHandoffRequest");
+    }
+
+    public Command overrideArmAcceleration(double armAcceleration) {
+        return armCommands.overrideArmAcceleration(armAcceleration);
+    }
+
+    public Command clearOverrideArmAcceleration() {
+        return armCommands.clearOverrideArmAcceleration();
+    }
+
+    public boolean armHasAlgae() {
+        return armCommands.getCurrentGamePiece() == ArmManagerState.HandGamePieceState.ALGAE;
     }
 }

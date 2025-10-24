@@ -41,7 +41,7 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
       Limelight bl,
       Limelight fl,
       Limelight right) {
-    super(VisionStates.TAGS);
+    super(VisionStates.TAGS, "VisionSubsystem");
     this.leftBackLimelight = bl;
     this.leftFrontLimelight = fl;
     this.rightLimelight = right;

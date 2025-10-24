@@ -1,5 +1,7 @@
 package frc.robot.subsystems.armManager.armScheduler;
 
+import com.ctre.phoenix6.Utils;
+
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -40,6 +42,7 @@ public class ArmSchedulerVisualization {
     }
 
     public void drawArm(double pivotY, double armX1, double armY1, double armX2, double armY2) {
+        if (!Utils.isSimulation()) return;
         armRoot.setPosition(windowCenter, pivotY);
         armLine1.setAngle(Units.radiansToDegrees(Math.atan2(armY1 - pivotY, armX1)));
         armLine1.setLength(Math.hypot(armX1, armY1 - pivotY));
@@ -48,6 +51,7 @@ public class ArmSchedulerVisualization {
     }
 
     public void drawIntake(double intakeWidth, double finalIntakeHeight) {
+        if (!Utils.isSimulation()) return;
         intakeRoot.setPosition(windowCenter - intakeWidth / 2.0, finalIntakeHeight);
         intake.setColor(new Color8Bit(Color.kRed));
     }

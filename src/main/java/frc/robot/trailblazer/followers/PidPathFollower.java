@@ -19,7 +19,7 @@ public class PidPathFollower implements PathFollower {
         this.thetaController = thetaController;
 
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
-        thetaController.setTolerance(0.01);
+        thetaController.setTolerance(0.005);
     }
 
     @Override
@@ -37,6 +37,6 @@ public class PidPathFollower implements PathFollower {
 
         // 0.02 is added as a slight feedforward to make sure the robot always has the minimum power needed to move
         // Completely arbitrary and may need tuning or removal at some point
-        return new PolarChassisSpeeds(-linearController.calculate(distance, 0.0) + 0.02, direction, rotationSpeed);
+        return new PolarChassisSpeeds(-linearController.calculate(distance, 0.0) + 0.0, direction, rotationSpeed);
     }
 }

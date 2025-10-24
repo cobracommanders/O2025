@@ -70,6 +70,7 @@ public enum ArmManagerState {
      *
      * PREPARE_<h>_<side> -> READY_<h>_<side> when At Position
      * READY_<h>_<side> -> SCORE_<h>_<side> when External Signal
+     * SCORE_<h>_<side> -> FINISHED_SCORE_<h>_<side> when At Position
      */
     PREPARE_L4_LEFT(CORAL),
     PREPARE_L3_LEFT(CORAL),
@@ -80,6 +81,9 @@ public enum ArmManagerState {
     SCORE_L4_LEFT(CORAL),
     SCORE_L3_LEFT(CORAL),
     SCORE_L2_LEFT(CORAL),
+    FINISHED_SCORE_L2_LEFT(NONE),
+    FINISHED_SCORE_L3_LEFT(NONE),
+    FINISHED_SCORE_L4_LEFT(NONE),
 
     PREPARE_L4_RIGHT(CORAL),
     PREPARE_L3_RIGHT(CORAL),
@@ -90,6 +94,9 @@ public enum ArmManagerState {
     SCORE_L4_RIGHT(CORAL),
     SCORE_L3_RIGHT(CORAL),
     SCORE_L2_RIGHT(CORAL),
+    FINISHED_SCORE_L2_RIGHT(NONE),
+    FINISHED_SCORE_L3_RIGHT(NONE),
+    FINISHED_SCORE_L4_RIGHT(NONE),
 
 
     /*
@@ -242,9 +249,14 @@ public enum ArmManagerState {
         };
     }
 
-    public boolean isCoralScoreState() {
+    public boolean isCoralScoreFinishedState() {
         return switch (this) {
-            case SCORE_L4_LEFT, SCORE_L3_LEFT, SCORE_L2_LEFT, SCORE_L4_RIGHT, SCORE_L3_RIGHT, SCORE_L2_RIGHT -> true;
+            case FINISHED_SCORE_L4_LEFT,
+                 FINISHED_SCORE_L3_LEFT,
+                 FINISHED_SCORE_L2_LEFT,
+                 FINISHED_SCORE_L4_RIGHT,
+                 FINISHED_SCORE_L3_RIGHT,
+                 FINISHED_SCORE_L2_RIGHT -> true;
             default -> false;
         };
     }
@@ -288,6 +300,22 @@ public enum ArmManagerState {
             case READY_L4_RIGHT -> SCORE_L4_RIGHT;
             case READY_L3_RIGHT -> SCORE_L3_RIGHT;
             case READY_L2_RIGHT -> SCORE_L2_RIGHT;
+            default -> this;
+        };
+    }
+
+    /**
+     * Get the "FINISHED_SCORE_XXX_XXX" state based on the given "SCORE_XXX_XXX" state.
+     * Returns the given state if this is not a coral score state.
+     */
+    public ArmManagerState getCoralScoreToFinishedState() {
+        return switch (this) {
+            case SCORE_L4_LEFT -> FINISHED_SCORE_L4_LEFT;
+            case SCORE_L3_LEFT -> FINISHED_SCORE_L3_LEFT;
+            case SCORE_L2_LEFT -> FINISHED_SCORE_L2_LEFT;
+            case SCORE_L4_RIGHT -> FINISHED_SCORE_L4_RIGHT;
+            case SCORE_L3_RIGHT -> FINISHED_SCORE_L3_RIGHT;
+            case SCORE_L2_RIGHT -> FINISHED_SCORE_L2_RIGHT;
             default -> this;
         };
     }

@@ -1,9 +1,12 @@
 package frc.robot.autos.auto_path_commands.red;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.FieldConstants.PipeScoringLevel;
 import frc.robot.autoAlign.ReefPipe;
+import frc.robot.autoAlign.ReefPipeLevel;
 import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.autos.AutoBlocks.Lollipop;
 import frc.robot.autos.BaseAuto;
@@ -11,13 +14,10 @@ import frc.robot.autos.Points;
 import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.Trailblazer;
-import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 
 public class redFourCoralNonProcessor extends BaseAuto {
-    private static final AutoConstraintOptions CONSTRAINTS = new AutoConstraintOptions(2, 57, 1, 30);
-
-    public redFourCoralNonProcessor(RequestManager robotManager, Trailblazer trailblazer) {
-        super(robotManager, trailblazer);
+    public redFourCoralNonProcessor(RequestManager robotManager, Trailblazer trailblazer, RobotCommands robotCommands) {
+        super(robotManager, trailblazer, robotCommands);
     }
 
     @Override
@@ -25,39 +25,55 @@ public class redFourCoralNonProcessor extends BaseAuto {
         return Points.START_R1_AND_B1.redPose;
     }
 
-    public Pose2d getStartingPosition() {
-        return getStartingPose();
-    }
+    double startTime = 0.0;
 
     @Override
     protected Command createAutoCommand() {
         return Commands.sequence(
                 blocks.driveToBackReefRedNonProcessor(),
-                blocks.scorePreloadL4(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                requestManager.prepareLollipopAndAwaitReady(),
-                // Commands.parallel(
 
-                blocks.pickUpLolli(Lollipop.RIGHT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                // ),
-                blocks.scoreL2(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                requestManager.prepareLollipopAndAwaitReady(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
 
-                // RobotCommands.getInstance().waitForAllIdle(),
-                // RobotCommands.getInstance().lollipopIntakeCommand(),
-                blocks.pickUpLolli(Lollipop.MIDDLE, ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                blocks.scoreL2(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_A, RobotScoringSide.LEFT),
-                requestManager.prepareLollipopAndAwaitReady(),
+                blocks.approachLollipop(Lollipop.LEFT).withDeadline(
+                        requestManager.prepareLollipopAndAwaitReady().asProxy()
+                ),
 
-                // RobotCommands.getInstance().waitForAllIdle(),
-                // RobotCommands.getInstance().lollipopIntakeCommand(),
-                blocks.pickUpLolli(Lollipop.LEFT, ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                blocks.scoreL4(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT),
-                blocks.backUpFromReef(ReefPipe.PIPE_B, RobotScoringSide.LEFT)
 
-        );
+                blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
+
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
+
+                blocks.approachLollipop(Lollipop.MIDDLE).withDeadline(
+                        Commands.sequence(
+                                requestManager.overrideArmAcceleration(6.0),
+                                requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                                requestManager.clearOverrideArmAcceleration()
+                        )
+                ),
+
+
+                blocks.intakeLollipop(Lollipop.MIDDLE).asProxy(),
+
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
+
+                blocks.approachLollipop(Lollipop.RIGHT).withDeadline(
+                        Commands.sequence(
+                                requestManager.overrideArmAcceleration(6.0),
+                                requestManager.prepareLollipopAndAwaitReady().asProxy(),
+                                requestManager.clearOverrideArmAcceleration()
+                        )
+                ),
+
+                blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
+
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy()
+//                requestManager.idleAll().asProxy()
+        )
+//                .beforeStarting(() -> startTime = Timer.getTimestamp())
+                .finallyDo(() -> {
+                    System.out.println("Total time: " + (Timer.getTimestamp() - startTime));
+                    requestManager.clearOverrideArmAcceleration().schedule();
+                })
+                ;
     }
 }
