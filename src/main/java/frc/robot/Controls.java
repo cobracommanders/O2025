@@ -71,7 +71,9 @@ public class Controls {
                 // whileTrue will cancel the command when the button is released
                 .whileTrue(Commands.either(
                         requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
-                        robotCommands.teleopReefAlignAndScore(driver::isStickActive, false),
+                        robotCommands.teleopReefAlignAndScore(driver::isStickActive,
+                                () -> driver.B().getAsBoolean(),
+                                false),
                         () -> OperatorOptions.getInstance().isCoralScoringL1()
                 ))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
@@ -92,7 +94,9 @@ public class Controls {
         // whileTrue will cancel the command when the button is released
         .whileTrue(Commands.either(
                 requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
-                robotCommands.teleopReefAlignAndScore(driver::isStickActive, true),
+                robotCommands.teleopReefAlignAndScore(driver::isStickActive,
+                        () -> driver.B().getAsBoolean(),
+                        true),
                 () -> OperatorOptions.getInstance().isCoralScoringL1()
         ))
         // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
