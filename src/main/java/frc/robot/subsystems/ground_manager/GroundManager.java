@@ -1,6 +1,7 @@
 package frc.robot.subsystems.ground_manager;
 
 import com.ctre.phoenix6.Utils;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.stateMachine.StateMachine;
@@ -20,6 +21,8 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         super(GroundManagerStates.PREPARE_IDLE, "GroundManager");
     }
 
+    private Debouncer coralDetectedDebouncer = new Debouncer(0.1);
+
     @Override
     protected GroundManagerStates getNextState(GroundManagerStates currentState) {
         GroundManagerStates nextState = currentState;
@@ -31,20 +34,31 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
             }
             case PREPARE_INTAKE -> {
                 if (intakePivot.atGoal()) {
-                    nextState = GroundManagerStates.INTAKING;
+                    nextState = GroundManagerStates.INTAKE;
                 }
             }
-            case INTAKING -> {
+            case INTAKE -> {
+                if (coralDetectedDebouncer.calculate(coralDetector.getState() != CoralDetectorState.NONE)) {
+                    nextState = GroundManagerStates.CENTERING;
+                }
+//                else if (Utils.isSimulation() && intakePivot.atGoal() && timeout(Math.random() + 0.5)) {
+//                    nextState = GroundManagerStates.PREPARE_IDLE;
+//                    CoralDetectorState simCoralPosition = switch ((int) (Math.random() * 3)) {
+//                        case 1 -> CoralDetectorState.LEFT;
+//                        case 2 -> CoralDetectorState.RIGHT;
+//                        default -> CoralDetectorState.MIDDLE;
+//                    };
+//                    coralDetector.setSimCoral(simCoralPosition);
+//                }
+            }
+            case CENTERING -> {
                 if (coralDetector.getState() == CoralDetectorState.MIDDLE) {
+                    nextState = GroundManagerStates.BONUS_CENTERING;
+                }
+            }
+            case BONUS_CENTERING -> {
+                if (timeout(0.25)) {
                     nextState = GroundManagerStates.PREPARE_IDLE;
-                } else if (Utils.isSimulation() && intakePivot.atGoal() && timeout(Math.random() + 0.5)) {
-                    nextState = GroundManagerStates.PREPARE_IDLE;
-                    CoralDetectorState simCoralPosition = switch ((int) (Math.random() * 3)) {
-                        case 1 -> CoralDetectorState.LEFT;
-                        case 2 -> CoralDetectorState.RIGHT;
-                        default -> CoralDetectorState.MIDDLE;
-                    };
-                    coralDetector.setSimCoral(simCoralPosition);
                 }
             }
             case PREPARE_HANDOFF -> {
@@ -89,7 +103,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 intakePivot.setState(IntakePivotStates.IDLE);
                 rollers.setState(IntakeRollersStates.IDLE);
             }
-            case PREPARE_INTAKE, INTAKING -> {
+            case PREPARE_INTAKE, INTAKE -> {
                 intakePivot.setState(IntakePivotStates.INTAKING);
                 rollers.setState(IntakeRollersStates.INTAKING);
             }
@@ -114,6 +128,12 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
                 rollers.setState(IntakeRollersStates.HANDOFF);
 
                 coralDetector.setSimCoral(CoralDetectorState.NONE);
+            }
+            case CENTERING, BONUS_CENTERING -> {
+                intakePivot.setState(IntakePivotStates.IDLE);
+                rollers.setState(IntakeRollersStates.INTAKING);
+
+                coralDetector.setSimCoral(CoralDetectorState.MIDDLE);
             }
             case INVERTED_HANDOFF -> {
                 intakePivot.setState(IntakePivotStates.HANDOFF);
@@ -187,7 +207,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
          * Intake until a piece is detected.
          */
         public Command intakeUntilPiece() {
-            return setState(GroundManagerStates.INTAKING)
+            return setState(GroundManagerStates.INTAKE)
                     .andThen(awaitGamePieceFromIntaking())
                     .withName("requestIntakeUntilPiece");
         }
@@ -198,7 +218,7 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
          */
         public Command awaitGamePieceFromIntaking() {
             return groundManager.waitForState(GroundManagerStates.PREPARE_IDLE)
-                    .onlyIf(() -> groundManager.getState() == GroundManagerStates.INTAKING);
+                    .onlyIf(() -> groundManager.getState() == GroundManagerStates.INTAKE);
         }
 
         /**
