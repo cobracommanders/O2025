@@ -48,10 +48,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         return timeout(0.5) && AutoAlign.getInstance().getUsedScoringPose().getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose().getTranslation()) >= 0.25;
     }
 
-    public boolean isReadyToReturnToIdleAfterIntakingAlgae() {
-        return AutoAlign.getInstance().getAlgaeDistance().getTranslation().getDistance(LocalizationSubsystem.getInstance().getPose().getTranslation()) >= 1.25;
-    }
-
     public boolean atPosition() {
         return armScheduler.isReady();
     }
@@ -175,15 +171,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                  ACTIVE_INTAKE_HIGH_REEF_ALGAE_RIGHT,
                  ACTIVE_INTAKE_LOW_REEF_ALGAE_LEFT,
                  ACTIVE_INTAKE_LOW_REEF_ALGAE_RIGHT -> {
-                if (isReadyToReturnToIdleAfterIntakingAlgae()) {
-                    nextState = ArmManagerState.IDLE_ALGAE;
-                }
             }
 
             case ACTIVE_INTAKE_GROUND_ALGAE -> {
-                if (hand.hasAlgaeForIntake()) {
-                    nextState = ArmManagerState.PREPARE_IDLE_ALGAE;
-                }
             }
 
 
@@ -239,6 +229,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState) {
         this.requestState(armState, elevatorState, handState, Constants.ArmConstants.DefaultMotionMagicAcceleration);
     }
+
     private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState, double armAcceleration) {
         armScheduler.scheduleStates(armState, elevatorState, handState, armAcceleration);
     }
@@ -294,12 +285,18 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case PREPARE_L2_RIGHT, READY_L2_RIGHT ->
                     requestState(ArmState.PREPARE_L2_RIGHT, ElevatorState.PREPARE_L2, HandState.IDLE_CORAL);
 
-            case SCORE_L4_LEFT -> requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
-            case SCORE_L3_LEFT -> requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 3.0);
-            case SCORE_L2_LEFT -> requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 3.0);
-            case SCORE_L4_RIGHT -> requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
-            case SCORE_L3_RIGHT -> requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 3.0);
-            case SCORE_L2_RIGHT -> requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 3.0);
+            case SCORE_L4_LEFT ->
+                    requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L3_LEFT ->
+                    requestState(ArmState.SCORE_L3_LEFT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 3.0);
+            case SCORE_L2_LEFT ->
+                    requestState(ArmState.SCORE_L2_LEFT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 3.0);
+            case SCORE_L4_RIGHT ->
+                    requestState(ArmState.SCORE_L4_RIGHT, ElevatorState.SCORE_L4, HandState.IDLE_CORAL, 6.0);
+            case SCORE_L3_RIGHT ->
+                    requestState(ArmState.SCORE_L3_RIGHT, ElevatorState.SCORE_L3, HandState.IDLE_CORAL, 3.0);
+            case SCORE_L2_RIGHT ->
+                    requestState(ArmState.SCORE_L2_RIGHT, ElevatorState.SCORE_L2, HandState.IDLE_CORAL, 3.0);
 
             case FINISHED_SCORE_L4_LEFT ->
                     requestState(ArmState.SCORE_L4_LEFT, ElevatorState.SCORE_L4, HandState.SCORE_CORAL);
@@ -394,6 +391,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
     public void requestCoralIdle() {
         setStateFromRequest(ArmManagerState.IDLE_CORAL_DOWN);
+    }
+
+    public void requestAlgaeIdle() {
+        setStateFromRequest(ArmManagerState.IDLE_ALGAE);
     }
 
     public void requestIdleClearGamePiece() {
@@ -580,7 +581,17 @@ public class ArmManager extends StateMachine<ArmManagerState> {
          */
         public Command requestAlgaeReefIntakeAndAwaitIdle(Supplier<RobotScoringSide> side, boolean top) {
             return armManager.runOnce(() -> armManager.requestReefAlgaeIntake(side.get(), top))
-                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_ALGAE))
+//                    .andThen(Commands.waitUntil(() -> {
+//                        Pose2d algaeAlignPose = AutoAlign.getInstance().getAlgaeDistance();
+//                        Translation2d robotPose = LocalizationSubsystem.getInstance().getPose().getTranslation();
+//                        return algaeAlignPose.getTranslation().getDistance(robotPose) <= 1.25;
+//                    }))
+//                    .andThen(Commands.waitUntil(() -> {
+//                        Pose2d algaeAlignPose = AutoAlign.getInstance().getAlgaeDistance();
+//                        Translation2d robotPose = LocalizationSubsystem.getInstance().getPose().getTranslation();
+//                        return algaeAlignPose.getTranslation().getDistance(robotPose) >= 1.5;
+//                    }))
+//                    .andThen(requestAlgaeIdleAndAwaitReady())
                     .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
                     .withName("requestAlgaeReefIntakeAndAwaitIdle");
         }
@@ -588,12 +599,12 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         /**
          * Request ground algae intake and await game piece.
          */
-        public Command requestGroundAlgaeIntakeAndAwaitGamePiece() {
+        public Command requestGroundAlgaeIntakeAndAwaitReady() {
             return armManager.runOnce(armManager::requestGroundAlgaeIntake)
                     .andThen(armManager.waitForState(ArmManagerState.ACTIVE_INTAKE_GROUND_ALGAE))
-                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_ALGAE))
+//                    .andThen(armManager.waitForState(ArmManagerState.PREPARE_IDLE_ALGAE))
                     .withInterruptBehavior(InterruptionBehavior.kCancelSelf)
-                    .withName("requestGroundAlgaeIntakeAndAwaitGamePiece");
+                    .withName("requestGroundAlgaeIntakeAndAwaitReady");
         }
 
         /**
@@ -623,6 +634,10 @@ public class ArmManager extends StateMachine<ArmManagerState> {
 
         public Command completeHandoffAndCoralIdle() {
             return Commands.runOnce(armManager::requestCoralIdle).andThen(Commands.waitUntil(armManager::isIdleState));
+        }
+
+        public Command requestAlgaeIdleAndAwaitReady() {
+            return Commands.runOnce(armManager::requestAlgaeIdle).andThen(Commands.waitUntil(armManager::isIdleState));
         }
 
         /**

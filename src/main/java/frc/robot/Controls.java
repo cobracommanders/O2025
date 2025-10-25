@@ -120,7 +120,9 @@ public class Controls {
                 requestManager.groundAlgaeIntake(),
                 requestManager.reefAlgaeIntake(),
                 () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
-        ));
+        )).onFalse(
+                requestManager.resetGroundAlgaeIntake()
+        );
 
         // Tick Intake Pivot
         driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));

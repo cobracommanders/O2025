@@ -55,7 +55,7 @@ public class RequestManager {
     //     }
     // }
 
-    public AlgaeIntakeLevel getAlgaeIntakeLevel(){
+    public AlgaeIntakeLevel getAlgaeIntakeLevel() {
         // if(FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()){
         //     if(AutoAlign.getInstance().approximateDistanceToReef() >= 2){
         //         return AlgaeIntakeLevel.GROUND_ALGAE;
@@ -65,15 +65,15 @@ public class RequestManager {
         //         return AlgaeIntakeLevel.LOW_REEF;
         //     }
         // } else {
-            return OperatorOptions.getInstance().algaeIntakeLevel;
+        return OperatorOptions.getInstance().algaeIntakeLevel;
         // }
     }
 
-    public Command setAlgaeIntakeLevel(){
-        switch (OperatorOptions.getInstance().getAlgaeIntakeLevel()){
+    public Command setAlgaeIntakeLevel() {
+        switch (OperatorOptions.getInstance().getAlgaeIntakeLevel()) {
             case GROUND_ALGAE -> {
                 return groundAlgaeIntake();
-            } 
+            }
             case HIGH_REEF -> {
                 return highReefAlgaeIntake(this::reefRobotSide);
             }
@@ -159,7 +159,13 @@ public class RequestManager {
     public Command groundAlgaeIntake() {
         return Commands.sequence(
                 groundCommands.prepareL1AndAwaitReady(),
-                armCommands.requestGroundAlgaeIntakeAndAwaitGamePiece(),
+                armCommands.requestGroundAlgaeIntakeAndAwaitReady()
+        );
+    }
+
+    public Command resetGroundAlgaeIntake() {
+        return Commands.sequence(
+                armCommands.requestAlgaeIdleAndAwaitReady(),
                 groundCommands.idleAndAwaitReady()
         );
     }
@@ -172,7 +178,7 @@ public class RequestManager {
         return armCommands.requestAlgaeReefIntakeAndAwaitIdle(side, false);
     }
 
-     public boolean algaeIntakeHeightIsTop() {
+    public boolean algaeIntakeHeightIsTop() {
         if (FeatureFlags.AUTO_ALGAE_INTAKE_HEIGHT.getAsBoolean()) {
             return AutoAlign.getInstance().getClosestReefSide().algaeHeight == ReefPipeLevel.L3;
         } else {
