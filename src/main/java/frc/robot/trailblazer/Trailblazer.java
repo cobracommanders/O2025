@@ -32,7 +32,7 @@ public class Trailblazer {
         if (Robot.isSimulation()) {
             this.pathFollower = new PidPathFollower(new PIDController(5.0, 0, 0.0), new PIDController(5.0, 0, 0.0));
         } else {
-            this.pathFollower = new PidPathFollower(new PIDController(3.7, 0, 0.05), new PIDController(4.0, 0, 0.2));
+            this.pathFollower = new PidPathFollower(new PIDController(7.0, 0, 0.02), new PIDController(5.0, 0, 0.0));
         }
     }
 

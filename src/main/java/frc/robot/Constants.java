@@ -5,9 +5,6 @@ import frc.robot.subsystems.armManager.elevator.ElevatorState;
 import frc.robot.subsystems.drivetrain.TunerConstants;
 
 public final class Constants {
-
-    public static boolean tuningMode = true;
-
     public static boolean isSimulation = false;
 
     public static final double SIM_LOOP_TIME = 0.02;
@@ -19,7 +16,8 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.24;
         public static final double MotionMagicCruiseVelocity = 7;
-        public static final double MotionMagicAcceleration = 3.5;
+        public static final double DefaultMotionMagicAcceleration = 4.5;
+        public static final double MotionMagicJerk = 0.0;
 //        public static final double encoderOffset = -0.64111328125 + 0.005371;
         public static final double encoderOffset = -0.384277 - 0.25;
         public static final double inchesFromCenter = 6.615;
@@ -33,7 +31,7 @@ public final class Constants {
         public static final double D = 0;
         public static final double G = 0.48;
         public static final double MotionMagicCruiseVelocity = 7.0;
-        public static final double MotionMagicAcceleration = 8.5;
+        public static final double MotionMagicAcceleration = 8.0;
         public static final double Tolerance = 0.025;
         public static final double MaxHeight = ElevatorState.ALGAE_NET.getPosition();
     }
@@ -45,9 +43,9 @@ public final class Constants {
         public static final double I = 0.0;
         public static final double D = 0.0;
         public static final double G = 0.32;
-        public static final double MotionMagicAcceleration = 5;
-        public static final double MotionMagicCruiseVelocity = 7;
-        public static final double MotionMagicJerk = 125;
+        public static final double MotionMagicAcceleration = 20;
+        public static final double MotionMagicCruiseVelocity = 10;
+        public static final double MotionMagicJerk = 0;
         public static final double InitialPosition = 0.3186;
         public static final double EncoderOffset = 0;
     }

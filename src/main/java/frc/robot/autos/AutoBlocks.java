@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.FieldConstants;
@@ -70,32 +70,36 @@ public class AutoBlocks {
         return getLollipopIntakePose(lollipop).plus(APPROACH_LOLLIPOP_OFFSET);
     }
 
-    public Command driveToBackReefRedNonProcessor() {
-        return Commands.sequence(
-                trailblazer.followSegment(
+    public Command initialDriveToReefBackNonProcessor() {
+        return trailblazer.followSegment(
                         new AutoSegment(
                                 new AutoConstraintOptions(
                                         4.75,
                                         Units.degreesToRadians(360.0),
-                                        9,
+                                        6,
                                         Units.degreesToRadians(360.0)
                                 ),
-                                new PoseErrorTolerance(Units.inchesToMeters(6.0), 10.0),
-                                new AutoPoint(new Pose2d(14.75, 2.0, Rotation2d.fromDegrees(70.0))),
+                                new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
+                                new AutoPoint(() -> {
+                                    Pose2d initial_waypoint = new Pose2d(13, 2.0, Rotation2d.fromDegrees(70.0));
+                                    return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(initial_waypoint) : initial_waypoint;
+                                }),
                                 new AutoPoint(
-                                        new Pose2d(14.75, 3.8, Rotation2d.fromDegrees(90.0)),
-                                        requestManager.prepareCoralScoreAndAwaitReady().asProxy(),
-                                        maximumConstraints.withMaxLinearAcceleration(3.0)
+                                        () -> {
+                                            Pose2d final_waypoint = new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0));
+                                            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
+                                        },
+                                        requestManager.prepareCoralScoreAndAwaitReady(),
+                                        maximumConstraints.withMaxLinearAcceleration(3.5)
                                 )
-                        ))
-        );
+                        ));
     }
 
     public Command approachLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(4.5),
-                        new PoseErrorTolerance(Units.inchesToMeters(4), 2.0),
+                        maximumConstraints.withMaxLinearAcceleration(3.5),
+                        new PoseErrorTolerance(Units.inchesToMeters(2), 1.0),
                         new AutoPoint(() -> getLollipopApproachPose(lollipop.index))
                 ));
     }
@@ -103,8 +107,8 @@ public class AutoBlocks {
     public Command intakeLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(4.5),
-                        new PoseErrorTolerance(Units.inchesToMeters(4), 1.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
+                        maximumConstraints.withMaxLinearAcceleration(4.0),
+                        new PoseErrorTolerance(Units.inchesToMeters(3), 2.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
                         new AutoPoint(() -> getLollipopIntakePose(lollipop.index)))
         );
     }

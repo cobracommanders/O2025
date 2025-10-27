@@ -5,6 +5,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.config.FeatureFlags;
+import frc.robot.localization.LocalizationSubsystem;
+import frc.robot.stateMachine.RequestManager;
 import frc.robot.Constants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
@@ -26,6 +31,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private ArmState targetArmState;
     private ElevatorState targetElevatorState;
     private HandState targetHandState;
+    private double armAcceleration;
 
     public ArmScheduler(
             Arm arm,
@@ -36,7 +42,12 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         this.arm = arm;
         this.elevator = elevator;
         this.hand = hand;
-        this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean()) {
+            this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+        } else {
+            this.visualization = null;
+        }
     }
 
     private final double armLength = Units.inchesToMeters(24.5);
@@ -54,26 +65,11 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private final double finalIntakeHeight = intakePivotHeight + intakeMinInterferenceUpHeightFromPivot + intakeHeightOffset;
     private final double intakeWidth = Units.inchesToMeters(21.25);
 
-    private final double minElevatorHeightForFullArmMovement = getNearestElevatorHeightWithoutArmCollision(ArmState.DOWN.getPosition(), 0.0);
+    private final double minElevatorHeightForFullArmMovement = getNearestElevatorHeightWithoutArmCollision(ArmState.DOWN.getPosition(), 0.0) + Units.inchesToMeters(3.0);
 
     private ArmSchedulerState assessState() {
         boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());
         boolean canMoveArmInternally = !willArmHitIntakeOrDrivetrain(targetArmState.getPosition(), elevator.getHeight());
-
-        // Ideally no longer needed with new coral autoalign
-
-//        boolean willArmExtendOutOfFrame = willArmExtendOutOfFrame(targetArmState.getPosition());
-//        boolean isArmExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
-
-//        if (willArmExtendOutOfFrame && isArmExtendingOutOfFrame) {
-//            return ArmSchedulerState.PARALLEL;
-//        }
-//
-//        if (willArmExtendOutOfFrame && !elevatorAtPosition() && canMoveElevatorInternally) {
-//            return ArmSchedulerState.ELEVATOR_FIRST;
-//        } else if (isArmExtendingOutOfFrame && !armAtPosition() && canMoveArmInternally) {
-//            return ArmSchedulerState.ARM_FIRST;
-//        }
 
         if (canMoveElevatorInternally && canMoveArmInternally) {
             return ArmSchedulerState.PARALLEL;
@@ -82,9 +78,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         } else if (canMoveArmInternally) {
             return ArmSchedulerState.ARM_FIRST;
         } else {
+            // No valid moves, probably should handle specially
             return getState();
-            // TODO remove for actual robot
-            //throw new IllegalStateException("Cannot move elevator or arm");
         }
     }
 
@@ -162,19 +157,21 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
      * Gets the arm state that ensures the movement will be in the correct direction to avoid various obstacles.
      */
     private ArmState getArmStateWithCollisionAvoidance(ArmState state) {
-        double currentArmPosition = arm.getNormalizedPosition();
-        double targetArmPosition = state.getPosition();
+        if (DriverStation.isAutonomous()) {
+            double currentArmPosition = arm.getNormalizedPosition();
+            double targetArmPosition = state.getPosition();
 
-        // Checks if the elevator is lower than the minimum required for the arm to not collide with the intake
-        boolean willSwingThroughRobotIfDownwardSwing = elevator.getHeight() < minElevatorHeightForFullArmMovement;
+            // Checks if the elevator is lower than the minimum required for the arm to not collide with the intake
+            boolean willSwingThroughRobotIfDownwardSwing = elevator.getHeight() < minElevatorHeightForFullArmMovement;
 
-        // Check if the arm is moving from the left side to the right side
-        boolean isSwitchingSides = isArmRight(currentArmPosition) != isArmRight(targetArmPosition);
+            // Check if the arm is moving from the left side to the right side
+            boolean isSwitchingSides = isArmRight(currentArmPosition) != isArmRight(targetArmPosition);
 
-        boolean isExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
+            boolean isExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
 
-        if (willSwingThroughRobotIfDownwardSwing && isSwitchingSides && isExtendingOutOfFrame) {
-            return ArmState.UP;
+            if (willSwingThroughRobotIfDownwardSwing && isSwitchingSides && isExtendingOutOfFrame) {
+                return ArmState.UP;
+            }
         }
 
         return state;
@@ -187,23 +184,23 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         // We want constant updating, so this goes in periodic instead of afterTransition()
         switch (getState()) {
             case PARALLEL -> {
-                arm.setState(getArmStateWithCollisionAvoidance(targetArmState));
+                arm.setState(getArmStateWithCollisionAvoidance(targetArmState), armAcceleration);
                 elevator.setState(targetElevatorState);
             }
             case ELEVATOR_FIRST -> {
                 elevator.setState(targetElevatorState);
                 double armPosition = getNearestArmPositionWithoutCollision(elevator.getHeight(), targetArmState.getPosition(), arm.getNormalizedPosition());
-                arm.setCustom(armPosition);
+                arm.setCustom(armPosition, armAcceleration);
             }
             case ARM_FIRST -> {
-                arm.setState(getArmStateWithCollisionAvoidance(targetArmState));
+                arm.setState(getArmStateWithCollisionAvoidance(targetArmState), armAcceleration);
 
                 boolean isSwitchingSides = isArmRight(arm.getNormalizedPosition()) != isArmRight(targetArmState.getPosition());
 
                 double elevatorPositionToPlaceArmAboveIntake = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
 
                 // If the arm is swinging downwards through the robot, just keep the elevator at full height until it passes for smoother motion
-                if (isSwitchingSides && !isArmUp(arm.getNormalizedPosition())) {
+                if (isSwitchingSides && !isArmHorizontal(10) && DriverStation.isAutonomous()) {
                     elevator.setCustom(minElevatorHeightForFullArmMovement);
                 } else {
                     elevator.setCustom(elevatorPositionToPlaceArmAboveIntake);
@@ -274,22 +271,28 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         DogLog.log("ArmScheduler/armAngle", arm.getNormalizedPosition());
         DogLog.log("ArmScheduler/elevatorHeight", elevator.getHeight());
         DogLog.log("ArmScheduler/armUp", isArmUp(arm.getNormalizedPosition()));
-        SmartDashboard.putData("ArmScheduler/ArmViz", visualization.getMechanism2d());
         DogLog.log("ArmScheduler/armHittingIntake", willArmHitIntake(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armHittingDrivetrain", willArmHitDrivetrain(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
+        DogLog.log("ArmScheduler/armAcceleration", armAcceleration);
         Coordinate[] coordinates = getArmCoordinates(arm.getNormalizedPosition(), elevator.getHeight());
 
 
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
-        visualization.drawArm(
-                elevatorBaseHeight + elevator.getHeight(),
-                coordinate1.x(),
-                coordinate1.y(),
-                coordinate2.x(),
-                coordinate2.y());
-        visualization.drawIntake(intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean() && visualization != null) {
+            visualization.drawArm(
+                    elevatorBaseHeight + elevator.getHeight(),
+                    coordinate1.x(),
+                    coordinate1.y(),
+                    coordinate2.x(),
+                    coordinate2.y());
+
+            visualization.drawIntake(intakeWidth, finalIntakeHeight);
+
+            SmartDashboard.putData("ArmScheduler/ArmViz", visualization.getMechanism2d());
+        }
     }
 
     public boolean isArmUp() {
@@ -315,12 +318,21 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         return isArmRight || isArmLeft;
     }
 
-    public void scheduleStates(ArmState armState, ElevatorState elevatorState, HandState handState) {
+    public void scheduleStates(ArmState armState, ElevatorState elevatorState, HandState handState, double armAcceleration) {
         this.targetArmState = armState;
         this.targetElevatorState = elevatorState;
         this.targetHandState = handState;
+        this.armAcceleration = armAcceleration;
 
         setStateFromRequest(assessState());
+    }
+
+    public void overrideArmAcceleration(double armAcceleration) {
+        arm.setOverrideAcceleration(armAcceleration);
+    }
+
+    public void clearOverrideArmAcceleration() {
+        arm.clearOverrideAcceleration();
     }
 
     /**

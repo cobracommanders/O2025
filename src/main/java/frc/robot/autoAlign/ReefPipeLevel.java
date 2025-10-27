@@ -41,11 +41,11 @@ public enum ReefPipeLevel {
       // Half of drivebase + bumper side width + 1 coral width + reef side to pipe distance +
       // extra
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875),
           Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(270)),
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875),
           -Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(90))),
 

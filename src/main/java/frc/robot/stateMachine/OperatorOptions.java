@@ -9,7 +9,7 @@ import frc.robot.autoAlign.ReefPipeLevel;
 public class OperatorOptions {
     public CoralScoreLocation coralScoreLocation = CoralScoreLocation.L4;
     public AlgaeScoreLocation algaeScoreLocation = AlgaeScoreLocation.BARGE;
-    public AlgaeIntakeLevel algaeIntakeLevel = AlgaeIntakeLevel.LOW_REEF;
+    public AlgaeIntakeLevel algaeIntakeLevel = AlgaeIntakeLevel.HIGH_REEF;
 
     private OperatorOptions() {}
 

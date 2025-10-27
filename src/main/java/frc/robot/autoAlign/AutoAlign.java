@@ -2,8 +2,6 @@ package frc.robot.autoAlign;
 
 import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -11,20 +9,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import frc.robot.autoAlign.tagAlign.TagAlign;
 import frc.robot.localization.LocalizationSubsystem;
-import frc.robot.stateMachine.OperatorOptions;
 import frc.robot.stateMachine.StateMachine;
-import frc.robot.subsystems.drivetrain.DriveSubsystem;
-import frc.robot.trailblazer.constraints.AutoConstraintOptions;
 import frc.robot.util.MathHelpers;
-import frc.robot.util.PolarChassisSpeeds;
 
 public class AutoAlign extends StateMachine<AutoAlignState> {
-    private static final AutoConstraintOptions CONSTRAINTS =
-            new AutoConstraintOptions(
-                    4.0, Units.rotationsToRadians(3.0), 4.0, Units.rotationsToRadians(3.0));
-    private static final AutoConstraintOptions L1_CONSTRAINTS =
-            new AutoConstraintOptions(
-                    3.0, Units.rotationsToRadians(2.0), 6.0, Units.rotationsToRadians(3.0));
     private static final Translation2d CENTER_OF_REEF_RED =
             new Translation2d(Units.inchesToMeters(514.13), Units.inchesToMeters(158.5));
     private static final Translation2d CENTER_OF_REEF_BLUE =
@@ -80,37 +68,28 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         return RobotScoringSide.LEFT;
     }
 
-    private final Debouncer isAlignedDebouncer = new Debouncer(0.3, DebounceType.kRising);
     private final LocalizationSubsystem localization;
     private final TagAlign tagAlign;
-    private final DriveSubsystem swerve;
 
     private Pose2d robotPose = Pose2d.kZero;
-    private ChassisSpeeds tagAlignSpeeds = new ChassisSpeeds();
-    private ChassisSpeeds l1AlignSpeeds = new ChassisSpeeds();
 
-    private ChassisSpeeds algaeAlignSpeeds = new ChassisSpeeds();
-    private boolean isAligned = false;
-    private boolean isAlignedDebounced = false;
     private final RobotScoringSide robotScoringSide = RobotScoringSide.RIGHT;
-    private ReefPipe bestReefPipe = ReefPipe.PIPE_A;
+    private ReefPipe autoalignPipe = ReefPipe.PIPE_A;
     private Pose2d usedScoringPose = Pose2d.kZero;
-    private ReefSideOffset reefSideOffset = ReefSideOffset.BASE;
     private ReefSide bestAlgaeSide = ReefSide.SIDE_AB;
 
     private AutoAlign() {
         super(AutoAlignState.DEFAULT_STATE, "AutoAlign");
         this.localization = LocalizationSubsystem.getInstance();
-        this.swerve = DriveSubsystem.getInstance();
-        this.tagAlign = new TagAlign(swerve, localization);
+        this.tagAlign = new TagAlign(localization);
     }
 
     public ReefSide getClosestReefSide() {
-        return ReefSide.fromPipe(bestReefPipe);
+        return ReefSide.fromPipe(autoalignPipe);
     }
 
     public Pose2d getAlgaeDistance() {
-        return bestAlgaeSide.getPose(reefSideOffset, robotScoringSide, robotPose);
+        return bestAlgaeSide.getPose(ReefSideOffset.BASE, robotScoringSide, robotPose);
     }
 
     double reefMaxRadius = Units.inchesToMeters(76.0 / 2);
@@ -125,64 +104,18 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
     @Override
     protected void collectInputs() {
         robotPose = localization.getPose();
-        bestReefPipe = tagAlign.getBestPipe();
-        usedScoringPose = tagAlign.getUsedScoringPose(bestReefPipe);
-        // isAligned = tagAlign.isAligned(bestReefPipe);
-        // isAlignedDebounced = isAlignedDebouncer.calculate(isAligned);
-        bestAlgaeSide = tagAlign.getBestAlgaeSide();
-        // algaeAlignSpeeds =
-        //         tagAlign.getAlgaeAlignmentChassisSpeeds(
-        //                 bestAlgaeSide.getPose(reefSideOffset, robotScoringSide, robotPose),
-        //                 robotPose,
-        //                 CONSTRAINTS,
-        //                 new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
-        tagAlignSpeeds =
-                tagAlign.getReefPipeAlignmentChassisSpeeds(
-                        usedScoringPose,
-                        robotPose,
-                        CONSTRAINTS,
-                        new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
-        // l1AlignSpeeds =
-        //         tagAlign.getL1AlignmentChassisSpeeds(
-        //                 usedScoringPose,
-        //                 robotPose,
-        //                 L1_CONSTRAINTS,
-        //                 new PolarChassisSpeeds(swerve.getFieldRelativeSpeeds()));
-        tagAlign.setLevel(ReefPipeLevel.L3, ReefPipeLevel.L3, getScoringSideFromRobotPose(robotPose));
+        autoalignPipe = tagAlign.getAutoalignPipe();
+        usedScoringPose = tagAlign.getUsedScoringPose(autoalignPipe);
+        bestAlgaeSide = tagAlign.getAutoalignSide();
+        tagAlign.setSide(getScoringSideFromRobotPose(robotPose));
     }
 
     @Override
     public void periodic() {
         super.periodic();
         DogLog.log("AutoAlign/UsedScoringPose", usedScoringPose);
-        DogLog.log("AutoAlign/IsAligned", isAligned);
-        DogLog.log("AutoAlign/IsAlignedDebounced", isAlignedDebounced);
         DogLog.log("AutoAlign/ApproximateDistanceToReef", approximateDistanceToReef());
     }
-
-    public ChassisSpeeds getTagAlignSpeeds() {
-        DogLog.log("AutoAlign/TagAlignSpeeds", tagAlignSpeeds);
-        if (OperatorOptions.getInstance().isCoralScoringL1()) {
-            return l1AlignSpeeds;
-        }
-        return tagAlignSpeeds;
-    }
-
-    public ChassisSpeeds getAlgaeAlignSpeeds() {
-        return algaeAlignSpeeds;
-    }
-
-    public void setAlgaeIntakingOffset(ReefSideOffset offset) {
-        reefSideOffset = offset;
-    }
-
-    // public boolean isAligned() {
-    //     return isAligned;
-    // }
-
-    // public boolean isAlignedDebounced() {
-    //     return isAlignedDebounced;
-    // }
 
     public Pose2d getUsedScoringPose() {
         return usedScoringPose;

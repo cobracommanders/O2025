@@ -1,13 +1,14 @@
 package frc.robot.subsystems.armManager.arm;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.DoubleSubscriber;
 
 public enum ArmState {
     START_POSITION(0.25),
-    IDLE_ALGAE(0.18),
+    IDLE_ALGAE(0.25),
     IDLE_CORAL_UP(0.25),
-    INTAKE_GROUND_ALGAE(-0.03),
+    INTAKE_GROUND_ALGAE(-0.07),
     HANDOFF_RIGHT(-0.235),
     HANDOFF_LEFT(-0.265),
     HANDOFF_MIDDLE(-0.25),
@@ -20,9 +21,9 @@ public enum ArmState {
     UP(0.25),
     DOWN(-0.25),
 
-    INTAKE_HIGH_REEF_ALGAE_RIGHT(0),
+    INTAKE_HIGH_REEF_ALGAE_RIGHT(0 + Units.degreesToRotations(1)),
     INTAKE_HIGH_REEF_ALGAE_LEFT(invertPosition(INTAKE_HIGH_REEF_ALGAE_RIGHT)),
-    INTAKE_LOW_REEF_ALGAE_RIGHT(0),
+    INTAKE_LOW_REEF_ALGAE_RIGHT(0 + Units.degreesToRotations(1)),
     INTAKE_LOW_REEF_ALGAE_LEFT(invertPosition(INTAKE_LOW_REEF_ALGAE_RIGHT)),
     ALGAE_NET_RIGHT(0.17),
     ALGAE_NET_LEFT(invertPosition(ALGAE_NET_RIGHT)),
@@ -32,11 +33,11 @@ public enum ArmState {
     PREPARE_L3_LEFT(invertPosition(PREPARE_L3_RIGHT)),
     PREPARE_L2_RIGHT(0.08),
     PREPARE_L2_LEFT(invertPosition(PREPARE_L2_RIGHT)),
-    SCORE_L4_RIGHT(0.03),
+    SCORE_L4_RIGHT(0.05),
     SCORE_L4_LEFT(invertPosition(SCORE_L4_RIGHT)),
-    SCORE_L3_RIGHT(0.0),
+    SCORE_L3_RIGHT(0.01),
     SCORE_L3_LEFT(invertPosition(SCORE_L3_RIGHT)),
-    SCORE_L2_RIGHT(0.0),
+    SCORE_L2_RIGHT(0.01),
     SCORE_L2_LEFT(invertPosition(SCORE_L2_RIGHT)),
     CUSTOM(0.0); // Set in the arm class
 

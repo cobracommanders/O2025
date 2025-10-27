@@ -67,50 +67,62 @@ public class Controls {
         driver.start().onTrue(requestManager.resetArmGamePieceAndIdle());
 
         // Score Coral
-        driver.rightBumper()
+        operator.rightTrigger()
                 // whileTrue will cancel the command when the button is released
                 .whileTrue(Commands.either(
                         requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
-                        robotCommands.teleopReefAlignAndScore(driver::isStickActive, false),
+                        robotCommands.teleopReefAlignAndScore(driver::isStickActive,
+                                () -> driver.B().getAsBoolean(),
+                                false),
                         () -> OperatorOptions.getInstance().isCoralScoringL1()
                 ))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
                 // Only resets if the robot is far away from the reef and not likely to score again soon
-                .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
-    
+                .onFalse(requestManager.idleAll().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
-        driver.Y().onTrue(requestManager.algaeNetScore(() -> requestManager.netRobotSide()));
 
-        // driver.rightTrigger().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
-        driver.leftBumper()
+        driver.Y().onTrue(
+                Commands.either(
+                        requestManager.algaeNetScore(() -> requestManager.netRobotSide()),
+                        requestManager.algaeProcessorScore(() -> driver.X().getAsBoolean()),
+                        () -> operatorOptions.algaeScoreLocation == OperatorOptions.AlgaeScoreLocation.BARGE
+                )
+        );
+        driver.X().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
+
+        operator.leftTrigger()
         // whileTrue will cancel the command when the button is released
         .whileTrue(Commands.either(
                 requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
-                robotCommands.teleopReefAlignAndScore(driver::isStickActive, true),
+                robotCommands.teleopReefAlignAndScore(driver::isStickActive,
+                        () -> driver.B().getAsBoolean(),
+                        true),
                 () -> OperatorOptions.getInstance().isCoralScoringL1()
         ))
         // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
         // Only resets if the robot is far away from the reef and not likely to score again soon
-        .onFalse(requestManager.idleArm().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
+        .onFalse(requestManager.idleAll().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
 
         // Fix drivetrain state
-        driver.X().onTrue(runOnce(() -> {
-            Command currentCommand = driveSubsystem.getCurrentCommand();
-            if (currentCommand != null) {
-                currentCommand.cancel();
-            }
-        }).andThen(robotCommands.driveTeleopCommand()));
+//        driver.X().onTrue(runOnce(() -> {
+//            Command currentCommand = driveSubsystem.getCurrentCommand();
+//            if (currentCommand != null) {
+//                currentCommand.cancel();
+//            }
+//        }).andThen(robotCommands.driveTeleopCommand()));
 
         // Align to Reef Algae
         // driver.Y().onTrue(robotCommands.algaeAlignCommand());
 
         // Algae Intake
         //driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
-        driver.rightTrigger().onTrue(Commands.either(
+        driver.rightTrigger().and((operator.leftTrigger().negate().and(operator.rightTrigger().negate()))).onTrue(Commands.either(
                 requestManager.groundAlgaeIntake(),
                 requestManager.reefAlgaeIntake(),
                 () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
-        ));
+        )).onFalse(
+                requestManager.resetGroundAlgaeIntake()
+        );
 
         // Tick Intake Pivot
         driver.POVMinus90().onTrue(runOnce(() -> IntakePivot.getInstance().tickUp()));
@@ -119,7 +131,7 @@ public class Controls {
 
         /* ******** OPERATOR ******** */
         operator.leftBumper().onTrue(operatorOptions.setProcessorCommand());
-        operator.leftTrigger().and(operator.rightTrigger()).onTrue(requestManager.climbRequest());
+//        driver.leftBumper().and(driver.rightBumper()).onTrue(requestManager.climbRequest());
         operator.rightBumper().onTrue(operatorOptions.setBargeCommand());
         operator.Y().onTrue(operatorOptions.setL3Command());
         operator.B().onTrue(operatorOptions.setL4Command());
@@ -129,7 +141,7 @@ public class Controls {
         //operator.POVMinus90().onTrue(requestManager.prepareCoralScoreAndAwaitReady().andThen(robotCommands.driveTeleopCommand()));
         operator.POV90().onTrue(operatorOptions.setGroundAlgaeCommand());
         operator.POV180().onTrue(operatorOptions.setLowReefAlgaeCommand());
-        operator.back().onTrue(requestManager.invertedHandoffRequest());
+        operator.back().onTrue(requestManager.climbRequest());
         operator.start().onTrue(requestManager.resetArmGamePieceAndIdle());
     }
 }
