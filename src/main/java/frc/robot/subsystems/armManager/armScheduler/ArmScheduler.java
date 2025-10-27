@@ -157,19 +157,21 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
      * Gets the arm state that ensures the movement will be in the correct direction to avoid various obstacles.
      */
     private ArmState getArmStateWithCollisionAvoidance(ArmState state) {
-        double currentArmPosition = arm.getNormalizedPosition();
-        double targetArmPosition = state.getPosition();
+        if (DriverStation.isAutonomous()) {
+            double currentArmPosition = arm.getNormalizedPosition();
+            double targetArmPosition = state.getPosition();
 
-        // Checks if the elevator is lower than the minimum required for the arm to not collide with the intake
-        boolean willSwingThroughRobotIfDownwardSwing = elevator.getHeight() < minElevatorHeightForFullArmMovement;
+            // Checks if the elevator is lower than the minimum required for the arm to not collide with the intake
+            boolean willSwingThroughRobotIfDownwardSwing = elevator.getHeight() < minElevatorHeightForFullArmMovement;
 
-        // Check if the arm is moving from the left side to the right side
-        boolean isSwitchingSides = isArmRight(currentArmPosition) != isArmRight(targetArmPosition);
+            // Check if the arm is moving from the left side to the right side
+            boolean isSwitchingSides = isArmRight(currentArmPosition) != isArmRight(targetArmPosition);
 
-        boolean isExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
+            boolean isExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
 
-        if (willSwingThroughRobotIfDownwardSwing && isSwitchingSides && isExtendingOutOfFrame) {
-            return ArmState.UP;
+            if (willSwingThroughRobotIfDownwardSwing && isSwitchingSides && isExtendingOutOfFrame) {
+                return ArmState.UP;
+            }
         }
 
         return state;
@@ -198,7 +200,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
                 double elevatorPositionToPlaceArmAboveIntake = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
 
                 // If the arm is swinging downwards through the robot, just keep the elevator at full height until it passes for smoother motion
-                if (isSwitchingSides && !isArmHorizontal(10)) {
+                if (isSwitchingSides && !isArmHorizontal(10) && DriverStation.isAutonomous()) {
                     elevator.setCustom(minElevatorHeightForFullArmMovement);
                 } else {
                     elevator.setCustom(elevatorPositionToPlaceArmAboveIntake);
