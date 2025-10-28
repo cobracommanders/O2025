@@ -4,5 +4,5 @@ public enum DriveStates {
     TELEOP,
     AUTO,
     REEF_ALIGN_TELEOP,
-    DRIVE_TO_POSE,
+    DRIVE_TO_POSE_250_hz,
 }

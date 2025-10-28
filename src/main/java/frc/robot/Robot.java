@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autos.Autos;
+import frc.robot.autos.BaseAuto;
 import frc.robot.autos.auto_path_commands.FourCoralNonProcessor;
 import frc.robot.commands.RobotCommands;
 import frc.robot.config.FeatureFlags;
@@ -108,17 +109,6 @@ public class Robot extends TimedRobot {
     public void robotInit() {
         DogLog.setEnabled(Robot.isSimulation());
 
-        FmsSubsystem.getInstance();
-        lights = new LED();
-        AutoAlign.getInstance();
-        controls.configureDriveteamCommands();
-        controls.configureDefaultCommands();
-    }
-
-    private final Command autoCommand = new FourCoralNonProcessor(requestManager, trailblazer, robotCommands).getAutoCommand();
-
-    @Override
-    public void autonomousInit() {
         if (Utils.isSimulation()) {
             Pose2d startingPose = new Pose2d(10.289, 0.47, Rotation2d.fromDegrees(90));
             localization.resetPose(
@@ -126,6 +116,18 @@ public class Robot extends TimedRobot {
             );
         }
 
+        FmsSubsystem.getInstance();
+        lights = new LED();
+        AutoAlign.getInstance();
+        controls.configureDriveteamCommands();
+        controls.configureDefaultCommands();
+    }
+
+    private final BaseAuto auto = new FourCoralNonProcessor(requestManager, trailblazer, robotCommands);
+    private final Command autoCommand = auto.getAutoCommand();
+
+    @Override
+    public void autonomousInit() {
         autoCommand.schedule();
     }
 

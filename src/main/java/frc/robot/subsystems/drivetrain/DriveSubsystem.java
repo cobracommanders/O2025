@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.commands.DriveToPose250hz;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.trailblazer.SwerveBase;
@@ -25,8 +26,8 @@ import java.util.Map;
 public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveBase {
     private ChassisSpeeds teleopSpeeds = new ChassisSpeeds();
     private ChassisSpeeds autoSpeeds = new ChassisSpeeds();
-    private final ChassisSpeeds algaeAutoAlignSpeeds = new ChassisSpeeds();
-    private Pose2d driveToPoseTarget = Pose2d.kZero;
+
+    private DriveToPose250hz driveToPose250hz = null;
 
     public final TunerConstants.TunerSwerveDrivetrain drivetrain = new TunerConstants.TunerSwerveDrivetrain(
             TunerConstants.DrivetrainConstants,
@@ -61,8 +62,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
 //            .withDeadband(0.05)
 //            .withRotationalDeadband(Units.degreesToRadians(2.0))
             ;
-
-    private final DriveToPoseRequest driveToPoseRequest = new DriveToPoseRequest();
 
     private boolean hasAppliedOperatorPerspective = false;
 
@@ -118,10 +117,6 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         autoSpeeds = speeds;
     }
 
-    public void setDriveToPoseTarget(Pose2d target) {
-        driveToPoseTarget = target;
-    }
-
     @Override
     public void simulationPeriodic() {
         drivetrain.updateSimState(0.02, RobotController.getBatteryVoltage());
@@ -170,8 +165,9 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         setTeleopSpeeds(0.0, 0.0, 0.0);
     }
 
-    public void requestDriveToPose() {
-        setStateFromRequest(DriveStates.DRIVE_TO_POSE);
+    public void requestDriveToPose250hz(DriveToPose250hz request) {
+        this.driveToPose250hz = request;
+        setStateFromRequest(DriveStates.DRIVE_TO_POSE_250_hz);
         setTeleopSpeeds(0.0, 0.0, 0.0);
     }
 
@@ -194,6 +190,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
                                 .withVelocityY(autoSpeeds.vyMetersPerSecond)
                                 .withRotationalRate(autoSpeeds.omegaRadiansPerSecond)
                                 .withDriveRequestType(DriveRequestType.Velocity));
+            }
+            case DRIVE_TO_POSE_250_hz -> {
+                if (driveToPose250hz != null) {
+                    drivetrain.setControl(driveToPose250hz);
+                }
             }
         }
     }
