@@ -35,7 +35,7 @@ public abstract class BaseAuto implements NamedAuto {
     autoCommand = createFullAutoCommand();
   }
 
-  protected abstract Pose2d getStartingPose();
+//  protected abstract Pose2d getStartingPose();
 
   protected abstract Command createAutoCommand();
 

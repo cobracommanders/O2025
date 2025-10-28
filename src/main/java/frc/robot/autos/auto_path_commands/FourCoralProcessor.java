@@ -13,25 +13,25 @@ import frc.robot.commands.RobotCommands;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.Trailblazer;
 
-public class FourCoralNonProcessor extends BaseAuto {
-    public FourCoralNonProcessor(RequestManager robotManager, Trailblazer trailblazer, RobotCommands robotCommands) {
+public class FourCoralProcessor extends BaseAuto {
+    public FourCoralProcessor(RequestManager robotManager, Trailblazer trailblazer, RobotCommands robotCommands) {
         super(robotManager, trailblazer, robotCommands);
     }
 
     @Override
     protected Command createAutoCommand() {
         return Commands.sequence(
-                blocks.initialDriveToReefBackNonProcessor(),
+                blocks.initialDriveToReefBackProcessor(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy(),
 
-                blocks.approachLollipop(Lollipop.LEFT).withDeadline(
+                blocks.approachLollipop(Lollipop.RIGHT).withDeadline(
                         requestManager.prepareLollipopAndAwaitReady().asProxy()
                 ),
 
-                blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
+                blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
 
                 blocks.approachLollipop(Lollipop.MIDDLE).withDeadline(
                         Commands.sequence(
@@ -43,9 +43,9 @@ public class FourCoralNonProcessor extends BaseAuto {
 
                 blocks.intakeLollipop(Lollipop.MIDDLE).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L2).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
 
-                blocks.approachLollipop(Lollipop.RIGHT).withDeadline(
+                blocks.approachLollipop(Lollipop.LEFT).withDeadline(
                         Commands.sequence(
                                 requestManager.overrideArmAcceleration(6.0),
                                 requestManager.prepareLollipopAndAwaitReady().asProxy(),
@@ -53,9 +53,9 @@ public class FourCoralNonProcessor extends BaseAuto {
                         )
                 ),
 
-                blocks.intakeLollipop(Lollipop.RIGHT).asProxy(),
+                blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_B, PipeScoringLevel.L4).asProxy()
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy()
         )
                 .finallyDo(() -> {
                     requestManager.clearOverrideArmAcceleration().schedule();
