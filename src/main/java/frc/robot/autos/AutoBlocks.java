@@ -12,8 +12,13 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.FieldConstants;
 import frc.robot.autoAlign.AutoAlign;
+import frc.robot.autoAlign.ReefPipe;
+import frc.robot.autoAlign.ReefPipeLevel;
+import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.commands.DriveToPose250hz;
 import frc.robot.fms.FmsSubsystem;
 import frc.robot.stateMachine.RequestManager;
+import frc.robot.subsystems.drivetrain.DriveSubsystem;
 import frc.robot.trailblazer.AutoPoint;
 import frc.robot.trailblazer.AutoSegment;
 import frc.robot.trailblazer.Trailblazer;
@@ -86,7 +91,12 @@ public class AutoBlocks {
                                 }),
                                 new AutoPoint(
                                         () -> {
-                                            Pose2d final_waypoint = new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0));
+                                            Pose2d final_waypoint = new Pose2d(
+                                                    15.0,
+                                                    3.5,
+//                                                    ReefPipe.PIPE_A.getPose(ReefPipeLevel.L4, RobotScoringSide.LEFT).getY(),
+                                                    Rotation2d.fromDegrees(90.0)
+                                            );
                                             return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
                                         },
                                         requestManager.prepareCoralScoreAndAwaitReady(),
@@ -96,21 +106,21 @@ public class AutoBlocks {
     }
 
     public Command approachLollipop(Lollipop lollipop) {
-        return trailblazer.followSegment(
-                new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(3.5),
-                        new PoseErrorTolerance(Units.inchesToMeters(2), 1.0),
-                        new AutoPoint(() -> getLollipopApproachPose(lollipop.index))
-                ));
+        return new DriveToPose250hz(
+                DriveSubsystem.getInstance(),
+                () -> getLollipopApproachPose(lollipop.index),
+                maximumConstraints.withMaxLinearAcceleration(3.5),
+                new PoseErrorTolerance(Units.inchesToMeters(2), 1.0)
+        ).asProxy();
     }
 
     public Command intakeLollipop(Lollipop lollipop) {
-        return trailblazer.followSegment(
-                new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(4.0),
-                        new PoseErrorTolerance(Units.inchesToMeters(3), 2.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
-                        new AutoPoint(() -> getLollipopIntakePose(lollipop.index)))
-        );
+        return new DriveToPose250hz(
+                DriveSubsystem.getInstance(),
+                () -> getLollipopIntakePose(lollipop.index),
+                maximumConstraints.withMaxLinearAcceleration(4.0),
+                new PoseErrorTolerance(Units.inchesToMeters(3), 2.0) // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
+        ).asProxy();
     }
 
     public enum Lollipop {
