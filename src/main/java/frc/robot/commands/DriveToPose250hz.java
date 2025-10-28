@@ -8,6 +8,7 @@ import dev.doglog.DogLog;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,7 +20,7 @@ import frc.robot.util.PoseErrorTolerance;
 import java.util.function.Supplier;
 
 public class DriveToPose250hz extends Command implements SwerveRequest {
-    public static final double PERIOD = 0.004;
+    private final double PERIOD = 0.004;
     private final ProfiledPIDController driveController;
     private final ProfiledPIDController thetaController =
             new ProfiledPIDController(
@@ -33,6 +34,7 @@ public class DriveToPose250hz extends Command implements SwerveRequest {
             );
     private final DriveSubsystem driveSubsystem;
     private final double ffMinRadius = 0.0, ffMaxRadius = 0.1;
+    private final double distanceFromEndToCompleteRotation = 0.75;
     private final Supplier<Pose2d> targetLocationSupplier;
     private Pose2d targetPosition = null;
     private final PoseErrorTolerance tolerance;
@@ -40,6 +42,9 @@ public class DriveToPose250hz extends Command implements SwerveRequest {
     private final FieldCentric fieldCentric = new FieldCentric()
             .withForwardPerspective(ForwardPerspectiveValue.BlueAlliance)
             .withDriveRequestType(SwerveModule.DriveRequestType.OpenLoopVoltage);
+
+    private double totalDistance = 0.0;
+    private Rotation2d initialRotation = Rotation2d.kZero;
 
     public DriveToPose250hz(
             DriveSubsystem driveSubsystem,
@@ -66,9 +71,12 @@ public class DriveToPose250hz extends Command implements SwerveRequest {
 
     @Override
     public void initialize() {
-        this.targetPosition = targetLocationSupplier.get();
-
         Pose2d currentPose = LocalizationSubsystem.getInstance().getPose();
+
+        this.targetPosition = targetLocationSupplier.get();
+        this.totalDistance = targetPosition.getTranslation().getDistance(currentPose.getTranslation());
+        this.initialRotation = currentPose.getRotation();
+
 
         double currentVelocity = Math.min(
                 0.0,
@@ -102,8 +110,13 @@ public class DriveToPose250hz extends Command implements SwerveRequest {
         if (currentDistance < tolerance.linearErrorTolerance()) linearVelocity = 0.0;
         DogLog.log("DriveToPose250hz/LinearVelocity", linearVelocity);
 
-
-        double thetaVelocity = thetaController.getSetpoint().velocity * ffScalar + thetaController.calculate(parameters.currentPose.getRotation().getRadians(), targetPosition.getRotation().getRadians());
+        double targetRotationRadians = Units.rotationsToRadians(
+                MathUtil.interpolate(
+                        MathUtil.inputModulus(initialRotation.getRotations(), -0.5, 0.5),
+                        MathUtil.inputModulus(targetPosition.getRotation().getRotations(), -0.5, 0.5),
+                        (totalDistance - (currentDistance - distanceFromEndToCompleteRotation)) / totalDistance)
+        );
+        double thetaVelocity = thetaController.getSetpoint().velocity * ffScalar + thetaController.calculate(parameters.currentPose.getRotation().getRadians(), targetRotationRadians);
         double thetaErrorAbs = Math.abs(parameters.currentPose.getRotation().minus(targetPosition.getRotation()).getRadians());
         if (thetaErrorAbs < Units.degreesToRadians(tolerance.angularErrorTolerance())) thetaVelocity = 0.0;
 
