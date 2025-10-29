@@ -198,8 +198,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case SCORE_ALGAE_NET_LEFT,
                  SCORE_ALGAE_NET_RIGHT,
                  SCORE_ALGAE_PROCESSOR -> {
-                if (timeout(0.5)) {
-                    nextState = ArmManagerState.SCORE_ALGAE_NET_EXIT;
+                if (timeout(1.0)) {
+//                    nextState = ArmManagerState.SCORE_ALGAE_NET_EXIT;
+                    nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
                 }
             }
 
