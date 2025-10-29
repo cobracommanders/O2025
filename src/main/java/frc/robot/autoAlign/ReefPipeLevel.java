@@ -1,12 +1,10 @@
 package frc.robot.autoAlign;
 
-import com.pathplanner.lib.config.RobotConfig;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.subsystems.armManager.arm.Arm;
+import frc.robot.FieldConstants.PipeScoringLevel;
 
 public enum ReefPipeLevel {
   BASE(
@@ -43,11 +41,11 @@ public enum ReefPipeLevel {
       // Half of drivebase + bumper side width + 1 coral width + reef side to pipe distance +
       // extra
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875),
           Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(270)),
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875),
           -Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(90))),
 
@@ -78,6 +76,14 @@ public enum ReefPipeLevel {
           -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 35.0 - 4.0),
           -Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(90)));
+
+  public static ReefPipeLevel fromPipeScoringLevel(PipeScoringLevel level) {
+    return switch (level) {
+        case L2 -> L2;
+        case L3 -> L3;
+        case L4 -> L4;
+    };
+  }
 
   public final Transform2d leftOffset;
   public final Transform2d rightOffset;

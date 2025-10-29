@@ -7,20 +7,20 @@ import edu.wpi.first.networktables.DoubleSubscriber;
 public enum ElevatorState {
     IDLE(0.1),
     IDLE_CORAL_UP(0.4),
-    HIGH_REEF_ALGAE(0.95),
+    HIGH_REEF_ALGAE(0.9),
     LOW_REEF_ALGAE(0.53),
-    GROUND_ALGAE(0),
-    ALGAE_NET(1.38),
+    GROUND_ALGAE(0.16),
+    ALGAE_NET(1.38 + Units.inchesToMeters(0.75)),
     ALGAE_PROCESSOR(0.1),
-    HANDOFF(0.775 - Units.inchesToMeters(0.75)), // Actual handoff position
+    HANDOFF(0.785 - Units.inchesToMeters(0.75)), // Actual handoff position
     IDLE_EMPTY(0.825), // State above the intake that allows the intake to move in/out freely
     LOLLIPOP(0),
     PREPARE_L4(1.3),
     PREPARE_L3(0.765),
     PREPARE_L2(0.35),
-    SCORE_L4(1.13),
-    SCORE_L3(0.624),
-    SCORE_L2(0.35),
+    SCORE_L4(1.2),
+    SCORE_L3(0.634),
+    SCORE_L2(0.219),
     CUSTOM(0.0); // Set in the elevator class
 
 

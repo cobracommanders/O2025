@@ -1,26 +1,29 @@
 package frc.robot.subsystems.ground_manager.coraldetection;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
 import dev.doglog.DogLog;
-import frc.robot.Constants;
 import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.util.PhoenixSignalManager;
 
 public class CoralDetector extends StateMachine<CoralDetectorState> {
-    private final CANrange lCANRange;
-    private final CANrange rCANRange;
+    private final CANrange lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
+    private final CANrange rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
+
     public boolean lDetected = false;
     public boolean rDetected = false;
-    public double lDistance;
     public double rDistance;
-    public final String name;
 
     public CoralDetectorState simCoralPosition = CoralDetectorState.NONE;
 
+    private final StatusSignal<Boolean> lIsDetectedSignal = lCANRange.getIsDetected();
+    private final StatusSignal<Boolean> rIsDetectedSignal = rCANRange.getIsDetected();
+
     private CoralDetector() {
-        super(CoralDetectorState.NONE);
+        super(CoralDetectorState.NONE, "CoralDetector");
 
         CANrangeConfiguration config = new CANrangeConfiguration();
 
@@ -28,30 +31,24 @@ public class CoralDetector extends StateMachine<CoralDetectorState> {
         config.ProximityParams.ProximityThreshold = 0.065;
         config.ProximityParams.MinSignalStrengthForValidMeasurement = 8000;
 
-        lCANRange = new CANrange(Ports.coralDetectorPorts.LEFT_CAN_RANGE);
-        rCANRange = new CANrange(Ports.coralDetectorPorts.RIGHT_CAN_RANGE);
-
         lCANRange.getConfigurator().apply(config);
         rCANRange.getConfigurator().apply(config);
 
-        this.name = getName();
+        PhoenixSignalManager.registerSignals(false, lIsDetectedSignal, rIsDetectedSignal);
     }
 
     protected void collectInputs() {
-        lDistance = lCANRange.getDistance().getValueAsDouble();
-        rDistance = rCANRange.getDistance().getValueAsDouble();
 
         //We can switch to using .isDetected() if we would like.
-        lDetected = lCANRange.getIsDetected().getValue();
-        rDetected = rCANRange.getIsDetected().getValue();
+
+        lDetected = lIsDetectedSignal.getValue();
+        rDetected = rIsDetectedSignal.getValue();
 
         DogLog.log(name + "/Left Detected", lDetected);
         DogLog.log(name + "/Right Detected", rDetected);
-        DogLog.log(name + "/Left Distance", lDistance);
-        DogLog.log(name + "/Right Distance", rDistance);
 
-        DogLog.log(name + "/Left Signal", lCANRange.getSignalStrength().getValueAsDouble());
-        DogLog.log(name + "/Right Signal", rCANRange.getSignalStrength().getValueAsDouble());
+        // DogLog.log(name + "/Left Signal", lCANRange.getSignalStrength().getValueAsDouble());
+        // DogLog.log(name + "/Right Signal", rCANRange.getSignalStrength().getValueAsDouble());
     }
 
     @Override

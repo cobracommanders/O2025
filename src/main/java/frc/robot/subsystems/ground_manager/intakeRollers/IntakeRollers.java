@@ -1,30 +1,34 @@
 package frc.robot.subsystems.ground_manager.intakeRollers;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import dev.doglog.DogLog;
+import edu.wpi.first.units.measure.Current;
 import frc.robot.Ports;
-import frc.robot.Constants.IntakeRollersConstants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
+import frc.robot.util.PhoenixSignalManager;
 
 
 public class IntakeRollers extends StateMachine<IntakeRollersStates>{
-  public final String name = getName();
   
-    private final TalonFX motor;
+    private final TalonFX motor = new TalonFX(Ports.IntakeRollersPorts.INTAKE_ROLLER_MOTOR);
     private double motorStatorCurrent;
 
     private CoralDetector coralDetector = CoralDetector.getInstance();
     
+    private final StatusSignal<Current> motorStatorCurrentSignal = motor.getStatorCurrent();
+
     private IntakeRollers() {
-        super(IntakeRollersStates.IDLE);
-        motor = new TalonFX(Ports.IntakeRollersPorts.INTAKE_ROLLER_MOTOR);
+        super(IntakeRollersStates.IDLE, "IntakeRollers");
+
+        PhoenixSignalManager.registerSignals(false, motorStatorCurrentSignal);
     }
    
     @Override
     public void collectInputs() {
-      motorStatorCurrent = motor.getStatorCurrent().getValueAsDouble();
+      motorStatorCurrent = motorStatorCurrentSignal.getValueAsDouble();
       DogLog.log(name + "/Stator Current", motorStatorCurrent);
     }
     public double getMotorStatorCurrent() {

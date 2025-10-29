@@ -2,6 +2,7 @@ package frc.robot.subsystems.ground_manager.intake;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -20,6 +21,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj.RobotController;
@@ -33,9 +35,9 @@ import frc.robot.mechanism_visualizer.MechanismVisualizer;
 import frc.robot.Ports;
 import frc.robot.TunablePid;
 import frc.robot.stateMachine.StateMachine;
+import frc.robot.util.PhoenixSignalManager;
 
 public class IntakePivot extends StateMachine<IntakePivotStates> {
-  public final String name = getName();
 
   // Create a tunable double with a key of "Intake/Voltage" and a default value of
   // 4.5
@@ -49,7 +51,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   // 4.5
   // TODO update motor configs
   private final DutyCycle encoder;
-  public final TalonFX intakeMotor;
+  public final TalonFX intakeMotor = new TalonFX(Ports.IntakePivotPorts.INTAKE_MOTOR);
   public final TalonFXConfiguration motor_config = new TalonFXConfiguration()
       .withSlot0(new Slot0Configs().withKP(IntakePivotConstants.P).withKI(IntakePivotConstants.I)
           .withKD(IntakePivotConstants.D)
@@ -62,17 +64,21 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
 
   private MotionMagicVoltage motor_request = new MotionMagicVoltage(0).withSlot(0);
 
+  private final StatusSignal<Angle> intakePositionSignal = intakeMotor.getPosition();
+
   private IntakePivot() {
-    super(IntakePivotStates.IDLE);
+    super(IntakePivotStates.IDLE, "IntakePivot");
     encoder = new DutyCycle(new DigitalInput(Ports.IntakePivotPorts.INTAKE_PIVOT_DUTY_CYCLE_ENCODER));
     motor_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     motor_config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    intakeMotor = new TalonFX(Ports.IntakePivotPorts.INTAKE_MOTOR);
     motor_config.MotionMagic.MotionMagicCruiseVelocity = IntakePivotConstants.MotionMagicCruiseVelocity;
     motor_config.MotionMagic.MotionMagicAcceleration = IntakePivotConstants.MotionMagicAcceleration;
     motor_config.MotionMagic.MotionMagicJerk = IntakePivotConstants.MotionMagicJerk;
     intakeMotor.getConfigurator().apply(motor_config);
     tolerance = 0.003;
+
+    PhoenixSignalManager.registerSignals(false, intakePositionSignal);
+    
     collectInputs();
     syncEncoder();
   }
@@ -94,7 +100,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
 
   @Override
   public void collectInputs() {
-    intakePosition = intakeMotor.getPosition().getValueAsDouble();
+    intakePosition = intakePositionSignal.getValueAsDouble();
     absolutePosition = 1 - encoder.getOutput() - 0.163;
     DogLog.log(name + "/motor Position", intakePosition);
     DogLog.log(name + "/absolute Position", absolutePosition);

@@ -80,11 +80,11 @@ public class LED {
                 }
             }
 
-            if (Robot.armManager.getCurrentGamePiece().isCoral()) {
-                LEDPattern.solid(Color.kWhite).applyTo(m_middle);
-            } else {
-                LEDPattern.solid(c).applyTo(m_middle);
-            }
+//            if (Robot.armManager.getCurrentGamePiece().isCoral()) {
+//                LEDPattern.solid(Color.kWhite).applyTo(m_middle);
+//            } else {
+//                LEDPattern.solid(c).applyTo(m_middle);
+//            }
 
 //            //start blinking the LEDs .5 seconds before the climber starts pulling the robot up
 //            if (Climber.getInstance().getState() == ClimberStates.CONTINUE_SUCKING) {

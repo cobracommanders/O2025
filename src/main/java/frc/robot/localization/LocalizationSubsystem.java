@@ -38,7 +38,7 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
     private Pose2d robotPose = Pose2d.kZero;
 
     private LocalizationSubsystem() {
-        super(LocalizationStates.DEFAULT_STATE);
+        super(LocalizationStates.DEFAULT_STATE, "LocalizationSubsystem");
         this.swerve = DriveSubsystem.getInstance();
         this.drivetrain = DriveSubsystem.getInstance();
         this.vision = VisionSubsystem.getInstance();
@@ -65,7 +65,10 @@ public class LocalizationSubsystem extends StateMachine<LocalizationStates> impl
                 .getLeftFrontTagResult()
                 .or(vision::getLeftBackTagResult)
                 .ifPresent(this::ingestTagResult);
-        vision.getRightTagResult().ifPresent(this::ingestTagResult);
+        vision
+                .getRightFrontTagResult()
+                .or(vision::getRightBackTagResult)
+                .ifPresent(this::ingestTagResult);
         vision.getGamePieceTagResult().ifPresent(this::ingestTagResult);
         robotPose = swerve.drivetrain.getState().Pose;
         vision.setEstimatedPoseAngle(robotPose.getRotation().getDegrees());

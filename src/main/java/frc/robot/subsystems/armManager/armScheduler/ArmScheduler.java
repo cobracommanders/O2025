@@ -7,8 +7,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.config.FeatureFlags;
 import frc.robot.localization.LocalizationSubsystem;
 import frc.robot.stateMachine.RequestManager;
+import frc.robot.Constants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.arm.ArmState;
@@ -29,24 +31,30 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private ArmState targetArmState;
     private ElevatorState targetElevatorState;
     private HandState targetHandState;
+    private double armAcceleration;
 
     public ArmScheduler(
             Arm arm,
             Elevator elevator,
             Hand hand
     ) {
-        super(ArmSchedulerState.READY);
+        super(ArmSchedulerState.READY, "ArmScheduler");
         this.arm = arm;
         this.elevator = elevator;
         this.hand = hand;
-        this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean()) {
+            this.visualization = new ArmSchedulerVisualization(driveWidth, driveHeight, intakeWidth, finalIntakeHeight);
+        } else {
+            this.visualization = null;
+        }
     }
 
     private final double armLength = Units.inchesToMeters(24.5);
     private final double armWidth = Units.inchesToMeters(5.0); // Left-right width of the arm when viewed from the front
     private final double handHeight = Units.inchesToMeters(5.0); // Used for algae floor intake, the length of arm that can contact the intake when the arm is horizontal
 
-    private final double driveWidth = Units.inchesToMeters(35.0);
+    private final double driveWidth = Constants.DrivetrainConstants.WIDTH_METERS;
     private final double driveHeight = Units.inchesToMeters(6.5);
 
     private final double elevatorBaseHeight = Units.inchesToMeters(13.75);
@@ -57,24 +65,11 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private final double finalIntakeHeight = intakePivotHeight + intakeMinInterferenceUpHeightFromPivot + intakeHeightOffset;
     private final double intakeWidth = Units.inchesToMeters(21.25);
 
+    private final double minElevatorHeightForFullArmMovement = getNearestElevatorHeightWithoutArmCollision(ArmState.DOWN.getPosition(), 0.0) + Units.inchesToMeters(3.0);
+
     private ArmSchedulerState assessState() {
         boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());
         boolean canMoveArmInternally = !willArmHitIntakeOrDrivetrain(targetArmState.getPosition(), elevator.getHeight());
-
-        // Ideally no longer needed with new coral autoalign
-
-//        boolean willArmExtendOutOfFrame = willArmExtendOutOfFrame(targetArmState.getPosition());
-//        boolean isArmExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
-
-//        if (willArmExtendOutOfFrame && isArmExtendingOutOfFrame) {
-//            return ArmSchedulerState.PARALLEL;
-//        }
-//
-//        if (willArmExtendOutOfFrame && !elevatorAtPosition() && canMoveElevatorInternally) {
-//            return ArmSchedulerState.ELEVATOR_FIRST;
-//        } else if (isArmExtendingOutOfFrame && !armAtPosition() && canMoveArmInternally) {
-//            return ArmSchedulerState.ARM_FIRST;
-//        }
 
         if (canMoveElevatorInternally && canMoveArmInternally) {
             return ArmSchedulerState.PARALLEL;
@@ -83,9 +78,8 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         } else if (canMoveArmInternally) {
             return ArmSchedulerState.ARM_FIRST;
         } else {
+            // No valid moves, probably should handle specially
             return getState();
-            // TODO remove for actual robot
-            //throw new IllegalStateException("Cannot move elevator or arm");
         }
     }
 
@@ -116,7 +110,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     }
 
     /**
-     * Checks if the arm will swing through the outside of the frame perimiter, but starts and ends within the frame.
+     * Checks if the arm will swing through the outside of the frame perimeter, but starts and ends within the frame.
      */
     private boolean willArmSwingThroughOutsideFrame(double armPosition, double targetArmPosition) {
         return !willArmExtendOutOfFrame(armPosition) && !willArmExtendOutOfFrame(targetArmPosition) && (isArmUp(armPosition) != isArmUp(targetArmPosition));
@@ -146,7 +140,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         ArmSchedulerState nextState = currentState;
 
         switch (currentState) {
-            case NEW_COMMAND, PARALLEL, ELEVATOR_FIRST, ARM_FIRST -> {
+            case PARALLEL, ELEVATOR_FIRST, ARM_FIRST -> {
                 nextState = assessState();
 
                 if (atPosition()) {
@@ -160,48 +154,57 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     }
 
     /**
-     * Gets the arm state that ensures that if the arm will swing through the outside of the frame perimiter, it will swing in the correct direction away from the reef.
+     * Gets the arm state that ensures the movement will be in the correct direction to avoid various obstacles.
      */
-    private ArmState getArmStateWithSwingDirection(ArmState state) {
-        boolean willSwingOutOfFrame = willArmSwingThroughOutsideFrame(arm.getNormalizedPosition(), state.getPosition());
-        RobotScoringSide reefSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
-        // return switch (reefSide) {
-        //        case RIGHT -> ArmState.TRANSITION_OUTSIDE_FRAME_LEFT;
-        //        case LEFT -> ArmState.TRANSITION_OUTSIDE_FRAME_RIGHT;
-        // };
-        if (willSwingOutOfFrame) {
-           //RobotScoringSide reefSide = AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
-        //    return switch (reefSide) {
-        //        case RIGHT -> ArmState.TRANSITION_OUTSIDE_FRAME_LEFT;
-        //        case LEFT -> ArmState.TRANSITION_OUTSIDE_FRAME_RIGHT;
-        //    };
-            return state;
-        } else {
-            return state;
+    private ArmState getArmStateWithCollisionAvoidance(ArmState state) {
+        if (DriverStation.isAutonomous()) {
+            double currentArmPosition = arm.getNormalizedPosition();
+            double targetArmPosition = state.getPosition();
+
+            // Checks if the elevator is lower than the minimum required for the arm to not collide with the intake
+            boolean willSwingThroughRobotIfDownwardSwing = elevator.getHeight() < minElevatorHeightForFullArmMovement;
+
+            // Check if the arm is moving from the left side to the right side
+            boolean isSwitchingSides = isArmRight(currentArmPosition) != isArmRight(targetArmPosition);
+
+            boolean isExtendingOutOfFrame = willArmExtendOutOfFrame(arm.getNormalizedPosition());
+
+            if (willSwingThroughRobotIfDownwardSwing && isSwitchingSides && isExtendingOutOfFrame) {
+                return ArmState.UP;
+            }
         }
+
+        return state;
     }
 
     @Override
     public void periodic() {
         super.periodic();
 
-        // We want constant updating, so this goes in periodic instead of after Transition()
+        // We want constant updating, so this goes in periodic instead of afterTransition()
         switch (getState()) {
-            case NEW_COMMAND -> {
-            }
             case PARALLEL -> {
-                arm.setState(getArmStateWithSwingDirection(targetArmState));
+                arm.setState(getArmStateWithCollisionAvoidance(targetArmState), armAcceleration);
                 elevator.setState(targetElevatorState);
             }
             case ELEVATOR_FIRST -> {
                 elevator.setState(targetElevatorState);
                 double armPosition = getNearestArmPositionWithoutCollision(elevator.getHeight(), targetArmState.getPosition(), arm.getNormalizedPosition());
-                arm.setCustom(armPosition);
+                arm.setCustom(armPosition, armAcceleration);
             }
             case ARM_FIRST -> {
-                arm.setState(getArmStateWithSwingDirection(targetArmState));
-                double elevatorPosition = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
-                elevator.setCustom(elevatorPosition);
+                arm.setState(getArmStateWithCollisionAvoidance(targetArmState), armAcceleration);
+
+                boolean isSwitchingSides = isArmRight(arm.getNormalizedPosition()) != isArmRight(targetArmState.getPosition());
+
+                double elevatorPositionToPlaceArmAboveIntake = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
+
+                // If the arm is swinging downwards through the robot, just keep the elevator at full height until it passes for smoother motion
+                if (isSwitchingSides && !isArmHorizontal(10) && DriverStation.isAutonomous()) {
+                    elevator.setCustom(minElevatorHeightForFullArmMovement);
+                } else {
+                    elevator.setCustom(elevatorPositionToPlaceArmAboveIntake);
+                }
             }
             case READY -> {
                 // Clear target state
@@ -220,34 +223,19 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
      * Gets the elevator position that will be closest to the desired position while not hitting the intake or drivetrain with the arm.
      */
     public double getNearestElevatorHeightWithoutArmCollision(double armPosition, double targetElevatorPosition) {
-        // This method will only be called in ELEVATOR_FIRST mode, so we know the arm would hit the intake or drivetrain if the elevator moved all the way, therefore move just above the intake to be safe
-
-        boolean useIntakeHeight = true;
-        // if (armPosition >= -0.05){
-        //     useIntakeHeight = false;
-        // }
-
-        if(useIntakeHeight == true){
-            double desiredHeight = finalIntakeHeight + (armWidth / 2.0) + Units.inchesToMeters(1.0);
-
-            double minElevatorPositionForArm = getElevatorPositionForDesiredArmHeight(armPosition, desiredHeight);
+        // This method will only be called in ARM_FIRST mode, so we know the arm would hit the intake or drivetrain if the elevator moved all the way, therefore move just above the intake to be safe
+        double desiredHeight = finalIntakeHeight + (armWidth / 2.0) + Units.inchesToMeters(1.0);
+        double minElevatorPositionForArm = getElevatorPositionForDesiredArmHeight(armPosition, desiredHeight);
 
         // No need to go below the target position
-            return Math.max(targetElevatorPosition, minElevatorPositionForArm);
-        } else {
-            double desiredHeightWithoutIntake = (armWidth / 2.0) + Units.inchesToMeters(1.0);
-
-            double minElevatorPositionForArmWithoutIntake = getElevatorPositionForDesiredArmHeight(armPosition, desiredHeightWithoutIntake);
-
-            return Math.max(targetElevatorPosition, minElevatorPositionForArmWithoutIntake);
-        }
+        return Math.max(targetElevatorPosition, minElevatorPositionForArm);
     }
 
     /**
      * Gets the arm position that will be closest to the desired position while not hitting the intake or drivetrain.
      */
     public double getNearestArmPositionWithoutCollision(double elevatorPosition, double targetArmPosition, double armPosition) {
-        // This method will only be called in ARM_FIRST mode, so we know the arm would hit the intake or drivetrain if it moved all the way, therefore move just above the intake to be safe
+        // This method will only be called in ELEVATOR_FIRST mode, so we know the arm would hit the intake or drivetrain if it moved all the way, therefore move just above the intake to be safe
         double desiredHeight = finalIntakeHeight + (armWidth / 2.0) + Units.inchesToMeters(1.0);
 
         double solutionOne = Arm.normalizePosition(getArmPositionForDesiredArmHeight(elevatorPosition, desiredHeight));
@@ -283,24 +271,28 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         DogLog.log("ArmScheduler/armAngle", arm.getNormalizedPosition());
         DogLog.log("ArmScheduler/elevatorHeight", elevator.getHeight());
         DogLog.log("ArmScheduler/armUp", isArmUp(arm.getNormalizedPosition()));
-        SmartDashboard.putData("ArmScheduler/ArmViz", visualization.getMechanism2d());
         DogLog.log("ArmScheduler/armHittingIntake", willArmHitIntake(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armHittingDrivetrain", willArmHitDrivetrain(arm.getNormalizedPosition(), elevator.getHeight()));
         DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
+        DogLog.log("ArmScheduler/armAcceleration", armAcceleration);
         Coordinate[] coordinates = getArmCoordinates(arm.getNormalizedPosition(), elevator.getHeight());
 
-        DogLog.log("ArmScheduler/armRight", isArmRight());
-        
 
         Coordinate coordinate1 = coordinates[0];
         Coordinate coordinate2 = coordinates[1];
-        visualization.drawArm(
-                elevatorBaseHeight + elevator.getHeight(),
-                coordinate1.x(),
-                coordinate1.y(),
-                coordinate2.x(),
-                coordinate2.y());
-        visualization.drawIntake(intakeWidth, finalIntakeHeight);
+
+        if (FeatureFlags.useMechanismVisualizer.getAsBoolean() && visualization != null) {
+            visualization.drawArm(
+                    elevatorBaseHeight + elevator.getHeight(),
+                    coordinate1.x(),
+                    coordinate1.y(),
+                    coordinate2.x(),
+                    coordinate2.y());
+
+            visualization.drawIntake(intakeWidth, finalIntakeHeight);
+
+            SmartDashboard.putData("ArmScheduler/ArmViz", visualization.getMechanism2d());
+        }
     }
 
     public boolean isArmUp() {
@@ -313,15 +305,34 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     }
 
     private boolean isArmRight() {
-        return MathUtil.isNear(arm.getNormalizedPosition(), 0.0, 0.25);
+        return isArmRight(arm.getNormalizedPosition());
     }
 
-    public void scheduleStates(ArmState armState, ElevatorState elevatorState, HandState handState) {
+    private boolean isArmRight(double armAngle) {
+        return MathUtil.isNear(armAngle, ArmState.RIGHT.getPosition(), 0.25);
+    }
+
+    private boolean isArmHorizontal(double toleranceDegrees) {
+        boolean isArmRight = MathUtil.isNear(ArmState.RIGHT.getPosition(), arm.getNormalizedPosition(), Units.degreesToRotations(toleranceDegrees));
+        boolean isArmLeft = MathUtil.isNear(ArmState.LEFT.getPosition(), arm.getNormalizedPosition(), Units.degreesToRotations(toleranceDegrees));
+        return isArmRight || isArmLeft;
+    }
+
+    public void scheduleStates(ArmState armState, ElevatorState elevatorState, HandState handState, double armAcceleration) {
         this.targetArmState = armState;
         this.targetElevatorState = elevatorState;
         this.targetHandState = handState;
+        this.armAcceleration = armAcceleration;
 
-        setStateFromRequest(ArmSchedulerState.NEW_COMMAND);
+        setStateFromRequest(assessState());
+    }
+
+    public void overrideArmAcceleration(double armAcceleration) {
+        arm.setOverrideAcceleration(armAcceleration);
+    }
+
+    public void clearOverrideArmAcceleration() {
+        arm.clearOverrideAcceleration();
     }
 
     /**
