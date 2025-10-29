@@ -257,6 +257,13 @@ public class GroundManager extends StateMachine<GroundManagerStates> {
         public Command doNothing() {
             return Commands.idle(groundManager);
         }
+
+        public boolean isIdle() {
+            return groundManager.getState() == GroundManagerStates.IDLE;
+        }
+        public boolean isL1() {
+            return groundManager.getState() == GroundManagerStates.PREPARE_SCORE_L1 || groundManager.getState() == GroundManagerStates.READY_SCORE_L1 || groundManager.getState() == GroundManagerStates.SCORE_L1;
+        }
     }
 
     private static GroundManager instance;

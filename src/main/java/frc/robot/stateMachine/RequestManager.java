@@ -40,6 +40,14 @@ public class RequestManager {
         return armCommands.isArmIdle();
     }
 
+    public boolean isGroundIdle() {
+        return groundCommands.isIdle();
+    }
+
+    public boolean isL1() {
+        return groundCommands.isL1();
+    }
+
     public RobotScoringSide reefRobotSide() {
         return AutoAlign.getScoringSideFromRobotPose(LocalizationSubsystem.getInstance().getPose());
     }
@@ -104,12 +112,6 @@ public class RequestManager {
 
     public Command idleAll() {
         return Commands.parallel(idleArm(), idleGround());
-    }
-
-    public Command algaeNetScore(Supplier<RobotScoringSide> side, BooleanSupplier confirmation) {
-        return armCommands.requestAlgaeNetPrepareAndAwaitReady(side)
-                .andThen(armCommands.doNothing().until(confirmation))
-                .andThen(armCommands.executeAlgaeNetScoreAndAwaitIdle());
     }
 
     public Command algaeNetScore(Supplier<RobotScoringSide> side) {

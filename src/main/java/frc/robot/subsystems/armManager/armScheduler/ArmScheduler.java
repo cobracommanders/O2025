@@ -5,11 +5,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.autoAlign.AutoAlign;
-import frc.robot.autoAlign.RobotScoringSide;
 import frc.robot.config.FeatureFlags;
-import frc.robot.localization.LocalizationSubsystem;
-import frc.robot.stateMachine.RequestManager;
 import frc.robot.Constants;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.subsystems.armManager.arm.Arm;
@@ -27,6 +23,7 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private final Elevator elevator;
     private final Hand hand;
     private final ArmSchedulerVisualization visualization;
+    private Priority priority = Priority.NONE;
 
     private ArmState targetArmState;
     private ElevatorState targetElevatorState;
@@ -68,19 +65,26 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     private final double minElevatorHeightForFullArmMovement = getNearestElevatorHeightWithoutArmCollision(ArmState.DOWN.getPosition(), 0.0) + Units.inchesToMeters(3.0);
 
     private ArmSchedulerState assessState() {
-        boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());
-        boolean canMoveArmInternally = !willArmHitIntakeOrDrivetrain(targetArmState.getPosition(), elevator.getHeight());
+        return switch (priority) {
+            case NONE -> {
+                boolean canMoveElevatorInternally = !willArmHitIntakeOrDrivetrain(arm.getNormalizedPosition(), targetElevatorState.getPosition());
+                boolean canMoveArmInternally = !willArmHitIntakeOrDrivetrain(targetArmState.getPosition(), elevator.getHeight());
 
-        if (canMoveElevatorInternally && canMoveArmInternally) {
-            return ArmSchedulerState.PARALLEL;
-        } else if (canMoveElevatorInternally) {
-            return ArmSchedulerState.ELEVATOR_FIRST;
-        } else if (canMoveArmInternally) {
-            return ArmSchedulerState.ARM_FIRST;
-        } else {
-            // No valid moves, probably should handle specially
-            return getState();
-        }
+                if (canMoveElevatorInternally && canMoveArmInternally) {
+                    yield ArmSchedulerState.PARALLEL;
+                } else if (canMoveElevatorInternally) {
+                    yield ArmSchedulerState.ELEVATOR_FIRST;
+                } else if (canMoveArmInternally) {
+                    yield ArmSchedulerState.ARM_FIRST;
+                } else {
+                    // No valid moves, probably should handle specially
+                    yield getState();
+                }
+            }
+
+            case ARM_FIRST -> ArmSchedulerState.ARM_FIRST;
+            case ELEVATOR_FIRST -> ArmSchedulerState.ELEVATOR_FIRST;
+        };
     }
 
     private boolean willArmHitIntakeOrDrivetrain(double armPosition, double elevatorPosition) {
@@ -189,21 +193,25 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
             }
             case ELEVATOR_FIRST -> {
                 elevator.setState(targetElevatorState);
-                double armPosition = getNearestArmPositionWithoutCollision(elevator.getHeight(), targetArmState.getPosition(), arm.getNormalizedPosition());
-                arm.setCustom(armPosition, armAcceleration);
+                if (priority == Priority.NONE) {
+                    double armPosition = getNearestArmPositionWithoutCollision(elevator.getHeight(), targetArmState.getPosition(), arm.getNormalizedPosition());
+                    arm.setCustom(armPosition, armAcceleration);
+                }
             }
             case ARM_FIRST -> {
                 arm.setState(getArmStateWithCollisionAvoidance(targetArmState), armAcceleration);
 
-                boolean isSwitchingSides = isArmRight(arm.getNormalizedPosition()) != isArmRight(targetArmState.getPosition());
+                if (priority == Priority.NONE) {
+                    boolean isSwitchingSides = isArmRight(arm.getNormalizedPosition()) != isArmRight(targetArmState.getPosition());
 
-                double elevatorPositionToPlaceArmAboveIntake = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
+                    double elevatorPositionToPlaceArmAboveIntake = getNearestElevatorHeightWithoutArmCollision(arm.getNormalizedPosition(), targetElevatorState.getPosition());
 
-                // If the arm is swinging downwards through the robot, just keep the elevator at full height until it passes for smoother motion
-                if (isSwitchingSides && !isArmHorizontal(10) && DriverStation.isAutonomous()) {
-                    elevator.setCustom(minElevatorHeightForFullArmMovement);
-                } else {
-                    elevator.setCustom(elevatorPositionToPlaceArmAboveIntake);
+                    // If the arm is swinging downwards through the robot, just keep the elevator at full height until it passes for smoother motion
+                    if (isSwitchingSides && !isArmHorizontal(10) && DriverStation.isAutonomous()) {
+                        elevator.setCustom(minElevatorHeightForFullArmMovement);
+                    } else {
+                        elevator.setCustom(elevatorPositionToPlaceArmAboveIntake);
+                    }
                 }
             }
             case READY -> {
@@ -318,10 +326,11 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
         return isArmRight || isArmLeft;
     }
 
-    public void scheduleStates(ArmState armState, ElevatorState elevatorState, HandState handState, double armAcceleration) {
+    public void scheduleStates(ArmState armState, ElevatorState elevatorState, HandState handState, Priority priority, double armAcceleration) {
         this.targetArmState = armState;
         this.targetElevatorState = elevatorState;
         this.targetHandState = handState;
+        this.priority = priority;
         this.armAcceleration = armAcceleration;
 
         setStateFromRequest(assessState());
@@ -352,5 +361,9 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
 
     public boolean isReady() {
         return getState() == ArmSchedulerState.READY;
+    }
+
+    public enum Priority {
+        ARM_FIRST, ELEVATOR_FIRST, NONE
     }
 }

@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Ports.OIPorts;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.commands.RobotCommands;
@@ -14,6 +15,7 @@ import frc.robot.subsystems.armManager.ArmManager;
 import frc.robot.subsystems.armManager.arm.Arm;
 import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
 import frc.robot.subsystems.drivetrain.DriveSubsystem;
+import frc.robot.subsystems.ground_manager.coraldetection.CoralDetector;
 import frc.robot.subsystems.ground_manager.intake.IntakePivot;
 import frc.robot.vision.VisionSubsystem;
 
@@ -69,11 +71,8 @@ public class Controls {
         // Score Coral
         operator.rightTrigger()
                 // whileTrue will cancel the command when the button is released
-                .whileTrue(Commands.either(
-                        requestManager.scoreL1(driver.rightTrigger()).asProxy(),
-                        robotCommands.teleopReefAlignAndScore(driver.B(),false),
-                        () -> OperatorOptions.getInstance().isCoralScoringL1()
-                ))
+                .whileTrue(robotCommands.teleopReefAlignAndScore(driver.B(),false)
+                        .unless(() -> OperatorOptions.getInstance().isCoralScoringL1()))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
                 // Only resets if the robot is far away from the reef and not likely to score again soon
                 .onFalse(requestManager.idleAll().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
@@ -90,14 +89,27 @@ public class Controls {
 
         operator.leftTrigger()
         // whileTrue will cancel the command when the button is released
-        .whileTrue(Commands.either(
-                requestManager.scoreL1(driver.X()).asProxy(),
-                robotCommands.teleopReefAlignAndScore(driver.B(),true),
-                () -> OperatorOptions.getInstance().isCoralScoringL1()
-        ))
+            .whileTrue(robotCommands.teleopReefAlignAndScore(driver.B(),true)
+                    .unless(() -> OperatorOptions.getInstance().isCoralScoringL1()))
         // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
         // Only resets if the robot is far away from the reef and not likely to score again soon
         .onFalse(requestManager.idleAll().onlyIf(() -> AutoAlign.getInstance().approximateDistanceToReef() > 0.125));
+
+        new Trigger(
+                () -> OperatorOptions.getInstance().isCoralScoringL1() &&
+                        (requestManager.isGroundIdle() || requestManager.isL1()) &&
+                        (CoralDetector.getInstance().hasCoral() || requestManager.isL1())
+        ).and(driver.leftTrigger().negate()).whileTrue(
+            requestManager.scoreL1(driver.X())
+        ).onFalse(requestManager.idleGround());
+
+        new Trigger(() -> CoralDetector.getInstance().hasCoral()).whileTrue(
+                Commands.startEnd(
+                        () -> driver.rumble(1.0),
+                        () -> driver.rumble(0.0)
+                ).withTimeout(0.5)
+        );
+
 
         // Fix drivetrain state
 //        driver.X().onTrue(runOnce(() -> {
