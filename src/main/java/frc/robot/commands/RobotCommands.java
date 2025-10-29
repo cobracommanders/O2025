@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.FieldConstants;
 import frc.robot.FieldConstants.PipeScoringLevel;
 import frc.robot.autoAlign.AutoAlign;
@@ -78,7 +79,7 @@ public class RobotCommands {
     // 2. Drive up to the final scoring position
     // 3. Score coral
     // 4. Drive backwards to pull the coral out and signal that the sequence is complete
-    public Command teleopReefAlignAndScore(BooleanSupplier backupDriveInterrupt, BooleanSupplier overrideScore, Boolean isLeft) {
+    public Command teleopReefAlignAndScore(Trigger overrideScore, Boolean isLeft) {
         return sequence(
                 // Start by driving up to the reef and preparing the arm for scoring in parallel
                 parallel(

@@ -2,6 +2,7 @@ package frc.robot.subsystems.armManager;
 
 import frc.robot.FieldConstants;
 import frc.robot.autoAlign.RobotScoringSide;
+import frc.robot.subsystems.armManager.armScheduler.ArmScheduler;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
 
 import static frc.robot.subsystems.armManager.ArmManagerState.HandGamePieceState.*;
@@ -141,6 +142,8 @@ public enum ArmManagerState {
     SCORE_ALGAE_NET_LEFT(ALGAE),
     SCORE_ALGAE_NET_RIGHT(ALGAE),
     SCORE_ALGAE_PROCESSOR(ALGAE),
+
+    SCORE_ALGAE_NET_EXIT(NONE), // Make the arm vertical after scoring to avoid hitting the barge when resetting
 
     /*
      * LOLLIPOP STATES

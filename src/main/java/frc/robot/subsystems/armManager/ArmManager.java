@@ -198,7 +198,14 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case SCORE_ALGAE_NET_LEFT,
                  SCORE_ALGAE_NET_RIGHT,
                  SCORE_ALGAE_PROCESSOR -> {
-                if (timeout(1.5)) {
+                if (timeout(1.0)) {
+//                    nextState = ArmManagerState.SCORE_ALGAE_NET_EXIT;
+                    nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
+                }
+            }
+
+            case SCORE_ALGAE_NET_EXIT -> {
+                if (atPosition()) {
                     nextState = ArmManagerState.PREPARE_IDLE_EMPTY;
                 }
             }
@@ -224,14 +231,6 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         }
 
         return nextState;
-    }
-
-    private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState) {
-        this.requestState(armState, elevatorState, handState, Constants.ArmConstants.DefaultMotionMagicAcceleration);
-    }
-
-    private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState, double armAcceleration) {
-        armScheduler.scheduleStates(armState, elevatorState, handState, armAcceleration);
     }
 
     public boolean isArmUp() {
@@ -334,8 +333,9 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE, 2);
             case SCORE_ALGAE_NET_LEFT -> hand.setState(HandState.SCORE_ALGAE_NET);
             case SCORE_ALGAE_NET_RIGHT -> hand.setState(HandState.SCORE_ALGAE_NET);
-            case SCORE_ALGAE_PROCESSOR ->
-                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR, 2);
+            case SCORE_ALGAE_PROCESSOR -> hand.setState(HandState.SCORE_ALGAE_PROCESSOR);
+
+            case SCORE_ALGAE_NET_EXIT -> requestState(ArmState.UP, ElevatorState.IDLE_EMPTY, HandState.IDLE_EMPTY, ArmScheduler.Priority.ARM_FIRST);
 
             /* ******** LOLLIPOP INTAKE STATES ******** */
             case PREPARE_INTAKE_LOLLIPOP -> requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
@@ -471,6 +471,24 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     public boolean isReadyToClimb() {
         return getState() == ArmManagerState.READY_CLIMB;
     }
+
+
+    private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState, double armAcceleration) {
+        this.requestState(armState, elevatorState, handState, ArmScheduler.Priority.NONE, armAcceleration);
+    }
+
+    private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState, ArmScheduler.Priority priority) {
+        this.requestState(armState, elevatorState, handState, priority, Constants.ArmConstants.DefaultMotionMagicAcceleration);
+    }
+
+    private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState) {
+        this.requestState(armState, elevatorState, handState, ArmScheduler.Priority.NONE, Constants.ArmConstants.DefaultMotionMagicAcceleration);
+    }
+
+    private void requestState(ArmState armState, ElevatorState elevatorState, HandState handState, ArmScheduler.Priority priority, double armAcceleration) {
+        armScheduler.scheduleStates(armState, elevatorState, handState, priority, armAcceleration);
+    }
+
 
     public static class CommandWrapper {
         private final ArmManager armManager;
@@ -689,3 +707,4 @@ public class ArmManager extends StateMachine<ArmManagerState> {
         }
     }
 }
+
