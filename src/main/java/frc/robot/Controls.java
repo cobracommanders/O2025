@@ -70,10 +70,8 @@ public class Controls {
         operator.rightTrigger()
                 // whileTrue will cancel the command when the button is released
                 .whileTrue(Commands.either(
-                        requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
-                        robotCommands.teleopReefAlignAndScore(driver::isStickActive,
-                                () -> driver.B().getAsBoolean(),
-                                false),
+                        requestManager.scoreL1(driver.rightTrigger()).asProxy(),
+                        robotCommands.teleopReefAlignAndScore(driver.B(),false),
                         () -> OperatorOptions.getInstance().isCoralScoringL1()
                 ))
                 // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
@@ -83,8 +81,8 @@ public class Controls {
 
         driver.Y().onTrue(
                 Commands.either(
-                        requestManager.algaeNetScore(() -> requestManager.netRobotSide()),
-                        requestManager.algaeProcessorScore(() -> driver.X().getAsBoolean()),
+                        requestManager.algaeNetScore(requestManager::netRobotSide),
+                        requestManager.algaeProcessorScore(driver.X()),
                         () -> operatorOptions.algaeScoreLocation == OperatorOptions.AlgaeScoreLocation.BARGE
                 )
         );
@@ -93,10 +91,8 @@ public class Controls {
         operator.leftTrigger()
         // whileTrue will cancel the command when the button is released
         .whileTrue(Commands.either(
-                requestManager.scoreL1(() -> driver.rightTrigger().getAsBoolean()).asProxy(),
-                robotCommands.teleopReefAlignAndScore(driver::isStickActive,
-                        () -> driver.B().getAsBoolean(),
-                        true),
+                requestManager.scoreL1(driver.X()).asProxy(),
+                robotCommands.teleopReefAlignAndScore(driver.B(),true),
                 () -> OperatorOptions.getInstance().isCoralScoringL1()
         ))
         // onFalse will reset the superstructure if the button is released (likely means the command is cancelled)
@@ -116,7 +112,7 @@ public class Controls {
 
         // Algae Intake
         //driver.leftBumper().onTrue(requestManager.reefAlgaeIntake());
-        driver.rightTrigger().and((operator.leftTrigger().negate().and(operator.rightTrigger().negate()))).onTrue(Commands.either(
+        driver.rightTrigger().onTrue(Commands.either(
                 requestManager.groundAlgaeIntake(),
                 requestManager.reefAlgaeIntake(),
                 () -> operatorOptions.algaeIntakeLevel == OperatorOptions.AlgaeIntakeLevel.GROUND_ALGAE
