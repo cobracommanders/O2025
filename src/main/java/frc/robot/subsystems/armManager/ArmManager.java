@@ -333,8 +333,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.IDLE_ALGAE, 2);
             case SCORE_ALGAE_NET_LEFT -> hand.setState(HandState.SCORE_ALGAE_NET);
             case SCORE_ALGAE_NET_RIGHT -> hand.setState(HandState.SCORE_ALGAE_NET);
-            case SCORE_ALGAE_PROCESSOR ->
-                    requestState(ArmState.ALGAE_PROCESSOR, ElevatorState.ALGAE_PROCESSOR, HandState.SCORE_ALGAE_PROCESSOR, 2);
+            case SCORE_ALGAE_PROCESSOR -> hand.setState(HandState.SCORE_ALGAE_PROCESSOR);
 
             case SCORE_ALGAE_NET_EXIT -> requestState(ArmState.UP, ElevatorState.IDLE_EMPTY, HandState.IDLE_EMPTY, ArmScheduler.Priority.ARM_FIRST);
 

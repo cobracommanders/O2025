@@ -81,11 +81,17 @@ public class Controls {
         driver.Y().onTrue(
                 Commands.either(
                         requestManager.algaeNetScore(requestManager::netRobotSide),
-                        requestManager.algaeProcessorScore(driver.X()),
+                        requestManager.algaeProcessorScore(),
                         () -> operatorOptions.algaeScoreLocation == OperatorOptions.AlgaeScoreLocation.BARGE
                 )
         );
-        driver.X().onTrue(requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle());
+        driver.X().onTrue(
+                Commands.either(
+                        requestManager.armCommands.executeAlgaeNetScoreAndAwaitIdle(),
+                        requestManager.armCommands.executeAlgaeProcessorScoreAndAwaitIdle(),
+                        () -> operatorOptions.algaeScoreLocation == OperatorOptions.AlgaeScoreLocation.BARGE
+                )
+        );
 
         operator.leftTrigger()
         // whileTrue will cancel the command when the button is released

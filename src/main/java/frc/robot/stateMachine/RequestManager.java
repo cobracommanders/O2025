@@ -18,7 +18,6 @@ import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
@@ -118,10 +117,8 @@ public class RequestManager {
         return armCommands.requestAlgaeNetPrepareAndAwaitReady(side);
     }
 
-    public Command algaeProcessorScore(Trigger confirmation) {
-        return armCommands.requestAlgaeProcessorPrepareAndAwaitReady()
-                .andThen(Commands.waitUntil(confirmation))
-                .andThen(armCommands.executeAlgaeProcessorScoreAndAwaitIdle());
+    public Command algaeProcessorScore() {
+        return armCommands.requestAlgaeProcessorPrepareAndAwaitReady();
     }
 
     public Command prepareCoralScoreAndAwaitReady(
