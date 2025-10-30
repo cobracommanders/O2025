@@ -2,23 +2,21 @@ package frc.robot.autos;
 
 import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 
+import frc.robot.autos.auto_path_commands.OneCoralClimberSideBackReef;
 import frc.robot.commands.RobotCommands;
 import frc.robot.autos.auto_path_commands.FourCoralNonProcessor;
+import frc.robot.autos.auto_path_commands.FourCoralProcessor;
 import frc.robot.stateMachine.RequestManager;
 import frc.robot.trailblazer.Trailblazer;
 
 public enum AutoSelection implements AutoSelectionBase {
-  // L4(redL4::new, blueL4::new),
-  FOUR_CORAL_NON_PROCESSOR(FourCoralNonProcessor::new, FourCoralNonProcessor::new);//,
-  // FOUR_CORAL_PROCESSOR(redFourCoralProcessor::new, blueFourCoralProcessor::new);
+  FOUR_CORAL_NON_PROCESSOR(FourCoralNonProcessor::new),
+  FOUR_CORAL_PROCESSOR(FourCoralProcessor::new),
+  ONE_CORAL_CLIMBERSIDE_POLE_H(OneCoralClimberSideBackReef::new);
 
-  public final TriFunction<RequestManager, Trailblazer,RobotCommands, BaseAuto> redAuto;
-  public final TriFunction<RequestManager, Trailblazer, RobotCommands, BaseAuto> blueAuto;
+  public final TriFunction<RequestManager, Trailblazer,RobotCommands, BaseAuto> auto;
 
-  private AutoSelection(
-      TriFunction<RequestManager, Trailblazer, RobotCommands, BaseAuto> redAuto,
-      TriFunction<RequestManager, Trailblazer, RobotCommands, BaseAuto> blueAuto) {
-    this.redAuto = redAuto;
-    this.blueAuto = blueAuto;
+  AutoSelection(TriFunction<RequestManager, Trailblazer, RobotCommands, BaseAuto> auto) {
+    this.auto = auto;
   }
 }

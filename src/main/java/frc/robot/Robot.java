@@ -119,7 +119,7 @@ public class Robot extends TimedRobot {
 
 //    private final Command autoCommand = new FourCoralNonProcessor(requestManager, trailblazer, robotCommands).getAutoCommand();
 //    private final Command autoCommand = new FourCoralProcessor(requestManager, trailblazer, robotCommands).getAutoCommand();
-    private final Command autoCommand = new OneCoralClimberSideBackReef(requestManager, trailblazer, robotCommands).getAutoCommand();
+//    private final Command autoCommand = new OneCoralClimberSideBackReef(requestManager, trailblazer, robotCommands).getAutoCommand();
 
     @Override
     public void autonomousInit() {
@@ -130,7 +130,8 @@ public class Robot extends TimedRobot {
             );
         }
 
-        autoCommand.schedule();
+//        autoCommand.schedule();
+        autos.getAutoCommand().schedule();
     }
 
     @Override
