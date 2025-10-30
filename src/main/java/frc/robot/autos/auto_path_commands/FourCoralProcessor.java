@@ -43,7 +43,7 @@ public class FourCoralProcessor extends BaseAuto {
 
                 blocks.intakeLollipop(Lollipop.MIDDLE).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
 
                 blocks.approachLollipop(Lollipop.LEFT).withDeadline(
                         Commands.sequence(
@@ -55,7 +55,7 @@ public class FourCoralProcessor extends BaseAuto {
 
                 blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy()
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy()
         )
                 .finallyDo(() -> {
                     requestManager.clearOverrideArmAcceleration().schedule();
