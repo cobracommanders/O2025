@@ -27,7 +27,7 @@ public class FeatureFlags {
             FeatureFlag.of("LED/IntakeBlink", true);
 
     public static final BooleanSupplier AUTO_ALGAE_INTAKE_HEIGHT =
-            FeatureFlag.of("AutoAlign/AutoAlgaeIntakeHeight", false);
+            FeatureFlag.of("AutoAlign/AutoAlgaeIntakeHeight", true);
 
     private FeatureFlags() {}
 }
