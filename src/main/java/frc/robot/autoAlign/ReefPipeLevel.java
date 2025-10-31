@@ -19,33 +19,33 @@ public enum ReefPipeLevel {
       // Half of drivebase + bumper side width + 1 coral width + reef side to pipe distance +
       // extra
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 4.0 - 1.5),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 3.75),
           Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(270)),
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 4.0 - 1.5),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 3.75),
           -Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(90))),
   L3(
       // Half of drivebase + bumper side width + 1 coral width + reef side to pipe distance +
       // extra
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 4.0 - 1.5),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 3.75),
           Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(270)),
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 4.0 - 1.5),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.0 + 2.0 - 3.75),
           -Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(90))),
   L4(
       // Half of drivebase + bumper side width + 1 coral width + reef side to pipe distance +
       // extra
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875 + 1.5),
           Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(270)),
       new Transform2d(
-          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875),
+          -Units.inchesToMeters(14.5 + 4.0 + 4.5 + 2.5 - 4.0 + 1.875 + 1.5),
           -Units.inchesToMeters(ArmConstants.inchesFromCenter),
           Rotation2d.fromDegrees(90))),
 

@@ -95,6 +95,39 @@ public class AutoBlocks {
                         ));
     }
 
+    public Command initialDriveToReefBackProcessor() {
+        return trailblazer.followSegment(
+                        new AutoSegment(
+                                new AutoConstraintOptions(
+                                        4.75,
+                                        Units.degreesToRadians(360.0),
+                                        6,
+                                        Units.degreesToRadians(360.0)
+                                ),
+                                new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
+                                new AutoPoint(() -> {
+                                    Pose2d initial_waypoint = new Pose2d(
+                                            13.0,
+                                            (Units.feetToMeters(26) + Units.inchesToMeters(5.0)) - 2.0,
+                                            Rotation2d.fromDegrees(70.0)
+                                    );
+                                    return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(initial_waypoint) : initial_waypoint;
+                                }),
+                                new AutoPoint(
+                                        () -> {
+                                            Pose2d final_waypoint = new Pose2d(
+                                                    15.0,
+                                                    (Units.feetToMeters(26) + Units.inchesToMeters(5.0)) - 3.5,
+                                                    Rotation2d.fromDegrees(90.0)
+                                            );
+                                            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
+                                        },
+                                        requestManager.prepareCoralScoreAndAwaitReady(),
+                                        maximumConstraints.withMaxLinearAcceleration(3.5)
+                                )
+                        ));
+    }
+
     public Command approachLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(

@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autos.Autos;
 import frc.robot.autos.auto_path_commands.FourCoralNonProcessor;
+import frc.robot.autos.auto_path_commands.FourCoralProcessor;
+import frc.robot.autos.auto_path_commands.OneCoralClimberSideBackReef;
 import frc.robot.commands.RobotCommands;
 import frc.robot.config.FeatureFlags;
 import frc.robot.fms.FmsSubsystem;
@@ -115,7 +117,9 @@ public class Robot extends TimedRobot {
         controls.configureDefaultCommands();
     }
 
-    private final Command autoCommand = new FourCoralNonProcessor(requestManager, trailblazer, robotCommands).getAutoCommand();
+//    private final Command autoCommand = new FourCoralNonProcessor(requestManager, trailblazer, robotCommands).getAutoCommand();
+//    private final Command autoCommand = new FourCoralProcessor(requestManager, trailblazer, robotCommands).getAutoCommand();
+//    private final Command autoCommand = new OneCoralClimberSideBackReef(requestManager, trailblazer, robotCommands).getAutoCommand();
 
     @Override
     public void autonomousInit() {
@@ -126,7 +130,8 @@ public class Robot extends TimedRobot {
             );
         }
 
-        autoCommand.schedule();
+//        autoCommand.schedule();
+        autos.getAutoCommand().schedule();
     }
 
     @Override

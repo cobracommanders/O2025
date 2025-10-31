@@ -3,6 +3,7 @@ package frc.robot.stateMachine;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.FieldConstants;
 import frc.robot.autoAlign.AutoAlign;
 import frc.robot.autoAlign.ReefPipeLevel;
@@ -17,7 +18,6 @@ import frc.robot.subsystems.climber.ClimberStates;
 import frc.robot.subsystems.ground_manager.GroundManager;
 import frc.robot.subsystems.ground_manager.coraldetection.CoralDetectorState;
 
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
@@ -37,6 +37,14 @@ public class RequestManager {
 
     public boolean isArmIdle() {
         return armCommands.isArmIdle();
+    }
+
+    public boolean isGroundIdle() {
+        return groundCommands.isIdle();
+    }
+
+    public boolean isL1() {
+        return groundCommands.isL1();
     }
 
     public RobotScoringSide reefRobotSide() {
@@ -105,20 +113,12 @@ public class RequestManager {
         return Commands.parallel(idleArm(), idleGround());
     }
 
-    public Command algaeNetScore(Supplier<RobotScoringSide> side, BooleanSupplier confirmation) {
-        return armCommands.requestAlgaeNetPrepareAndAwaitReady(side)
-                .andThen(armCommands.doNothing().until(confirmation))
-                .andThen(armCommands.executeAlgaeNetScoreAndAwaitIdle());
-    }
-
     public Command algaeNetScore(Supplier<RobotScoringSide> side) {
         return armCommands.requestAlgaeNetPrepareAndAwaitReady(side);
     }
 
-    public Command algaeProcessorScore(BooleanSupplier confirmation) {
-        return armCommands.requestAlgaeProcessorPrepareAndAwaitReady()
-                .andThen(Commands.waitUntil(confirmation))
-                .andThen(armCommands.executeAlgaeProcessorScoreAndAwaitIdle());
+    public Command algaeProcessorScore() {
+        return armCommands.requestAlgaeProcessorPrepareAndAwaitReady();
     }
 
     public Command prepareCoralScoreAndAwaitReady(
@@ -200,7 +200,7 @@ public class RequestManager {
                 .onlyIf(DriverStation::isAutonomous);
     }
 
-    public Command scoreL1(BooleanSupplier confirmation) {
+    public Command scoreL1(Trigger confirmation) {
         return groundCommands.prepareL1AndAwaitReady()
                 .andThen(waitUntil(confirmation))
                 .andThen(groundCommands.executeL1ScoreAndAwaitIdle());
