@@ -342,7 +342,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
             case ACTIVE_INTAKE_LOLLIPOP -> requestState(ArmState.LOLLIPOP, ElevatorState.LOLLIPOP, HandState.LOLLIPOP);
 
             /* ******** CLIMB STATES ******** */
-            case PREPARE_CLIMB, READY_CLIMB -> requestState(ArmState.CLIMB, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
+            case PREPARE_CLIMB, READY_CLIMB -> requestState(ArmState.CLIMB, ElevatorState.CLIMB, HandState.CLEAR_ALGAE);
         }
     }
 
