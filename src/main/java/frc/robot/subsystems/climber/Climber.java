@@ -22,6 +22,8 @@ import frc.robot.Ports;
 import frc.robot.stateMachine.StateMachine;
 import frc.robot.util.PhoenixSignalManager;
 
+import static java.lang.Math.abs;
+
 public class Climber extends StateMachine<ClimberStates> {
     public final DoubleSubscriber climberSpeed = DogLog.tunable("climb/Speed [-1, 1]", 0.0);
     private final DutyCycle encoder;
@@ -58,7 +60,7 @@ public class Climber extends StateMachine<ClimberStates> {
     @Override
     public void collectInputs() {
 
-        motorCurrent = motorCurrentSignal.getValueAsDouble();
+        motorCurrent = abs(motorCurrentSignal.getValueAsDouble());
         climberPosition = climberPositionSignal.getValueAsDouble();
         absolutePosition = encoder.getOutput() - ClimberConstants.EncoderOffset;
         // TODO: update climberPosition
