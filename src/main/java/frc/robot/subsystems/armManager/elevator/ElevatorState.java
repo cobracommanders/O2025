@@ -19,7 +19,7 @@ public enum ElevatorState {
     PREPARE_L4(1.418),
     PREPARE_L3(0.765),
     PREPARE_L2(0.35),
-    SCORE_L4(1.25 + Units.inchesToMeters(1.5)),
+    SCORE_L4(1.25 + Units.inchesToMeters(2.5)),
     SCORE_L3(0.634),
     SCORE_L2(0.219),
     CUSTOM(0.0); // Set in the elevator class
