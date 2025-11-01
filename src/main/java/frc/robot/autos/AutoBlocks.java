@@ -76,7 +76,7 @@ public class AutoBlocks {
                                 new AutoConstraintOptions(
                                         4.75,
                                         Units.degreesToRadians(360.0),
-                                        6,
+                                        5,
                                         Units.degreesToRadians(360.0)
                                 ),
                                 new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
@@ -90,7 +90,7 @@ public class AutoBlocks {
                                             return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
                                         },
                                         requestManager.prepareCoralScoreAndAwaitReady(),
-                                        maximumConstraints.withMaxLinearAcceleration(3.5)
+                                        maximumConstraints.withMaxLinearAcceleration(3.0)
                                 )
                         ));
     }
@@ -101,7 +101,7 @@ public class AutoBlocks {
                                 new AutoConstraintOptions(
                                         4.75,
                                         Units.degreesToRadians(360.0),
-                                        6,
+                                        5,
                                         Units.degreesToRadians(360.0)
                                 ),
                                 new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
@@ -123,7 +123,7 @@ public class AutoBlocks {
                                             return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
                                         },
                                         requestManager.prepareCoralScoreAndAwaitReady(),
-                                        maximumConstraints.withMaxLinearAcceleration(3.5)
+                                        maximumConstraints.withMaxLinearAcceleration(3.0)
                                 )
                         ));
     }
@@ -131,7 +131,7 @@ public class AutoBlocks {
     public Command approachLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(3.5),
+                        maximumConstraints.withMaxLinearAcceleration(2.5),
                         new PoseErrorTolerance(Units.inchesToMeters(2), 1.0),
                         new AutoPoint(() -> getLollipopApproachPose(lollipop.index))
                 ),
@@ -141,7 +141,7 @@ public class AutoBlocks {
     public Command intakeLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
-                        maximumConstraints.withMaxLinearAcceleration(4.0),
+                        maximumConstraints.withMaxLinearAcceleration(3.0),
                         new PoseErrorTolerance(Units.inchesToMeters(3), 2.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
                         new AutoPoint(() -> getLollipopIntakePose(lollipop.index))),
                 false // TODO Change to rotate immediately
