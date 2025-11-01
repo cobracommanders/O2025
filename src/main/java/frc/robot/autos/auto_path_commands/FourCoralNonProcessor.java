@@ -23,7 +23,7 @@ public class FourCoralNonProcessor extends BaseAuto {
         return Commands.sequence(
                 blocks.initialDriveToReefBackNonProcessor(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
 
                 blocks.approachLollipop(Lollipop.LEFT).alongWith(
                         requestManager.prepareLollipopAndAwaitReady().asProxy()
@@ -31,7 +31,7 @@ public class FourCoralNonProcessor extends BaseAuto {
 
                 blocks.intakeLollipop(Lollipop.LEFT).asProxy(),
 
-                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L4).asProxy(),
+                robotCommands.autoReefAlignAndScore(RobotScoringSide.LEFT, ReefPipe.PIPE_A, PipeScoringLevel.L2).asProxy(),
 
                 blocks.approachLollipop(Lollipop.MIDDLE).alongWith(
                         Commands.sequence(
