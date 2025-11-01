@@ -21,6 +21,7 @@ public class Trailblazer {
     private final LocalizationBase localization;
 
     private final PathTracker pathTracker = new PurePursuitPathTracker(false, true);
+    private final PathTracker ripathTracker = new PurePursuitPathTracker(true, true);
     private final PathFollower pathFollower;
     private int previousAutoPointIndex = -1;
     private TimestampedChassisSpeeds previousSpeeds = new TimestampedChassisSpeeds(0);
@@ -37,14 +38,22 @@ public class Trailblazer {
     }
 
     public Command followSegment(AutoSegment segment) {
-        return followSegment(segment, true);
+        return followSegment(segment, true, false);
     }
 
-    public Command followSegment(AutoSegment segment, boolean shouldEnd) {
+    public Command followSegment(AutoSegment segment, boolean ri) {
+        return followSegment(segment, true, ri);
+    }
+
+    public Command followSegment(AutoSegment segment, boolean shouldEnd, boolean ri) {
         TrailblazerPathLogger.logSegment(segment);
         var command = Commands.parallel(
                         Commands.runOnce(() -> {
-                            pathTracker.resetAndSetPoints(segment.points);
+                            if (ri) {
+                                ripathTracker.resetAndSetPoints(segment.points);
+                            } else {
+                                pathTracker.resetAndSetPoints(segment.points);
+                            }
                             previousAutoPointIndex = -1;
                             DogLog.log(
                                     "Autos/Trailblazer/CurrentSegment/InitialPoints",
@@ -53,12 +62,18 @@ public class Trailblazer {
                                             .toArray(Pose2d[]::new));
                         }),
                         Commands.run(() -> {
-                            pathTracker.updateRobotState(localization.getPose(), swerve.getFieldRelativeSpeeds());
-                            var currentAutoPointIndex = pathTracker.getCurrentPointIndex();
+                            int currentAutoPointIndex;
+                            if (ri) {
+                                ripathTracker.updateRobotState(localization.getPose(), swerve.getFieldRelativeSpeeds());
+                                currentAutoPointIndex = ripathTracker.getCurrentPointIndex();
+                            } else {
+                                pathTracker.updateRobotState(localization.getPose(), swerve.getFieldRelativeSpeeds());
+                                currentAutoPointIndex = pathTracker.getCurrentPointIndex();
+                            }
                             var currentAutoPoint = segment.points.get(currentAutoPointIndex);
                             double distanceToSegmentEnd = segment.getRemainingDistance(localization.getPose(), currentAutoPointIndex);
 
-                            var constrainedVelocityGoal = getSwerveSetpoint(currentAutoPoint, segment.defaultConstraints, distanceToSegmentEnd);
+                            var constrainedVelocityGoal = getSwerveSetpoint(currentAutoPoint, segment.defaultConstraints, distanceToSegmentEnd, ri);
 
                             DogLog.log("Autos/Trailblazer/Tracker/VelocityTarget", constrainedVelocityGoal);
                             DogLog.log("Autos/Trailblazer/Tracker/VelocityActual", swerve.getFieldRelativeSpeeds());
@@ -85,7 +100,9 @@ public class Trailblazer {
 
         if (shouldEnd) {
             return command
-                    .until(() -> segment.isFinished(localization.getPose(), pathTracker.getCurrentPointIndex()))
+                    .until(() -> segment.isFinished(localization.getPose(),
+                            ri ? ripathTracker.getCurrentPointIndex() : pathTracker.getCurrentPointIndex()
+                    ))
                     .andThen(Commands.runOnce(() -> swerve.setFieldRelativeAutoSpeeds(new ChassisSpeeds())))
                     .withName("FollowSegmentUntilFinished");
         }
@@ -95,13 +112,13 @@ public class Trailblazer {
         return command;
     }
 
-    private ChassisSpeeds getSwerveSetpoint(AutoPoint point, AutoConstraintOptions segmentConstraints, double distanceToSegmentEnd) {
+    private ChassisSpeeds getSwerveSetpoint(AutoPoint point, AutoConstraintOptions segmentConstraints, double distanceToSegmentEnd, boolean ri) {
         if (previousSpeeds.timestampSeconds == 0) {
             previousSpeeds = new TimestampedChassisSpeeds(Timer.getFPGATimestamp() - 0.02);
         }
 
         Pose2d currentPose = localization.getPose();
-        Pose2d targetPose = pathTracker.getTargetPose();
+        Pose2d targetPose = ri ? ripathTracker.getTargetPose() : pathTracker.getTargetPose();
         var rawVelocityGoal = new TimestampedChassisSpeeds(pathFollower.calculateSpeeds(currentPose, targetPose));
 
         // Get point-specific constraints if applicable, otherwise use the constraints of the full segment

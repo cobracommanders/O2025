@@ -134,7 +134,8 @@ public class AutoBlocks {
                         maximumConstraints.withMaxLinearAcceleration(3.5),
                         new PoseErrorTolerance(Units.inchesToMeters(2), 1.0),
                         new AutoPoint(() -> getLollipopApproachPose(lollipop.index))
-                ));
+                ),
+                false); // TODO Change to rotate immediately
     }
 
     public Command intakeLollipop(Lollipop lollipop) {
@@ -142,7 +143,9 @@ public class AutoBlocks {
                 new AutoSegment(
                         maximumConstraints.withMaxLinearAcceleration(4.0),
                         new PoseErrorTolerance(Units.inchesToMeters(3), 2.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
-                        new AutoPoint(() -> getLollipopIntakePose(lollipop.index)))
+                        new AutoPoint(() -> getLollipopIntakePose(lollipop.index))),
+                false // TODO Change to rotate immediately
+
         );
     }
 
