@@ -22,7 +22,7 @@ import frc.robot.util.MathHelpers;
 import frc.robot.util.PoseErrorTolerance;
 
 public class AutoBlocks {
-    private final AutoConstraintOptions maximumConstraints = new AutoConstraintOptions(
+    public static final AutoConstraintOptions maximumConstraints = new AutoConstraintOptions(
             4.75, // Linear Velocity
             Units.degreesToRadians(360.0), // Angular Velocity
             6.0, // Linear Acceleration

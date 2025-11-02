@@ -3,6 +3,7 @@ package frc.robot.autos;
 import com.pathplanner.lib.auto.AutoBuilder.TriFunction;
 
 import frc.robot.autos.auto_path_commands.OneCoralClimberSideBackReef;
+import frc.robot.autos.auto_path_commands.SuperSpecialAuto;
 import frc.robot.commands.RobotCommands;
 import frc.robot.autos.auto_path_commands.FourCoralNonProcessor;
 import frc.robot.autos.auto_path_commands.FourCoralProcessor;
@@ -12,7 +13,8 @@ import frc.robot.trailblazer.Trailblazer;
 public enum AutoSelection implements AutoSelectionBase {
   FOUR_CORAL_NON_PROCESSOR(FourCoralNonProcessor::new),
   FOUR_CORAL_PROCESSOR(FourCoralProcessor::new),
-  ONE_CORAL_CLIMBERSIDE_POLE_H(OneCoralClimberSideBackReef::new);
+  ONE_CORAL_CLIMBERSIDE_POLE_E(OneCoralClimberSideBackReef::new),
+  SUPER_SPECIAL_AUTO(SuperSpecialAuto::new);
 
   public final TriFunction<RequestManager, Trailblazer,RobotCommands, BaseAuto> auto;
 
