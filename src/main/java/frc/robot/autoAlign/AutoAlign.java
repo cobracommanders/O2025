@@ -59,8 +59,6 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
         var angleToAim = MathUtil.angleModulus(Math.atan2(centerOfReef.getY() - robotPose.getY(), centerOfReef.getX() - robotPose.getX()));
         var errorRight = Math.abs(MathUtil.angleModulus(angleToAim - (robotPose.getRotation().getRadians() - (Math.PI / 2.0))));
         var errorLeft = Math.abs(MathUtil.angleModulus(angleToAim - (robotPose.getRotation().getRadians() + (Math.PI / 2.0))));
-        DogLog.log("AutoAlign/errorRight", errorRight);
-        DogLog.log("AutoAlign/errorLeft", errorLeft);
 
         if (errorRight < errorLeft) {
             return RobotScoringSide.RIGHT;
@@ -113,8 +111,8 @@ public class AutoAlign extends StateMachine<AutoAlignState> {
     @Override
     public void periodic() {
         super.periodic();
-        DogLog.log("AutoAlign/UsedScoringPose", usedScoringPose);
-        DogLog.log("AutoAlign/ApproximateDistanceToReef", approximateDistanceToReef());
+//        DogLog.log("AutoAlign/UsedScoringPose", usedScoringPose);
+//        DogLog.log("AutoAlign/ApproximateDistanceToReef", approximateDistanceToReef());
     }
 
     public Pose2d getUsedScoringPose() {

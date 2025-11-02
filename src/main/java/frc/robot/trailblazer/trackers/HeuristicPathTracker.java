@@ -29,8 +29,8 @@ public class HeuristicPathTracker implements PathTracker {
         Pose2d currentTargetPose = currentPoint.poseSupplier.get();
 
         /// DogLog.log("Autos/Trailblazer/CurrentWaypoint", currentPoint);
-        DogLog.log("Autos/Trailblazer/NextPointIndex", currentPointIndex);
-        DogLog.log("Autos/Trailblazer/CurrentTargetPose", currentTargetPose);
+//        DogLog.log("Autos/Trailblazer/NextPointIndex", currentPointIndex);
+//        DogLog.log("Autos/Trailblazer/CurrentTargetPose", currentTargetPose);
 
         double distanceToTarget =
                 currentPose.getTranslation().getDistance(currentTargetPose.getTranslation());
@@ -41,8 +41,8 @@ public class HeuristicPathTracker implements PathTracker {
 
         var targetPose = points.get(currentPointIndex).poseSupplier.get();
 
-        DogLog.log("Autos/Trailblazer/TargetPose", targetPose);
-        DogLog.log("Autos/Trailblazer/DistanceToTarget", distanceToTarget);
+//        DogLog.log("Autos/Trailblazer/TargetPose", targetPose);
+//        DogLog.log("Autos/Trailblazer/DistanceToTarget", distanceToTarget);
 
         return targetPose;
     }

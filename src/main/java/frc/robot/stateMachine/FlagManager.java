@@ -19,7 +19,7 @@ public class FlagManager<T extends Enum<T>> {
   }
 
   public void log() {
-    DogLog.log(loggerCategory + "/Flags", checked.stream().map(Enum::name).toArray(String[]::new));
+//    DogLog.log(loggerCategory + "/Flags", checked.stream().map(Enum::name).toArray(String[]::new));
   }
 
   public void check(T flag) {

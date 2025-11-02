@@ -67,6 +67,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     @Override
     protected void collectInputs() {
         DogLog.log("ArmManager/atPosition", atPosition());
+        DogLog.log("ArmManager/State", getState());
     }
 
     protected ArmManagerState getNextState(ArmManagerState currentState) {

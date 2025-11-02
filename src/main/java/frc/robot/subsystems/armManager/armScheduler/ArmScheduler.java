@@ -276,13 +276,14 @@ public class ArmScheduler extends StateMachine<ArmSchedulerState> {
     @Override
     protected void collectInputs() {
         DogLog.log("ArmScheduler/atPosition", atPosition());
-        DogLog.log("ArmScheduler/armAngle", arm.getNormalizedPosition());
-        DogLog.log("ArmScheduler/elevatorHeight", elevator.getHeight());
-        DogLog.log("ArmScheduler/armUp", isArmUp(arm.getNormalizedPosition()));
-        DogLog.log("ArmScheduler/armHittingIntake", willArmHitIntake(arm.getNormalizedPosition(), elevator.getHeight()));
-        DogLog.log("ArmScheduler/armHittingDrivetrain", willArmHitDrivetrain(arm.getNormalizedPosition(), elevator.getHeight()));
-        DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
-        DogLog.log("ArmScheduler/armAcceleration", armAcceleration);
+        DogLog.log("ArmScheduler/State", getState());
+//        DogLog.log("ArmScheduler/armAngle", arm.getNormalizedPosition());
+//        DogLog.log("ArmScheduler/elevatorHeight", elevator.getHeight());
+//        DogLog.log("ArmScheduler/armUp", isArmUp(arm.getNormalizedPosition()));
+//        DogLog.log("ArmScheduler/armHittingIntake", willArmHitIntake(arm.getNormalizedPosition(), elevator.getHeight()));
+//        DogLog.log("ArmScheduler/armHittingDrivetrain", willArmHitDrivetrain(arm.getNormalizedPosition(), elevator.getHeight()));
+//        DogLog.log("ArmScheduler/armExtendingOutOfFrame", willArmExtendOutOfFrame(arm.getNormalizedPosition()));
+//        DogLog.log("ArmScheduler/armAcceleration", armAcceleration);
         Coordinate[] coordinates = getArmCoordinates(arm.getNormalizedPosition(), elevator.getHeight());
 
 

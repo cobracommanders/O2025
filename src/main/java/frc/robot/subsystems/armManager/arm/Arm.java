@@ -101,12 +101,12 @@ public class Arm extends StateMachine<ArmState> {
         absolutePosition = absolutePositionSignal.getValueAsDouble();
         armPosition = positionSignal.getValueAsDouble();
 
-        DogLog.log("Arm/Absolute Encoder position", absolutePosition);
-        DogLog.log("Arm/Motor Encoder Position", armPosition);
-        DogLog.log("Arm/Normalized Position", getNormalizedPosition());
+//        DogLog.log("Arm/Absolute Encoder position", absolutePosition);
+//        DogLog.log("Arm/Motor Encoder Position", armPosition);
+//        DogLog.log("Arm/Normalized Position", getNormalizedPosition());
         DogLog.log("Arm/At Goal", atGoal());
-        DogLog.log("Arm/CustomPosition", customStatePosition);
-        DogLog.log("Arm/Acceleration", acceleration);
+//        DogLog.log("Arm/CustomPosition", customStatePosition);
+//        DogLog.log("Arm/Acceleration", acceleration);
         MechanismVisualizer.setArmPosition(armPosition);
     }
 
@@ -171,7 +171,7 @@ public class Arm extends StateMachine<ArmState> {
     }
 
     private void setMotorToTargetPosition(double position) {
-        DogLog.log("Arm/Setpoint", position);
+//        DogLog.log("Arm/Setpoint", position);
         double finalAcceleration = Double.isNaN(overrideAcceleration) ? acceleration : overrideAcceleration;
         motor.setControl(motionMagicVoltage.withPosition(position).withAcceleration(finalAcceleration));
     }

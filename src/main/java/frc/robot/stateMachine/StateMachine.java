@@ -127,7 +127,7 @@ public abstract class StateMachine<S extends Enum<S>> extends SubsystemBase {
 
 
     lastTransitionTimestamp = Timer.getFPGATimestamp();
-    DogLog.log(name + "/State", state);
+//    DogLog.log(name + "/State", state);
 
     afterTransition(state);
   }

@@ -82,7 +82,7 @@ public class Limelight extends StateMachine<LimelightStates> {
             return tagResult.empty();
         }
         if (mT2Estimate.tagCount == 0) {
-            DogLog.log("Vision/" + name + "/Tags/RawLimelightPose", Pose2d.kZero);
+//            DogLog.log("Vision/" + name + "/Tags/RawLimelightPose", Pose2d.kZero);
 
             return tagResult.empty();
         }
@@ -92,13 +92,13 @@ public class Limelight extends StateMachine<LimelightStates> {
                 return tagResult.empty();
             }
         }
-        DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", mT2Estimate.timestampSeconds);
+//        DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", mT2Estimate.timestampSeconds);
         if (FeatureFlags.VISION_STALE_DATA_CHECK.getAsBoolean()) {
             var newTimestamp = mT2Estimate.timestampSeconds;
             if (newTimestamp == lastTimestamp) {
-                DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", 0.0);
+//                DogLog.log("Vision/" + name + "/Tags/MT2Timestamp", 0.0);
 
-                DogLog.log("Vision/" + name + "/Tags/RawLimelightPose", Pose2d.kZero);
+//                DogLog.log("Vision/" + name + "/Tags/RawLimelightPose", Pose2d.kZero);
                 return tagResult.empty();
             }
 
@@ -116,7 +116,7 @@ public class Limelight extends StateMachine<LimelightStates> {
         var devs = VecBuilder.fill(0.01, 0.01, Double.MAX_VALUE);
         if (mt1Compatible && FeatureFlags.MT_VISION_METHOD.getAsBoolean()) {
             var distance = mT2Estimate.avgTagDist;
-            DogLog.log("Vision/" + name + "/Tags/DistanceFromTag", Units.metersToInches(distance));
+//            DogLog.log("Vision/" + name + "/Tags/DistanceFromTag", Units.metersToInches(distance));
 
             var xyDev = 0.01 * Math.pow(distance, 1.2);
             var thetaDev = 0.03 * Math.pow(distance, 1.2);
@@ -124,7 +124,7 @@ public class Limelight extends StateMachine<LimelightStates> {
             devs = VecBuilder.fill(xyDev, xyDev, thetaDev);
 
             if (distance <= USE_MT1_DISTANCE_THRESHOLD) {
-                DogLog.timestamp("Vision/" + name + "/Tags/UsingMT1Rotation");
+//                DogLog.timestamp("Vision/" + name + "/Tags/UsingMT1Rotation");
                 var mT1Result = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightTableName);
                 if (mT1Result != null
                         && mT1Result.tagCount != 0
@@ -153,15 +153,14 @@ public class Limelight extends StateMachine<LimelightStates> {
     @Override
     public void periodic() {
         super.periodic();
-        DogLog.log("Vision/" + name + "/State", getState());
+//        DogLog.log("Vision/" + name + "/State", getState());
 
         var lastTagTimestamp = lastGoodTagResult.isPresent()
                 ? lastGoodTagResult.orElseThrow().timestamp()
                 : Double.MIN_VALUE;
 
         if (Timer.getTimestamp() - lastTagTimestamp > 30) {
-            DogLog.logFault(
-                    limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
+//            DogLog.logFault(limelightTableName + " has not seen a tag in the last 30 seconds", AlertType.kWarning);
         }
         switch (getState()) {
             case TAGS -> {
@@ -177,7 +176,7 @@ public class Limelight extends StateMachine<LimelightStates> {
 
     private void updateHealth(ReusableOptional<?> result) {
         var newHeartbeat = LimelightHelpers.getLimelightNTDouble(limelightTableName, "hb");
-        DogLog.log("Vision/" + name + "/Heartbeat", newHeartbeat);
+//        DogLog.log("Vision/" + name + "/Heartbeat", newHeartbeat);
         if (limelightHeartbeat != newHeartbeat) {
             limelightTimer.restart();
         }
@@ -188,18 +187,18 @@ public class Limelight extends StateMachine<LimelightStates> {
         var cameraPoseTargetSpace = LimelightHelpers.getCameraPose3d_TargetSpace(limelightTableName);
         var robotPoseTargetSpace = new Pose3d() ; //TODO: Find Robot pose relative to to calibration
         var cameraRobotRelativePose = getRobotRelativeCameraPosition(robotPoseTargetSpace, cameraPoseTargetSpace);
-        DogLog.log("CameraPositionCalibration/" + name + "/LL Right", cameraRobotRelativePose.getX());
-        DogLog.log("CameraPositionCalibration/" + name + "/LL Up", cameraRobotRelativePose.getY());
-        DogLog.log("CameraPositionCalibration/" + name + "/LL Forward", cameraRobotRelativePose.getZ());
-        DogLog.log(
-                "CameraPositionCalibration/" + name + "/LL Roll",
-                Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getX()));
-        DogLog.log(
-                "CameraPositionCalibration/" + name + "/LL Pitch",
-                Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getY()));
-        DogLog.log(
-                "CameraPositionCalibration/" + name + "/LL Yaw",
-                Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getZ()));
+//        DogLog.log("CameraPositionCalibration/" + name + "/LL Right", cameraRobotRelativePose.getX());
+//        DogLog.log("CameraPositionCalibration/" + name + "/LL Up", cameraRobotRelativePose.getY());
+//        DogLog.log("CameraPositionCalibration/" + name + "/LL Forward", cameraRobotRelativePose.getZ());
+//        DogLog.log(
+//                "CameraPositionCalibration/" + name + "/LL Roll",
+//                Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getX()));
+//        DogLog.log(
+//                "CameraPositionCalibration/" + name + "/LL Pitch",
+//                Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getY()));
+//        DogLog.log(
+//                "CameraPositionCalibration/" + name + "/LL Yaw",
+//                Units.radiansToDegrees(cameraRobotRelativePose.getRotation().getZ()));
     }
 
     @Override

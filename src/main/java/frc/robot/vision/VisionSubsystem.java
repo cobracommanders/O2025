@@ -171,8 +171,8 @@ public class VisionSubsystem extends StateMachine<VisionStates> {
       rightBackLimelight.logCameraPositionCalibrationValues();
     }
 
-    DogLog.log("Vision/SeeingTag", seeingTag);
-    DogLog.log("Vision/SeeingTagLast5Seconds", seenTagRecentlyForReset);
+//    DogLog.log("Vision/SeeingTag", seeingTag);
+//    DogLog.log("Vision/SeeingTagLast5Seconds", seenTagRecentlyForReset);
   }
 
   public void setClosestScoringReefAndPipe(int tagID) {

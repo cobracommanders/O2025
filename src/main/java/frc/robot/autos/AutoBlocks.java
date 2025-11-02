@@ -36,14 +36,8 @@ public class AutoBlocks {
         this.requestManager = requestManager;
         this.trailblazer = trailblazer;
 
-        DogLog.log("AlgaePositions", new Pose2d[]{
-                getLollipopIntakePose(0),
-                getLollipopIntakePose(1),
-                getLollipopIntakePose(2),
-        });
-
-        DogLog.log("1ATesting/LollipopPoseBase", getLollipopApproachPose(Lollipop.LEFT.index));
-        DogLog.log("1ATesting/LollipopPoseTransformed", getLollipopApproachPose(Lollipop.LEFT.index).transformBy(redInitialLollipopOffset));
+//        DogLog.log("1ATesting/LollipopPoseBase", getLollipopApproachPose(Lollipop.LEFT.index));
+//        DogLog.log("1ATesting/LollipopPoseTransformed", getLollipopApproachPose(Lollipop.LEFT.index).transformBy(redInitialLollipopOffset));
     }
 
     public static final Transform2d LOLLIPOP_INTAKE_OFFSET = new Transform2d(

@@ -102,8 +102,8 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   public void collectInputs() {
     intakePosition = intakePositionSignal.getValueAsDouble();
     absolutePosition = 1 - encoder.getOutput() - 0.163;
-    DogLog.log(name + "/motor Position", intakePosition);
-    DogLog.log(name + "/absolute Position", absolutePosition);
+//    DogLog.log(name + "/motor Position", intakePosition);
+//    DogLog.log(name + "/absolute Position", absolutePosition);
     if (Utils.isSimulation()) SimPivot.updateSimPosition(intakeMotor);
     MechanismVisualizer.setGroundPivotPosition(intakePosition);
   }
@@ -114,7 +114,7 @@ public class IntakePivot extends StateMachine<IntakePivotStates> {
   //   }
 
   public void setIntakePosition(double position) {
-    DogLog.log(name + "/Setpoint", position);
+//    DogLog.log(name + "/Setpoint", position);
     intakeMotor.setControl(motor_request.withPosition(position));
   }
 

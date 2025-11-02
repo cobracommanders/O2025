@@ -43,7 +43,7 @@ public class Hand extends StateMachine<HandState> {
         angularVelocity = velocitySignal.getValueAsDouble();
         DogLog.log("Hand/Stator Current", statorCurrent);
         DogLog.log("Hand/Angular Velocity", angularVelocity);
-        DogLog.log("Hand/hasAlgaeForIntake", hasAlgaeForIntake());
+//        DogLog.log("Hand/hasAlgaeForIntake", hasAlgaeForIntake());
     }
 
     public void setState(HandState state) {

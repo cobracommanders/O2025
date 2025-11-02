@@ -45,7 +45,6 @@ public class FmsSubsystem extends SubsystemBase {
         teleopEnabled = DriverStation.isTeleop();
         autoEnabled = DriverStation.isAutonomous();
         alliance = DriverStation.getAlliance().orElse(Alliance.Red);
-        DogLog.log("Fms/Alliance", isRedAlliance() ? "Red" : "Blue");
     }
 
     private static FmsSubsystem instance;

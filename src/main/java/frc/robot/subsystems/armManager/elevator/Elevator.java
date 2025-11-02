@@ -65,9 +65,9 @@ public class Elevator extends StateMachine<ElevatorState> {
     @Override
     public void collectInputs() {
         elevatorPosition = positionSignal.getValueAsDouble();
-        DogLog.log("Elevator/Position", elevatorPosition);
+//        DogLog.log("Elevator/Position", elevatorPosition);
         DogLog.log("Elevator/At Goal", atGoal());
-        DogLog.log("Elevator/CustomHeight", customStateHeight);
+//        DogLog.log("Elevator/CustomHeight", customStateHeight);
         MechanismVisualizer.setElevatorPosition(elevatorPosition);
     }
 
@@ -117,7 +117,7 @@ public class Elevator extends StateMachine<ElevatorState> {
 
     private void setMotorsToTargetHeight(double newState) {
         double position = MathUtil.clamp(newState, 0.0, ElevatorConstants.MaxHeight);
-        DogLog.log("Elevator/Setpoint", position);
+//        DogLog.log("Elevator/Setpoint", position);
         lMotor.setControl(motionMagicVoltage.withPosition(position));
     }
 }
