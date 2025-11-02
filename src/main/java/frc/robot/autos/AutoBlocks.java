@@ -138,12 +138,12 @@ public class AutoBlocks {
                         new PoseErrorTolerance(Units.inchesToMeters(2), 1.0),
                         new AutoPoint(() -> {
                             Pose2d lollipopApproachPose = getLollipopApproachPose(lollipop.index);
-//                            if (
-//                                    lollipop == Lollipop.LEFT &&
-//                                    DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
-//                            ) {
-//                                return lollipopApproachPose.transformBy(redInitialLollipopOffset);
-//                            }
+                            if (
+                                    lollipop == Lollipop.LEFT &&
+                                    DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
+                            ) {
+                                return lollipopApproachPose.transformBy(redInitialLollipopOffset);
+                            }
                             return lollipopApproachPose;
                         })
                 ),
@@ -157,12 +157,12 @@ public class AutoBlocks {
                         new PoseErrorTolerance(Units.inchesToMeters(3), 2.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
                         new AutoPoint(() -> {
                             Pose2d lollipopIntakePose = getLollipopIntakePose(lollipop.index);
-//                            if (
-//                                    lollipop == Lollipop.LEFT &&
-//                                            DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
-//                            ) {
-//                                return lollipopIntakePose.transformBy(redInitialLollipopOffset);
-//                            }
+                            if (
+                                    lollipop == Lollipop.LEFT &&
+                                            DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
+                            ) {
+                                return lollipopIntakePose.transformBy(redInitialLollipopOffset);
+                            }
                             return lollipopIntakePose;
                         })),
                 false // TODO Change to rotate immediately

@@ -109,8 +109,8 @@ public class Robot extends TimedRobot {
     @Override
     public void robotInit() {
         DogLog.setOptions(new DogLogOptions().withLogExtras(false).withCaptureConsole(false));
-        DogLog.setEnabled(Robot.isSimulation());
-//        DogLog.setEnabled(true);
+//        DOGLOG.SETENABLED(ROBOT.ISSIMULATION());
+        DogLog.setEnabled(true);
 
         FmsSubsystem.getInstance();
         lights = new LED();

@@ -19,7 +19,8 @@ import java.util.OptionalDouble;
 import com.pathplanner.lib.config.RobotConfig;
 
 public class Limelight extends StateMachine<LimelightStates> {
-    private static final int[] VALID_APRILTAGS = new int[] {6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 }; //TODO: Remove two
+//    private static final int[] VALID_APRILTAGS = new int[] {6, 7, 8, 9, 10, 11 }; // RED ALLIANCE
+    private static final int[] VALID_APRILTAGS = new int[] {17, 18, 19, 20, 21, 22 }; // BLUE ALLIANCE
 
     private static final double IS_OFFLINE_TIMEOUT = 3;
     private static final double USE_MT1_DISTANCE_THRESHOLD = Units.inchesToMeters(40.0);
