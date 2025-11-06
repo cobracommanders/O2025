@@ -126,6 +126,56 @@ public class RobotCommands {
                 .finallyDo(() -> DriveSubsystem.getInstance().requestTeleop());
     }
 
+    public Command handoffAutoReefAlignAndScoreNearest(RobotScoringSide scoringSide, ReefPipe reefpipe, PipeScoringLevel scoringLevel) {
+        return sequence(
+                // Start by driving up to the reef and preparing the arm for scoring in parallel
+                parallel(
+                        sequence(
+                                requestManager.handoffRequest().asProxy(),
+                                requestManager.idleGround().asProxy(),
+                                // Wait until the hand has a coral
+                                // This lets the command run while the handoff is happening without causing issues
+                                waitUntil(() -> requestManager.getHandGamePiece().isCoral() && (requestManager.isArmIdle() || requestManager.isArmReadyToScoreCoral())),
+                                // Set arm and elevator to prepare score state
+                                requestManager.prepareCoralScoreAndAwaitReady().asProxy() // See note above for .asProxy()
+                        ),
+
+                        // Drive up to the AWAIT_ARM_OFFSET position
+                        // This ensures the robot doesn't get too close to the reef while the arm is still preparing
+                        trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
+                                    // Switch between the offsets based on the side the robot is scoring on
+                                    Pose2d scoringPose = reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
+
+                                    return switch (scoringSide) {
+                                        case LEFT -> scoringPose.transformBy(AWAIT_ARM_LEFT_OFFSET);
+                                        case RIGHT -> scoringPose.transformBy(AWAIT_ARM_RIGHT_OFFSET);
+                                    };
+                                })))
+                                // .until cancels this drive command once the arm is in the ready state (after it's done preparing)
+                                .until(requestManager::isArmReadyToScoreCoral)
+                ),
+
+                // Drive to the final scoring position now that the arm is ready to score
+                trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
+                    return reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
+                }))),
+                // Once the drive command finishes, score the coral and wait for the arm to finish moving
+                requestManager.executeCoralScoreAndAwaitComplete().asProxy(), // See note above for .asProxy()
+
+                // Drive back after scoring to pull the coral out of the hand and signal to the driver that the sequence is complete
+                trailblazer.followSegment(new AutoSegment(EXTENDED_DRIVE_CONSTRAINTS, CORAL_SCORE_TOLERANCE, new AutoPoint(() -> {
+                    // Switch between the offsets based on the side the robot is scoring on
+                    Pose2d scoringPose = reefpipe.getPose(ReefPipeLevel.fromPipeScoringLevel(scoringLevel), scoringSide);
+                    return switch (scoringSide) {
+                        case LEFT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_LEFT_OFFSET_CAREFUL);
+                        case RIGHT -> scoringPose.transformBy(DRIVE_BACK_AFTER_SCORE_RIGHT_OFFSET_CAREFUL);
+                    };
+                })))
+        )
+                .beforeStarting(() -> DriveSubsystem.getInstance().requestReefAlign())
+                .finallyDo(() -> DriveSubsystem.getInstance().requestTeleop());
+    }
+
     public Command autoReefAlignAndScore(RobotScoringSide scoringSide, ReefPipe reefpipe, PipeScoringLevel scoringLevel) {
         return sequence(
                 // Start by driving up to the reef and preparing the arm for scoring in parallel

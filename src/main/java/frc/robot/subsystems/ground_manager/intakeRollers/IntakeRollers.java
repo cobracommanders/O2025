@@ -29,7 +29,7 @@ public class IntakeRollers extends StateMachine<IntakeRollersStates>{
     @Override
     public void collectInputs() {
       motorStatorCurrent = motorStatorCurrentSignal.getValueAsDouble();
-      DogLog.log(name + "/Stator Current", motorStatorCurrent);
+//      DogLog.log(name + "/Stator Current", motorStatorCurrent);
     }
     public double getMotorStatorCurrent() {
       return motorStatorCurrent;

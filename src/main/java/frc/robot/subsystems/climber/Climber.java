@@ -133,7 +133,7 @@ public class Climber extends StateMachine<ClimberStates> {
     }
 
     public void setClimberWheelSpeed(double speed) {
-        DogLog.log(name + "/Wheel Speed", speed);
+//        DogLog.log(name + "/Wheel Speed", speed);
         wheelMotor.set(speed);
     }
 

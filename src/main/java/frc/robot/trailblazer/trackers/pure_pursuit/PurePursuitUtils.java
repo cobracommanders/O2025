@@ -62,7 +62,7 @@ public class PurePursuitUtils {
         var curvature = (AB * BC * AC) / (4 * area);
         double value = curvature * DYNAMIC_LOOKAHEAD_SCALE;
         Pose2d[] curvaturepoints = {firstPoint, secondPoint, thirdPoint};
-        DogLog.log("Autos/Trailblazer/PurePursuitPathTracker/CurvaturePoints", curvaturepoints);
+//        DogLog.log("Autos/Trailblazer/PurePursuitPathTracker/CurvaturePoints", curvaturepoints);
         return Math.min(value, DYNAMIC_LOOKAHEAD_MAX);
     }
 

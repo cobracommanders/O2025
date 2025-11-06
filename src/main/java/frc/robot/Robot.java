@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.Utils;
 import dev.doglog.DogLog;
+import dev.doglog.DogLogOptions;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.IntegerPublisher;
@@ -84,7 +85,6 @@ public class Robot extends TimedRobot {
         }
 
         swerve.setElevatorHeight(elevator.getHeight());
-        DogLog.log("OperatorOptions/AlgaeLevel", OperatorOptions.getInstance().algaeIntakeLevel);
     }
 
 
@@ -108,7 +108,9 @@ public class Robot extends TimedRobot {
 
     @Override
     public void robotInit() {
-        DogLog.setEnabled(Robot.isSimulation());
+        DogLog.setOptions(new DogLogOptions().withLogExtras(false).withCaptureConsole(false));
+//        DOGLOG.SETENABLED(ROBOT.ISSIMULATION());
+        DogLog.setEnabled(true);
 
         FmsSubsystem.getInstance();
         lights = new LED();

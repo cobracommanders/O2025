@@ -86,9 +86,9 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
         double rightX = MathHelpers.signedExp(
                 ControllerHelpers.deadbandJoystickValue(theta, RIGHT_X_DEADBAND), 1.3);
 
-        DogLog.log("Swerve/LeftX", leftX);
-        DogLog.log("Swerve/LeftY", leftY);
-        DogLog.log("Swerve/RightX", rightX);
+//        DogLog.log("Swerve/LeftX", leftX);
+//        DogLog.log("Swerve/LeftY", leftY);
+//        DogLog.log("Swerve/RightX", rightX);
 
         Translation2d mappedPose = ControllerHelpers.fromCircularDiscCoordinates(leftX, leftY);
         double mappedX = mappedPose.getX();
@@ -123,11 +123,11 @@ public class DriveSubsystem extends StateMachine<DriveStates> implements SwerveB
     protected void collectInputs() {
         teleopSlowModePercent = ELEVATOR_HEIGHT_TO_SLOW_MODE.get(elevatorHeight);
 
-        DogLog.log("Swerve/AutoSpeeds", autoSpeeds);
-        DogLog.log("Swerve/TeleopSpeeds", teleopSpeeds);
-        DogLog.log("Swerve/FieldRelativeSpeeds", getFieldRelativeSpeeds());
-        DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);
-        DogLog.log("Swerve/Pose", drivetrain.getState().Pose);
+//        DogLog.log("Swerve/AutoSpeeds", autoSpeeds);
+//        DogLog.log("Swerve/TeleopSpeeds", teleopSpeeds);
+//        DogLog.log("Swerve/FieldRelativeSpeeds", getFieldRelativeSpeeds());
+//        DogLog.log("Swerve/SlowModePercent", teleopSlowModePercent);
+//        DogLog.log("Swerve/Pose", drivetrain.getState().Pose);
     }
 
     public ChassisSpeeds flipSpeeds(ChassisSpeeds speeds) {

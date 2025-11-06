@@ -26,7 +26,7 @@ public class TrailblazerPathLogger {
 
         currentPath.addAll(segment.points.stream().map(point -> point.poseSupplier.get()).toList());
 
-        DogLog.log("Autos/Paths/" + currentAuto, currentPath.toArray(Pose2d[]::new));
+//        DogLog.log("Autos/Paths/" + currentAuto, currentPath.toArray(Pose2d[]::new));
     }
 
     private TrailblazerPathLogger() {

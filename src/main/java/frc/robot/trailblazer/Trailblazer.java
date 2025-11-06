@@ -21,6 +21,7 @@ public class Trailblazer {
     private final LocalizationBase localization;
 
     private final PathTracker pathTracker = new PurePursuitPathTracker(false, true);
+    private final PathTracker ripathTracker = new PurePursuitPathTracker(true, true);
     private final PathFollower pathFollower;
     private int previousAutoPointIndex = -1;
     private TimestampedChassisSpeeds previousSpeeds = new TimestampedChassisSpeeds(0);
@@ -37,44 +38,62 @@ public class Trailblazer {
     }
 
     public Command followSegment(AutoSegment segment) {
-        return followSegment(segment, true);
+        return followSegment(segment, true, false);
     }
 
-    public Command followSegment(AutoSegment segment, boolean shouldEnd) {
+    public Command followSegment(AutoSegment segment, boolean ri) {
+        return followSegment(segment, true, ri);
+    }
+
+    public Command followSegment(AutoSegment segment, boolean shouldEnd, boolean ri) {
         TrailblazerPathLogger.logSegment(segment);
         var command = Commands.parallel(
                         Commands.runOnce(() -> {
-                            pathTracker.resetAndSetPoints(segment.points);
+                            if (ri) {
+                                ripathTracker.resetAndSetPoints(segment.points);
+                            } else {
+                                pathTracker.resetAndSetPoints(segment.points);
+                            }
                             previousAutoPointIndex = -1;
-                            DogLog.log(
-                                    "Autos/Trailblazer/CurrentSegment/InitialPoints",
-                                    segment.points.stream()
-                                            .map(point -> point.poseSupplier.get())
-                                            .toArray(Pose2d[]::new));
+//                            DogLog.log(
+//                                    "Autos/Trailblazer/CurrentSegment/InitialPoints",
+//                                    segment.points.stream()
+//                                            .map(point -> point.poseSupplier.get())
+//                                            .toArray(Pose2d[]::new));
                         }),
                         Commands.run(() -> {
-                            pathTracker.updateRobotState(localization.getPose(), swerve.getFieldRelativeSpeeds());
-                            var currentAutoPointIndex = pathTracker.getCurrentPointIndex();
+                            int currentAutoPointIndex;
+                            if (ri) {
+                                ripathTracker.updateRobotState(localization.getPose(), swerve.getFieldRelativeSpeeds());
+                                currentAutoPointIndex = ripathTracker.getCurrentPointIndex();
+                            } else {
+                                pathTracker.updateRobotState(localization.getPose(), swerve.getFieldRelativeSpeeds());
+                                currentAutoPointIndex = pathTracker.getCurrentPointIndex();
+                            }
                             var currentAutoPoint = segment.points.get(currentAutoPointIndex);
                             double distanceToSegmentEnd = segment.getRemainingDistance(localization.getPose(), currentAutoPointIndex);
 
-                            var constrainedVelocityGoal = getSwerveSetpoint(currentAutoPoint, segment.defaultConstraints, distanceToSegmentEnd);
+                            var constrainedVelocityGoal = getSwerveSetpoint(currentAutoPoint, segment.defaultConstraints, distanceToSegmentEnd, ri);
 
-                            DogLog.log("Autos/Trailblazer/Tracker/VelocityTarget", constrainedVelocityGoal);
-                            DogLog.log("Autos/Trailblazer/Tracker/VelocityActual", swerve.getFieldRelativeSpeeds());
+                            if (Robot.isSimulation()) {
+                                DogLog.log("Autos/Trailblazer/Tracker/VelocityTarget", constrainedVelocityGoal);
+                                DogLog.log("Autos/Trailblazer/Tracker/VelocityActual", swerve.getFieldRelativeSpeeds());
 
-                            DogLog.log("Autos/Trailblazer/Tracker/NormalizedVelocityTarget", Math.hypot(constrainedVelocityGoal.vxMetersPerSecond, constrainedVelocityGoal.vyMetersPerSecond));
-                            DogLog.log("Autos/Trailblazer/Tracker/NormalizedVelocityActual", Math.hypot(swerve.getFieldRelativeSpeeds().vxMetersPerSecond, swerve.getFieldRelativeSpeeds().vyMetersPerSecond));
+                                DogLog.log("Autos/Trailblazer/Tracker/NormalizedVelocityTarget", Math.hypot(constrainedVelocityGoal.vxMetersPerSecond, constrainedVelocityGoal.vyMetersPerSecond));
+                                DogLog.log("Autos/Trailblazer/Tracker/NormalizedVelocityActual", Math.hypot(swerve.getFieldRelativeSpeeds().vxMetersPerSecond, swerve.getFieldRelativeSpeeds().vyMetersPerSecond));
+
+                                DogLog.log("Autos/Trailblazer/Tracker/CurrentPointIndex", currentAutoPointIndex);
+                            }
+
                             swerve.setFieldRelativeAutoSpeeds(constrainedVelocityGoal);
 
-                            DogLog.log("Autos/Trailblazer/Tracker/CurrentPointIndex", currentAutoPointIndex);
                             if (previousAutoPointIndex != currentAutoPointIndex) {
                                 // Currently tracked point has changed, trigger side effects
 
                                 // Each of the points in (previous, current]
                                 var pointsToRunSideEffectsFor = segment.points.subList(previousAutoPointIndex + 1, currentAutoPointIndex + 1);
                                 for (var passedPoint : pointsToRunSideEffectsFor) {
-                                    DogLog.log("Autos/Trailblazer/Tracker/CommandTriggered", passedPoint.command.getName());
+//                                    DogLog.log("Autos/Trailblazer/Tracker/CommandTriggered", passedPoint.command.getName());
                                     passedPoint.command.schedule();
                                 }
                                 previousAutoPointIndex = currentAutoPointIndex;
@@ -85,7 +104,9 @@ public class Trailblazer {
 
         if (shouldEnd) {
             return command
-                    .until(() -> segment.isFinished(localization.getPose(), pathTracker.getCurrentPointIndex()))
+                    .until(() -> segment.isFinished(localization.getPose(),
+                            ri ? ripathTracker.getCurrentPointIndex() : pathTracker.getCurrentPointIndex()
+                    ))
                     .andThen(Commands.runOnce(() -> swerve.setFieldRelativeAutoSpeeds(new ChassisSpeeds())))
                     .withName("FollowSegmentUntilFinished");
         }
@@ -95,13 +116,13 @@ public class Trailblazer {
         return command;
     }
 
-    private ChassisSpeeds getSwerveSetpoint(AutoPoint point, AutoConstraintOptions segmentConstraints, double distanceToSegmentEnd) {
+    private ChassisSpeeds getSwerveSetpoint(AutoPoint point, AutoConstraintOptions segmentConstraints, double distanceToSegmentEnd, boolean ri) {
         if (previousSpeeds.timestampSeconds == 0) {
             previousSpeeds = new TimestampedChassisSpeeds(Timer.getFPGATimestamp() - 0.02);
         }
 
         Pose2d currentPose = localization.getPose();
-        Pose2d targetPose = pathTracker.getTargetPose();
+        Pose2d targetPose = ri ? ripathTracker.getTargetPose() : pathTracker.getTargetPose();
         var rawVelocityGoal = new TimestampedChassisSpeeds(pathFollower.calculateSpeeds(currentPose, targetPose));
 
         // Get point-specific constraints if applicable, otherwise use the constraints of the full segment
@@ -113,17 +134,19 @@ public class Trailblazer {
         // Update previous speeds for acceleration calculations
         previousSpeeds = constrainedVelocityGoal;
 
-        DogLog.log("Autos/Trailblazer/Constraints/Linear Velocity", constraints.maxLinearVelocity());
-        DogLog.log("Autos/Trailblazer/Constraints/Linear Acceleration", constraints.maxLinearAcceleration());
+        if (Robot.isSimulation()) {
+            DogLog.log("Autos/Trailblazer/Constraints/Linear Velocity", constraints.maxLinearVelocity());
+            DogLog.log("Autos/Trailblazer/Constraints/Linear Acceleration", constraints.maxLinearAcceleration());
 
-        DogLog.log("Autos/Trailblazer/Constraints/Angular Velocity", constraints.maxAngularVelocity());
-        DogLog.log("Autos/Trailblazer/Constraints/Angular Acceleration", constraints.maxAngularAcceleration());
+            DogLog.log("Autos/Trailblazer/Constraints/Angular Velocity", constraints.maxAngularVelocity());
+            DogLog.log("Autos/Trailblazer/Constraints/Angular Acceleration", constraints.maxAngularAcceleration());
 
-        DogLog.log("Autos/Trailblazer/Tracker/CurrentPose", currentPose);
-        DogLog.log("Autos/Trailblazer/Tracker/TargetPose", targetPose);
+            DogLog.log("Autos/Trailblazer/Tracker/CurrentPose", currentPose);
+            DogLog.log("Autos/Trailblazer/Tracker/TargetPose", targetPose);
 
-        DogLog.log("Autos/Trailblazer/Follower/Initial Goal", rawVelocityGoal);
-        DogLog.log("Autos/Trailblazer/Follower/Constrained Goal", constrainedVelocityGoal);
+            DogLog.log("Autos/Trailblazer/Follower/Initial Goal", rawVelocityGoal);
+            DogLog.log("Autos/Trailblazer/Follower/Constrained Goal", constrainedVelocityGoal);
+        }
 
         return constrainedVelocityGoal;
     }

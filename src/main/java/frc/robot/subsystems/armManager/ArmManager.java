@@ -67,6 +67,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
     @Override
     protected void collectInputs() {
         DogLog.log("ArmManager/atPosition", atPosition());
+        DogLog.log("ArmManager/State", getState());
     }
 
     protected ArmManagerState getNextState(ArmManagerState currentState) {
@@ -254,7 +255,7 @@ public class ArmManager extends StateMachine<ArmManagerState> {
                     requestState(ArmState.HANDOFF_MIDDLE, ElevatorState.IDLE_EMPTY, HandState.IDLE_CORAL);
 
             case PREPARE_IDLE_ALGAE, IDLE_ALGAE ->
-                    requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE, 2);
+                    requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.IDLE_ALGAE, 1);
             case IDLE_ALGAE_DROPPED -> requestState(ArmState.IDLE_ALGAE, ElevatorState.IDLE, HandState.CLEAR_ALGAE);
 
             /* ******** HANDOFF STATES ******** */

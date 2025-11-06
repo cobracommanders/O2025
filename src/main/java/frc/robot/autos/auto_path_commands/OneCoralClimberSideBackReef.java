@@ -19,7 +19,7 @@ public class OneCoralClimberSideBackReef extends BaseAuto {
     @Override
     protected Command createAutoCommand() {
         return Commands.sequence(
-                robotCommands.autoReefAlignAndScoreNearest(RobotScoringSide.LEFT, ReefPipe.PIPE_H, PipeScoringLevel.L4).asProxy(),
+                robotCommands.autoReefAlignAndScoreNearest(RobotScoringSide.LEFT, ReefPipe.PIPE_E, PipeScoringLevel.L4).asProxy(),
                 requestManager.idleArm().asProxy()
         )
                 .finallyDo(() -> {

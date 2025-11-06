@@ -22,7 +22,7 @@ import frc.robot.util.MathHelpers;
 import frc.robot.util.PoseErrorTolerance;
 
 public class AutoBlocks {
-    private final AutoConstraintOptions maximumConstraints = new AutoConstraintOptions(
+    public static final AutoConstraintOptions maximumConstraints = new AutoConstraintOptions(
             4.75, // Linear Velocity
             Units.degreesToRadians(360.0), // Angular Velocity
             6.0, // Linear Acceleration
@@ -36,11 +36,8 @@ public class AutoBlocks {
         this.requestManager = requestManager;
         this.trailblazer = trailblazer;
 
-        DogLog.log("AlgaePositions", new Pose2d[]{
-                getLollipopIntakePose(0),
-                getLollipopIntakePose(1),
-                getLollipopIntakePose(2),
-        });
+//        DogLog.log("1ATesting/LollipopPoseBase", getLollipopApproachPose(Lollipop.LEFT.index));
+//        DogLog.log("1ATesting/LollipopPoseTransformed", getLollipopApproachPose(Lollipop.LEFT.index).transformBy(redInitialLollipopOffset));
     }
 
     public static final Transform2d LOLLIPOP_INTAKE_OFFSET = new Transform2d(
@@ -72,69 +69,85 @@ public class AutoBlocks {
 
     public Command initialDriveToReefBackNonProcessor() {
         return trailblazer.followSegment(
-                        new AutoSegment(
-                                new AutoConstraintOptions(
-                                        4.75,
-                                        Units.degreesToRadians(360.0),
-                                        6,
-                                        Units.degreesToRadians(360.0)
-                                ),
-                                new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
-                                new AutoPoint(() -> {
-                                    Pose2d initial_waypoint = new Pose2d(13, 2.0, Rotation2d.fromDegrees(70.0));
-                                    return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(initial_waypoint) : initial_waypoint;
-                                }),
-                                new AutoPoint(
-                                        () -> {
-                                            Pose2d final_waypoint = new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0));
-                                            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
-                                        },
-                                        requestManager.prepareCoralScoreAndAwaitReady(),
-                                        maximumConstraints.withMaxLinearAcceleration(3.5)
-                                )
-                        ));
+                new AutoSegment(
+                        new AutoConstraintOptions(
+                                4.75,
+                                Units.degreesToRadians(360.0),
+                                6,
+                                Units.degreesToRadians(360.0)
+                        ),
+                        new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
+                        new AutoPoint(() -> {
+                            Pose2d initial_waypoint = new Pose2d(13, 2.0, Rotation2d.fromDegrees(70.0));
+                            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(initial_waypoint) : initial_waypoint;
+                        }),
+                        new AutoPoint(
+                                () -> {
+                                    Pose2d final_waypoint = new Pose2d(15.0, 3.5, Rotation2d.fromDegrees(90.0));
+                                    return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
+                                },
+                                requestManager.prepareCoralScoreAndAwaitReady(),
+                                maximumConstraints.withMaxLinearAcceleration(3.5)
+                        )
+                ));
     }
 
     public Command initialDriveToReefBackProcessor() {
         return trailblazer.followSegment(
-                        new AutoSegment(
-                                new AutoConstraintOptions(
-                                        4.75,
-                                        Units.degreesToRadians(360.0),
-                                        6,
-                                        Units.degreesToRadians(360.0)
-                                ),
-                                new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
-                                new AutoPoint(() -> {
-                                    Pose2d initial_waypoint = new Pose2d(
-                                            13.0,
-                                            (Units.feetToMeters(26) + Units.inchesToMeters(5.0)) - 2.0,
-                                            Rotation2d.fromDegrees(70.0)
+                new AutoSegment(
+                        new AutoConstraintOptions(
+                                4.75,
+                                Units.degreesToRadians(360.0),
+                                6,
+                                Units.degreesToRadians(360.0)
+                        ),
+                        new PoseErrorTolerance(Units.inchesToMeters(8.0), 10.0),
+                        new AutoPoint(() -> {
+                            Pose2d initial_waypoint = new Pose2d(
+                                    13.0,
+                                    (Units.feetToMeters(26) + Units.inchesToMeters(5.0)) - 2.0,
+                                    Rotation2d.fromDegrees(70.0)
+                            );
+                            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(initial_waypoint) : initial_waypoint;
+                        }),
+                        new AutoPoint(
+                                () -> {
+                                    Pose2d final_waypoint = new Pose2d(
+                                            15.0,
+                                            (Units.feetToMeters(26) + Units.inchesToMeters(5.0)) - 3.5,
+                                            Rotation2d.fromDegrees(90.0)
                                     );
-                                    return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(initial_waypoint) : initial_waypoint;
-                                }),
-                                new AutoPoint(
-                                        () -> {
-                                            Pose2d final_waypoint = new Pose2d(
-                                                    15.0,
-                                                    (Units.feetToMeters(26) + Units.inchesToMeters(5.0)) - 3.5,
-                                                    Rotation2d.fromDegrees(90.0)
-                                            );
-                                            return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
-                                        },
-                                        requestManager.prepareCoralScoreAndAwaitReady(),
-                                        maximumConstraints.withMaxLinearAcceleration(3.5)
-                                )
-                        ));
+                                    return DriverStation.getAlliance().orElse(DriverStation.Alliance.Red) == DriverStation.Alliance.Blue ? MathHelpers.pathflip(final_waypoint) : final_waypoint;
+                                },
+                                requestManager.prepareCoralScoreAndAwaitReady(),
+                                maximumConstraints.withMaxLinearAcceleration(3.5)
+                        )
+                ));
     }
+
+    private final Transform2d redInitialLollipopOffset = new Transform2d(
+            Units.inchesToMeters(2.0),
+            0.0,
+            Rotation2d.kZero
+    );
 
     public Command approachLollipop(Lollipop lollipop) {
         return trailblazer.followSegment(
                 new AutoSegment(
                         maximumConstraints.withMaxLinearAcceleration(3.5),
                         new PoseErrorTolerance(Units.inchesToMeters(2), 1.0),
-                        new AutoPoint(() -> getLollipopApproachPose(lollipop.index))
-                ));
+                        new AutoPoint(() -> {
+                            Pose2d lollipopApproachPose = getLollipopApproachPose(lollipop.index);
+                            if (
+                                    lollipop == Lollipop.LEFT &&
+                                    DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
+                            ) {
+                                return lollipopApproachPose.transformBy(redInitialLollipopOffset);
+                            }
+                            return lollipopApproachPose;
+                        })
+                ),
+                false); // TODO Change to rotate immediately
     }
 
     public Command intakeLollipop(Lollipop lollipop) {
@@ -142,7 +155,18 @@ public class AutoBlocks {
                 new AutoSegment(
                         maximumConstraints.withMaxLinearAcceleration(4.0),
                         new PoseErrorTolerance(Units.inchesToMeters(3), 2.0), // TODO does tolerance matter here? it's not trying to get to a specific point like for scoring, it either picks it up or it doesn't
-                        new AutoPoint(() -> getLollipopIntakePose(lollipop.index)))
+                        new AutoPoint(() -> {
+                            Pose2d lollipopIntakePose = getLollipopIntakePose(lollipop.index);
+                            if (
+                                    lollipop == Lollipop.LEFT &&
+                                            DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue) == DriverStation.Alliance.Red
+                            ) {
+                                return lollipopIntakePose.transformBy(redInitialLollipopOffset);
+                            }
+                            return lollipopIntakePose;
+                        })),
+                false // TODO Change to rotate immediately
+
         );
     }
 
